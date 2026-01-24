@@ -90,3 +90,24 @@ const isValidMove = ( currentIndex, targetIndex ) => {
   const isDiagonal = ( dx === 2 && dy === 2 );
   return isCardinal || isDiagonal;
 };
+
+exports.undoMove = async ( req, res ) => {
+  try { 
+    const { gameId } = req.body;
+    const userId = req.user._id;
+    const game = await Game.findById( gameId );
+    if ( !game ) return res.status( 404 ).json( { error: 'Game not found' } );
+    if ( game.userId.toString() !== userId.toString() ) return res.status( 403 ).json( { error: 'Not your game' } );
+    if ( game.status !== 'in_progress' ) return res.status( 400 ).json( { error: 'Game is over' } );
+    const lastMove = game.moves.pop();
+    game.grid[lastMove.position] = 0;
+    game.currentNumber -= 1;
+    game.moveCount -= 1;
+    game.markModified('grid');
+    await game.save();
+    res.json( { game } );
+  } catch ( error ) {
+    console.error( 'Error undoing move:', error );
+    res.status( 500 ).json( { error: 'Failed to undo move' } );
+  }
+};
