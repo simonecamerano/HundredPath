@@ -5,6 +5,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
+const authRoutes = require('./routes/auth');
 // Create Express app
 const app = express();
 // Connect to MongoDB database  
@@ -43,6 +44,9 @@ app.get('/', (req, res) => {
     version: '1.0.0'
   });
 });
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // ===== ERROR HANDLING =====
 // 404 - Route not found
