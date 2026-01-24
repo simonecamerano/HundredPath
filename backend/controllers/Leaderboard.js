@@ -47,7 +47,7 @@ exports.getLeaderboard = async ( req, res ) => {
           duration: 1,
           completedAt: 1,
           updatedAt: 1, // Aggiunto
-          currentNumber: 1 // Aggiunto
+          currentNumber: { $subtract: ["$currentNumber", 1] } // Aggiunto
         }
       }
     ] );
