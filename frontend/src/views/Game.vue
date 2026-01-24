@@ -124,7 +124,7 @@ const validMoves = computed(() => {
 });
 
 // STATO FINE PARTITA
-const isVictory = computed(() => currentNumber.value === 100);
+const isVictory = computed(() => currentNumber.value > 100);
 const isGameOver = computed(
   () =>
     !isVictory.value &&

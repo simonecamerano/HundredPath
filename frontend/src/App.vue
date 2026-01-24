@@ -1,17 +1,23 @@
 <template>
   <div class="app-container">
-    <h1>HundredPath</h1>
+    <Navbar />
     <router-view></router-view>
   </div>
 </template>
 <script setup>
+import Navbar from "./components/Navbar.vue";
 // Logic here
 </script>
 <style>
+.app-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
 /* Global styles */
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: #f0f2f5;
   color: #333;
 }

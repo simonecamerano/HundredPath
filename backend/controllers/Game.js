@@ -48,18 +48,23 @@ exports.makeMove = async ( req, res ) => {
       return res.status( 400 ).json( { error: 'Invalid move' } );
     }
     // 5. APPLICA MOSSA
-    game.currentNumber += 1; // Incrementa numero (es. da 1 a 2)
-    game.grid[position] = game.currentNumber; // Scrivi nella griglia (ops qui c'è un trucco...)
+    game.grid[position] = game.currentNumber; // Scrivi IL NUMERO CORRENTE (es. 1)
+    game.currentNumber += 1; // Incrementa per il prossimo (es. diventa 2)
 
     // NOTA DIDATTICA: Mongoose non rileva cambiamenti negli array primitivi facilmente.
     // Dobbiamo dirgli che l'abbiamo modificato:
     game.markModified( 'grid' );
     game.moves.push( {
-      number: game.currentNumber,
+      number: game.grid[position], // Store what we placed
       position: position
     } );
     game.moveCount += 1;
-    // 6. Controlla Vittoria/Fine (lo faremo dopo, per ora salva)
+    // 6. Controlla Vittoria/Fine
+    // Se currentNumber è diventato 101, vuol dire che abbiamo piazzato il 100.
+    if ( game.currentNumber > 100 ) {
+      game.status = 'completed';
+      game.completedAt = new Date();
+    }
     await game.save();
     res.json( { game } );
   } catch ( error ) {
@@ -92,7 +97,7 @@ const isValidMove = ( currentIndex, targetIndex ) => {
 };
 
 exports.undoMove = async ( req, res ) => {
-  try { 
+  try {
     const { gameId } = req.body;
     const userId = req.user._id;
     const game = await Game.findById( gameId );
@@ -103,7 +108,7 @@ exports.undoMove = async ( req, res ) => {
     game.grid[lastMove.position] = 0;
     game.currentNumber -= 1;
     game.moveCount -= 1;
-    game.markModified('grid');
+    game.markModified( 'grid' );
     await game.save();
     res.json( { game } );
   } catch ( error ) {

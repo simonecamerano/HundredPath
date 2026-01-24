@@ -1,13 +1,15 @@
 const express = require( 'express' );
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect } = require( '../middleware/auth' );
 
 // Import game controller
 const gameController = require( '../controllers/Game' );
+const LeaderboardController = require( '../controllers/Leaderboard' );
 
 // Routes
 router.post( '/start', protect, gameController.startGame );
-router.post('/move', protect, gameController.makeMove);
-router.post('/undo', protect, gameController.undoMove);
+router.post( '/move', protect, gameController.makeMove );
+router.post( '/undo', protect, gameController.undoMove );
+router.get( '/leaderboard', protect, LeaderboardController.getLeaderboard );
 
-module.exports = router;  
+module.exports = router;
