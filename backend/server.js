@@ -6,6 +6,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
+const gameRoutes = require('./routes/game');
 // Create Express app
 const app = express();
 // Connect to MongoDB database  
@@ -48,6 +49,9 @@ app.get('/', (req, res) => {
 // Auth routes
 app.use('/api/auth', authRoutes);
 
+// Game routes
+app.use('/api/game', gameRoutes);
+
 // ===== ERROR HANDLING =====
 // 404 - Route not found
 app.use((req, res) => {
@@ -56,6 +60,7 @@ app.use((req, res) => {
     path: req.path 
   });
 });
+
 // Error handler - Global error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
