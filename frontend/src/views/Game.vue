@@ -27,14 +27,21 @@ const isValidMove = (currentIndex, targetIndex) => {
 };
 // --- API & LIFECYCLE ---
 onMounted(async () => {
+  console.log("Game.vue mounted. Calling API...");
   try {
     loading.value = true;
     const res = await api.post("/game/start");
+    console.log("API Success:", res.data);
     gameId.value = res.data.game._id;
-    console.log("Game Started:", gameId.value);
+    grid.value = res.data.game.grid;
+    currentNumber.value = 1;
+    lastPosition.value = -1;
   } catch (err) {
     console.error("Errore start game:", err);
-    alert("Errore nell'iniziare la partita!");
+    alert(
+      "Errore nell'iniziare la partita: " +
+        (err.response?.data?.error || err.message),
+    );
   } finally {
     loading.value = false;
   }
@@ -65,16 +72,16 @@ async function handleMove(index) {
 async function undo() {
   if (currentNumber.value <= 1 || undoCount.value <= 0) return;
   try {
-    const res = await api.post('/game/undo', { gameId: gameId.value });
-    
+    const res = await api.post("/game/undo", { gameId: gameId.value });
+
     // AGGIORNIAMO TUTTO LO STATO DAL SERVER
     // Il server ci restituisce il gioco aggiornato
     const game = res.data.game;
-    
+
     grid.value = game.grid;
     currentNumber.value = game.currentNumber;
     undoCount.value--;
-    
+
     // Recuperiamo lastPosition dall'ultima mossa rimasta
     if (game.moves.length > 0) {
       lastPosition.value = game.moves[game.moves.length - 1].position;
@@ -83,6 +90,25 @@ async function undo() {
     }
   } catch (err) {
     console.error("Errore undo:", err);
+  }
+}
+
+async function restartGame() {
+  if (!confirm("Sicuro di voler ricominciare?")) return;
+  try {
+    loading.value = true;
+    const res = await api.post("/game/start");
+
+    // Reset Stato
+    gameId.value = res.data.game._id;
+    grid.value = res.data.game.grid;
+    currentNumber.value = 1;
+    lastPosition.value = -1;
+    undoCount.value = 3;
+  } catch (err) {
+    console.error("Restart failed", err);
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -96,17 +122,62 @@ const validMoves = computed(() => {
   }
   return moves;
 });
+
+// STATO FINE PARTITA
+const isVictory = computed(() => currentNumber.value === 100);
+const isGameOver = computed(
+  () =>
+    !isVictory.value &&
+    validMoves.value.length === 0 &&
+    lastPosition.value !== -1,
+);
 </script>
 <template>
   <div class="game-container">
     <h2>Turno: {{ currentNumber }}</h2>
 
     <div class="controls">
-      <button @click="undo" :disabled="currentNumber <= 1 || undoCount <= 0">
+      <button
+        @click="undo"
+        :disabled="
+          currentNumber <= 1 || undoCount <= 0 || isVictory || isGameOver
+        "
+      >
         Undo ↩️ ({{ undoCount }})
       </button>
+      <button
+        @click="restartGame"
+        style="margin-left: 10px; background: #ff9800"
+      >
+        Ricomincia 🔄
+      </button>
     </div>
-    <Grid :grid="grid" :validMoves="validMoves" @move="handleMove" />
+
+    <Grid
+      :grid="grid"
+      :validMoves="validMoves"
+      :currentPosition="lastPosition"
+      @move="handleMove"
+    />
+
+    <!-- OVERLAYS -->
+    <div v-if="isVictory" class="overlay victory">
+      <h3>🏆 VITTORIA! 🏆</h3>
+      <p>Hai completato il percorso!</p>
+      <button @click="restartGame">Nuova Partita</button>
+    </div>
+
+    <div v-if="isGameOver" class="overlay gameover">
+      <h3>💀 GAME OVER 💀</h3>
+      <p>Nessuna mossa disponibile.</p>
+      <button @click="undo" :disabled="undoCount <= 0">Usa Undo</button>
+      <button
+        @click="restartGame"
+        style="margin-left: 10px; background: #ff9800"
+      >
+        Ricomincia
+      </button>
+    </div>
   </div>
 </template>
 <style scoped>
@@ -128,5 +199,30 @@ button {
 button:disabled {
   background: #ccc;
   cursor: not-allowed;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.overlay h3 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+.victory h3 {
+  color: #ffd700;
+}
+.gameover h3 {
+  color: #ff4d4f;
 }
 </style>

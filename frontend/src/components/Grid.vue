@@ -2,27 +2,27 @@
   <div class="game-board">
     <!-- Loop per creare 100 celle -->
     <!-- cellIndex va da 0 a 99 -->
-    <div 
-      v-for="(cell, index) in grid" 
+    <div
+      v-for="(cell, index) in grid"
       :key="index"
       class="cell"
-      :class="{ 'valid': isValid(index) }" 
+      :class="{ valid: isValid(index), current: index === currentPosition }"
       @click="onCellClick(index)"
     >
       <!-- Mostra il numero se presente, altrimenti niente -->
-      {{ cell !== 0 ? cell : '' }}
+      {{ cell !== 0 ? cell : "" }}
     </div>
   </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 // Definiamo una prop per ricevere la griglia dal genitore (Game.vue)
-const props = defineProps(['grid', 'validMoves']);
-const emit = defineEmits(['move']);
+const props = defineProps(["grid", "validMoves", "currentPosition"]);
+const emit = defineEmits(["move"]);
 // Per ora usiamo una griglia di test se non passata
 const debugGrid = ref(Array(100).fill(0));
 function onCellClick(index) {
-  emit('move', index); // Diciamo al genitore: "Hanno cliccato la cella X"
+  emit("move", index); // Diciamo al genitore: "Hanno cliccato la cella X"
 }
 function isValid(index) {
   return props.validMoves && props.validMoves.includes(index);
@@ -61,5 +61,11 @@ function isValid(index) {
 }
 .valid:hover {
   background-color: #c3e6cb;
+}
+
+.current {
+  background-color: #007bff !important; /* Blu */
+  color: white;
+  border: 2px solid #0056b3;
 }
 </style>
