@@ -5,8 +5,17 @@
     </div>
     <div class="links">
       <template v-if="authStore.isAuthenticated">
+        <div class="user-info">
+          <img
+            :src="getAvatarUrl(authStore.user?.avatar)"
+            alt="Avatar"
+            class="nav-avatar"
+          />
+          <span class="nav-username">{{ authStore.user?.username }}</span>
+        </div>
         <router-link to="/game">Gioca</router-link>
         <router-link to="/leaderboard">Classifica 🏆</router-link>
+        <router-link to="/userbestscores">Record 🏆</router-link>
         <a href="#" @click.prevent="logout">Logout</a>
       </template>
       <template v-else>
@@ -21,6 +30,14 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 const authStore = useAuthStore();
 const router = useRouter();
+
+function getAvatarUrl(seed) {
+  const safeSeed = seed || "shape_default";
+  // Se inizia con "shape_", usa stile astratto. Altrimenti Adventurer.
+  const style = safeSeed.startsWith("shape_") ? "shapes" : "adventurer";
+  return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
+}
+
 function logout() {
   authStore.logout();
   router.push("/login");
@@ -50,5 +67,29 @@ function logout() {
 }
 .links a:hover {
   color: #007bff;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 15px;
+  padding-right: 15px;
+  border-right: 1px solid #eee;
+}
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+.nav-username {
+  font-weight: bold;
+  color: #333;
 }
 </style>

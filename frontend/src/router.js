@@ -2,9 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from './stores/auth'; // Import store
 import Game from './views/Game.vue';
 import Home from './views/Home.vue';
+import Leaderboard from './views/Leaderboard.vue';
 import Login from './views/Login.vue';
 import Register from './views/Register.vue';
-import Leaderboard from './views/Leaderboard.vue';
+import UserBestScores from './views/UserBestScores.vue';
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: Login },
@@ -18,7 +19,12 @@ const routes = [
     path: '/leaderboard',
     component: Leaderboard,
     meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
-  },  
+  },
+  {
+    path: '/userbestscores',
+    component: UserBestScores,
+    meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
+  },
 ];
 const router = createRouter( {
   history: createWebHistory(),
@@ -28,12 +34,7 @@ const router = createRouter( {
 router.beforeEach( ( to, from, next ) => {
   const authStore = useAuthStore();
 
-  console.log( "Navigating to:", to.path );
-  console.log( "Requires Auth:", to.meta.requiresAuth );
-  console.log( "Is Authenticated:", authStore.isAuthenticated );
-
   if ( to.meta.requiresAuth && !authStore.isAuthenticated ) {
-    console.log( "BLOCKED! Redirecting to login..." );
     next( '/login' );
   } else {
     next();

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import api from '../services/api';
 export const useAuthStore = defineStore( 'auth', {
   state: () => ( {
-    user: null,
+    user: JSON.parse( localStorage.getItem( 'user' ) ) || null,
     token: localStorage.getItem( 'token' ) || null,
   } ),
   getters: {
@@ -10,18 +10,17 @@ export const useAuthStore = defineStore( 'auth', {
   },
   actions: {
     async login( email, password ) {
-      console.log( "Auth Store: Attempting login for", email );
       try {
         const response = await api.post( '/auth/login', { email, password } );
-        console.log( "Auth Store: Login Success", response.data );
         this.token = response.data.token;
         this.user = response.data.user;
 
-        // Salva token nel browser
+        // Salva token e user nel browser
         localStorage.setItem( 'token', this.token );
+        localStorage.setItem( 'user', JSON.stringify( this.user ) );
         return true;
       } catch ( error ) {
-        console.error( 'Auth Store: Login failed', error );
+        console.error( 'Login failed', error );
         throw error.response?.data?.error || 'Login failed';
       }
     },
@@ -29,6 +28,7 @@ export const useAuthStore = defineStore( 'auth', {
       this.user = null;
       this.token = null;
       localStorage.removeItem( 'token' );
+      localStorage.removeItem( 'user' );
     },
     // Opzionale: recupera profilo all'avvio
     async fetchUser( id ) {

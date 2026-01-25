@@ -1,11 +1,11 @@
 <template>
-  <div class="leaderboard-container">
-    <h2>🏆 Classifica Migliori Tempi</h2>
+  <div class="userBestScores-container">
+    <h2>🏆 I tuoi Migliori Tempi</h2>
 
     <div v-if="loading" class="loading">Caricamento...</div>
     <div v-else-if="error" class="error">{{ error }}</div>
 
-    <table v-else class="leaderboard-table">
+    <table v-else class="userBestScores-table">
       <thead>
         <tr>
           <th>#</th>
@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(entry, index) in leaderboard" :key="entry._id">
+        <tr v-for="(entry, index) in userBestScores" :key="entry._id">
           <td>{{ index + 1 }}</td>
           <td>
             <img :src="getAvatarUrl(entry.avatar)" alt="Avatar" />
@@ -42,7 +42,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import api from "../services/api";
-const leaderboard = ref([]);
+const userBestScores = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
@@ -61,35 +61,35 @@ function formatDuration(ms) {
 }
 onMounted(async () => {
   try {
-    const res = await api.get("/game/leaderboard");
-    leaderboard.value = res.data;
+    const res = await api.get("/game/userBestScores");
+    userBestScores.value = res.data;
   } catch (err) {
     console.error(err);
-    error.value = "Impossibile caricare la classifica";
+    error.value = "Impossibile caricare i migliori tempi";
   } finally {
     loading.value = false;
   }
 });
 </script>
 <style scoped>
-.leaderboard-container {
+.userBestScores-container {
   max-width: 600px;
   margin: 0 auto;
 }
-.leaderboard-table {
+.userBestScores-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-.leaderboard-table th,
-.leaderboard-table td {
+.userBestScores-table th,
+.userBestScores-table td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #eee;
 }
-.leaderboard-table th {
+.userBestScores-table th {
   background-color: #f8f9fa;
   font-weight: bold;
 }

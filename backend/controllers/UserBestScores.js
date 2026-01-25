@@ -1,10 +1,16 @@
 const Game = require( '../models/Game' );
-exports.getLeaderboard = async ( req, res ) => {
+const mongoose = require( 'mongoose' );
+
+exports.getUserBestScores = async ( req, res ) => {
   try {
-    const leaderboard = await Game.aggregate( [
+    // FIX: Convertiamo esplicitamente in ObjectId per l'aggregazione
+    const targetUserId = new mongoose.Types.ObjectId( req.user._id );
+    console.log( "Searching best scores for user (ObjectId):", targetUserId );
+
+    const userBest = await Game.aggregate( [
       // 1. NON Filtrare solo vinte! Mostra tutto
       // { $match: { status: 'completed' } },
-
+      { $match: { userId: targetUserId } },
       // 2. Calcola durata
       {
         $addFields: {
@@ -43,18 +49,19 @@ exports.getLeaderboard = async ( req, res ) => {
       {
         $project: {
           _id: 1,
-          avatar: "$player.avatar",
           username: "$player.username",
+          avatar: "$player.avatar", // Aggiunto!
           duration: 1,
           completedAt: 1,
-          updatedAt: 1, // Aggiunto
-          currentNumber: { $subtract: ["$currentNumber", 1] } // Aggiunto
+          updatedAt: 1,
+          currentNumber: { $subtract: ["$currentNumber", 1] }
         }
       }
     ] );
-    res.json( leaderboard );
+
+    res.json( userBest );
   } catch ( error ) {
-    console.error( "Leaderboard error:", error );
+    console.error( "UserBestScores error:", error );
     res.status( 500 ).json( { error: "Server error" } );
   }
 };

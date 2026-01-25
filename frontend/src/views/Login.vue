@@ -25,13 +25,10 @@ const email = ref("");
 const password = ref("");
 const error = ref("");
 async function handleLogin() {
-  console.log("Login View: Button clicked. Email:", email.value);
   try {
     await authStore.login(email.value, password.value);
-    console.log("Login View: Login successful, redirecting...");
     router.push("/game"); // Vai al gioco dopo il login!
   } catch (err) {
-    console.error("Login View: Error caught:", err);
     error.value = err;
   }
 }

@@ -16,7 +16,13 @@ exports.registerUser = async ( req, res ) => {
       } );
     }
 
-    const user = new User( { username, email, password, avatar } );
+    // Create user
+    const user = await User.create( {
+      username,
+      email,
+      password,
+      avatar: req.body.avatar // Aggiunto!
+    } );
     await user.save();
 
     res.status( 201 ).json( {

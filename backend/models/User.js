@@ -8,10 +8,10 @@ const bcrypt = require( 'bcryptjs' );
 
 // User Schema  
 const userSchema = new mongoose.Schema( {
-   
-    avatar: {
+
+  avatar: {
     type: String,
-    default: 'default-avatar.png'
+    default: 'shape_default' // Prefisso 'shape_' attiva lo stile astratto
   },
   username: {
     type: String,
