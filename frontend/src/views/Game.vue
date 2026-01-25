@@ -16,7 +16,7 @@ const isGameActive = ref(false); // La partita è iniziata (timer attivo)?
 
 // TIMER
 const startTime = ref(null);
-const elapsedTime = ref("00:00");
+const elapsedTime = ref("00:00.00");
 let timerInterval = null;
 
 const toCoords = (index) => {
@@ -38,11 +38,15 @@ function startTimer() {
   stopTimer();
   startTime.value = Date.now();
   timerInterval = setInterval(() => {
-    const diff = Math.floor((Date.now() - startTime.value) / 1000);
-    const minutes = Math.floor(diff / 60);
-    const seconds = diff % 60;
-    elapsedTime.value = `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  }, 1000);
+    const totalMs = Date.now() - startTime.value;
+    const minutes = Math.floor(totalMs / 60000);
+    const seconds = Math.floor((totalMs % 60000) / 1000);
+    const centis = Math.floor((totalMs % 1000) / 10);
+
+    elapsedTime.value = `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}.${centis.toString().padStart(2, "0")}`;
+  }, 50);
 }
 
 function stopTimer() {
@@ -73,7 +77,7 @@ async function initGame() {
 
     undoCount.value = 3;
     isGameActive.value = false; // Aspettiamo il click su START
-    elapsedTime.value = "00:00"; // Reset grafico
+    elapsedTime.value = "00.00s"; // Reset grafico
   } catch (err) {
     console.error("Errore start game:", err);
     alert("Errore init");

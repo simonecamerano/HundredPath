@@ -52,12 +52,21 @@ function getAvatarUrl(seed) {
   return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
 }
 
-// Helper per formattare ms in mm:ss
+// Helper per formattare ms in ss.cc (o m ss.cc)
 function formatDuration(ms) {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  const totalMs = Math.floor(ms);
+  const minutes = Math.floor(totalMs / 60000);
+  const seconds = Math.floor((totalMs % 60000) / 1000);
+  const centis = Math.floor((totalMs % 1000) / 10);
+
+  if (minutes > 0) {
+    return `${minutes}m ${seconds.toString().padStart(2, "0")}.${centis
+      .toString()
+      .padStart(2, "0")}s`;
+  }
+  return `${seconds.toString().padStart(2, "0")}.${centis
+    .toString()
+    .padStart(2, "0")}s`;
 }
 onMounted(async () => {
   try {
