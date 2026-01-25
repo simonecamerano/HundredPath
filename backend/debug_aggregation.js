@@ -1,17 +1,24 @@
-const Game = require( '../models/Game' );
+
 const mongoose = require( 'mongoose' );
+const Game = require( './models/Game' );
+const User = require( './models/User' );
 
-exports.getUserBestScores = async ( req, res ) => {
+const MONGO_URI = 'mongodb://localhost:27017/hundredpath';
+
+async function testAggregation() {
   try {
-    // FIX: Convertiamo esplicitamente in ObjectId per l'aggregazione
-    const targetUserId = new mongoose.Types.ObjectId( req.user._id );
-    console.log( "Searching best scores for user (ObjectId):", targetUserId );
+    await mongoose.connect( MONGO_URI );
+    console.log( 'Connected to MongoDB' );
 
-    const userBest = await Game.aggregate( [
-      // 1. Filtra solo 'completed' per TUTTI gli utenti
+    const user = await User.findOne();
+    if ( !user ) {
+      console.log( 'No user found' );
+      process.exit( 1 );
+    }
+    const targetUserId = user._id;
+
+    const result = await Game.aggregate( [
       { $match: { status: 'completed' } },
-
-      // 2. Calcola durata per tutti
       {
         $addFields: {
           endTime: { $ifNull: ["$completedAt", "$updatedAt"] },
@@ -22,17 +29,12 @@ exports.getUserBestScores = async ( req, res ) => {
           duration: { $subtract: ["$endTime", "$startedAt"] }
         }
       },
-
-      // 3. CALCOLA IL RANK GLOBALE
-      // Poiché MongoDB $rank richiede un singolo campo di ordinamento in alcune configurazioni,
-      // creiamo un punteggio combinato: (punti * 1 miliardo) - durata_ms.
-      // Più è alto, migliore è la posizione.
       {
         $addFields: {
           combinedRankScore: {
             $subtract: [
               { $multiply: ["$currentNumber", 1000000000] },
-              { $ifNull: ["$duration", 0] }
+              "$duration"
             ]
           }
         }
@@ -48,17 +50,9 @@ exports.getUserBestScores = async ( req, res ) => {
           }
         }
       },
-
-      // 4. Ora filtriamo per l'utente target
       { $match: { userId: targetUserId } },
-
-      // 5. Ordiniamo i RISULTATI dell'utente (i suoi migliori)
       { $sort: { currentNumber: -1, duration: 1 } },
-
-      // 6. Limita a 10 (i top 10 dell'utente con il loro rank globale)
       { $limit: 10 },
-
-      // 7. Join con User per avere username
       {
         $lookup: {
           from: "users",
@@ -67,15 +61,11 @@ exports.getUserBestScores = async ( req, res ) => {
           as: "player"
         }
       },
-
-      // 8. Appiattisci
       { $unwind: "$player" },
-
-      // 9. Seleziona campi finali
       {
         $project: {
           _id: 1,
-          globalRank: 1, // Restituiamo il rank calcolato al punto 3
+          globalRank: 1,
           username: "$player.username",
           avatar: "$player.avatar",
           duration: 1,
@@ -86,9 +76,18 @@ exports.getUserBestScores = async ( req, res ) => {
       }
     ] );
 
-    res.json( userBest );
-  } catch ( error ) {
-    console.error( "UserBestScores error:", error );
-    res.status( 500 ).json( { error: "Server error" } );
+    console.log( 'Aggregation result length:', result.length );
+    if ( result.length > 0 ) {
+      console.log( 'First result:', JSON.stringify( result[0], null, 2 ) );
+    } else {
+      console.log( 'No games found for user:', targetUserId );
+    }
+
+    process.exit( 0 );
+  } catch ( err ) {
+    console.error( 'Aggregation failed:', err );
+    process.exit( 1 );
   }
-};
+}
+
+testAggregation();

@@ -48,16 +48,26 @@ const error = ref("");
 
 // Opzioni Avatar (Semi random o semi statici per scelta)
 const avatarOptions = [
-  "adventurer-neutral",
+  "Freddy",
   "Felix",
   "Aneka",
   "Willow",
   "Midnight",
   "Shadow",
+  "Daria",
+  "Simone",
+  "Marina",
+  "Leo",
+  "Riccardo",
+  "Serena",
 ];
-const selectedAvatar = ref("adventurer-neutral");
+const selectedAvatar = ref(null); // Nessun default
 
 async function register() {
+  if (!selectedAvatar.value) {
+    alert("Per favore seleziona un avatar!");
+    return;
+  }
   try {
     await api.post("/auth/register", {
       username: username.value,
@@ -115,8 +125,8 @@ button {
   flex-wrap: wrap;
 }
 .avatar-option {
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;

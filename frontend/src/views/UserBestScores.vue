@@ -8,7 +8,7 @@
     <table v-else class="userBestScores-table">
       <thead>
         <tr>
-          <th>#</th>
+          <th>Pos. Globale</th>
           <th>Avatar</th>
           <th>Giocatore</th>
           <th>Punteggio</th>
@@ -18,8 +18,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(entry, index) in userBestScores" :key="entry._id">
-          <td>{{ index + 1 }}</td>
+        <tr v-for="entry in userBestScores" :key="entry._id">
+          <td># {{ entry.globalRank }}</td>
           <td>
             <img :src="getAvatarUrl(entry.avatar)" alt="Avatar" />
           </td>

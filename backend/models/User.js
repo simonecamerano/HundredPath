@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema( {
 
   avatar: {
     type: String,
-    default: 'shape_default' // Prefisso 'shape_' attiva lo stile astratto
+    required: [true, "L'avatar è obbligatorio"] // Rimosso default, ora è required
   },
   username: {
     type: String,
