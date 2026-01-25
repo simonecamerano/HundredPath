@@ -11,6 +11,7 @@ const UserBestScoresController = require( '../controllers/UserBestScores' );
 router.post( '/start', protect, gameController.startGame );
 router.post( '/move', protect, gameController.makeMove );
 router.post( '/undo', protect, gameController.undoMove );
+router.post( '/over', protect, gameController.gameOver ); // Aggiunto
 router.get( '/leaderboard', protect, LeaderboardController.getLeaderboard );
 router.get( '/userBestScores', protect, UserBestScoresController.getUserBestScores );
 module.exports = router;

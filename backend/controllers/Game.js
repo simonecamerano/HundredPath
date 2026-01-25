@@ -2,20 +2,34 @@ const Game = require( '../models/Game' );
 
 exports.startGame = async ( req, res ) => {
   try {
-    // req.user viene popolato dal middleware 'protect'
     const userId = req.user._id;
 
-    // Crea una griglia 1D di 100 elementi inizializzata a 0 (rispetta il Model)
+    // 1. PULIZIA: Cancella vecchie partite abbandonate (in_progress)
+    // Così salviamo solo Vinte o Perse ufficialmente.
+    await Game.deleteMany( { userId, status: 'in_progress' } );
+
+    // 2. SETUP GRIGLIA
     const grid = Array( 100 ).fill( 0 );
 
-    // Crea la nuova partita
+    // 3. LOGICA RANDOM START
+    // Scegliamo una posizione a caso da 0 a 99
+    const startPos = Math.floor( Math.random() * 100 );
+
+    // Piazziamo l'1
+    grid[startPos] = 1;
+
+    // 4. CREAZIONE PARTITA
     const game = new Game( {
       userId,
       grid,
-      currentNumber: 1,
-      status: 'in_progress'
+      currentNumber: 2, // Siamo pronti per piazzare il 2
+      status: 'in_progress',
+      moves: [{ number: 1, position: startPos }], // Salviamo la prima mossa
+      moveCount: 1
     } );
+
     await game.save();
+
     res.status( 201 ).json( { game } );
   } catch ( error ) {
     console.error( 'Error starting game:', error );
@@ -114,5 +128,31 @@ exports.undoMove = async ( req, res ) => {
   } catch ( error ) {
     console.error( 'Error undoing move:', error );
     res.status( 500 ).json( { error: 'Failed to undo move' } );
+  }
+};
+
+exports.gameOver = async ( req, res ) => {
+  try {
+    const { gameId } = req.body;
+    const userId = req.user._id;
+
+    const game = await Game.findById( gameId );
+
+    if ( !game ) return res.status( 404 ).json( { error: 'Game not found' } );
+    if ( game.userId.toString() !== userId.toString() ) return res.status( 403 ).json( { error: 'Not your game' } );
+
+    // Se è già finita, amen
+    if ( game.status !== 'in_progress' ) return res.json( { game } );
+
+    // Segna come completata (anche se persa)
+    game.status = 'completed';
+    game.completedAt = new Date();
+
+    await game.save();
+
+    res.json( { game, message: "Game Over recorded" } );
+  } catch ( error ) {
+    console.error( 'Error ending game:', error );
+    res.status( 500 ).json( { error: 'Failed to record Game Over' } );
   }
 };

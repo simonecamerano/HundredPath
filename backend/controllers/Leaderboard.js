@@ -2,8 +2,8 @@ const Game = require( '../models/Game' );
 exports.getLeaderboard = async ( req, res ) => {
   try {
     const leaderboard = await Game.aggregate( [
-      // 1. NON Filtrare solo vinte! Mostra tutto
-      // { $match: { status: 'completed' } },
+      // 1. Filtra solo 'completed'
+      { $match: { status: 'completed' } },
 
       // 2. Calcola durata
       {

@@ -8,8 +8,8 @@ exports.getUserBestScores = async ( req, res ) => {
     console.log( "Searching best scores for user (ObjectId):", targetUserId );
 
     const userBest = await Game.aggregate( [
-      // 1. NON Filtrare solo vinte! Mostra tutto
-      // { $match: { status: 'completed' } },
+      // 1. Filtra solo 'completed'
+      { $match: { status: 'completed' } },
       { $match: { userId: targetUserId } },
       // 2. Calcola durata
       {
