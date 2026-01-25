@@ -51,7 +51,7 @@ function logout() {
   padding: 1rem 2rem;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 4rem;
 }
 .logo a {
   font-weight: bold;

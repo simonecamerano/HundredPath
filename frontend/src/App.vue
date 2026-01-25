@@ -22,7 +22,7 @@ body {
   color: #333;
 }
 .app-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
   text-align: center;
