@@ -148,4 +148,57 @@ onMounted(async () => {
   font-size: 1.5rem;
   vertical-align: middle;
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .users-container {
+    padding: 10px;
+  }
+
+  .users-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+  }
+
+  .user-card {
+    padding: 15px;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-width: 2px;
+  }
+
+  .user-card h3 {
+    font-size: 1rem;
+  }
+
+  .join-date {
+    font-size: 0.7rem;
+  }
+
+  .stat-item {
+    font-size: 0.75rem;
+  }
+
+  .medal {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-card {
+    padding: 20px;
+  }
+
+  .avatar {
+    width: 70px;
+    height: 70px;
+  }
+}
 </style>

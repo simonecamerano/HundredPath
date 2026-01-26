@@ -69,6 +69,7 @@ function isValid(index) {
   grid-template-columns: repeat(10, 1fr); /* IL MAGICO CSS GRID */
   gap: 4px;
   max-width: 500px;
+  width: 100%;
   margin: 20px auto;
   background: #ccc;
   padding: 4px;
@@ -147,6 +148,41 @@ function isValid(index) {
   }
   75% {
     transform: translateX(-5px);
+  }
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .game-board {
+    max-width: 100%;
+    width: 100%;
+    gap: 2px;
+    padding: 2px;
+    margin: 20px 0 10px 0; /* Aumentato margin-top a 20px */
+  }
+
+  .cell {
+    font-size: 0.9rem;
+    border-radius: 2px;
+  }
+
+  .cell.ranked {
+    font-size: 1.1rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 601px) and (max-width: 900px) {
+  .game-board {
+    max-width: 400px;
+  }
+
+  .cell {
+    font-size: 1rem;
+  }
+
+  .cell.ranked {
+    font-size: 1.3rem;
   }
 }
 </style>

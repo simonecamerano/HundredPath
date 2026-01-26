@@ -9,7 +9,6 @@
     <!-- SINGLE LEADERBOARD (no tabs) -->
     <div v-else class="leaderboards-grid">
       <div class="leaderboard-column">
-
         <!-- Records Table -->
         <table class="leaderboard-table">
           <thead>
@@ -192,5 +191,67 @@ h2 {
   color: #adb5bd;
   font-style: italic;
   padding: 40px !important;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .leaderboards-container {
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .leaderboard-column {
+    padding: 15px;
+  }
+
+  /* Horizontal scroll for table */
+  .leaderboard-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .leaderboard-table thead,
+  .leaderboard-table tbody {
+    display: table;
+    width: 100%;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .medal {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.3rem;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 6px 4px;
+    font-size: 0.75rem;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
 }
 </style>

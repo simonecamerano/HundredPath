@@ -124,11 +124,6 @@ function startGame(mode) {
         <p>Scala la vetta globale e sfida i tuoi amici.</p>
       </div>
     </section>
-
-    <!-- FOOTER -->
-    <footer>
-      <p>&copy; 2025 HundredPath - Developed with ❤️ by Simone Camerano</p>
-    </footer>
   </div>
 </template>
 
@@ -298,26 +293,65 @@ function startGame(mode) {
   line-height: 1.5;
 }
 
-footer {
-  margin-top: 80px;
-  color: #ced4da;
-  font-size: 0.8rem;
-  padding-bottom: 20px;
-}
-
 /* MOBILE */
 @media (max-width: 600px) {
+  .home-container {
+    padding-top: 0;
+  }
+
+  .hero {
+    padding: 0 15px 30px;
+  }
+
   .title {
     font-size: 2.5rem;
+    margin-bottom: 15px;
   }
-  .cta-group {
-    flex-direction: column;
+
+  .subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
   }
+
+  /* Stack mode buttons vertically */
+  .game-modes {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 0 10px;
+  }
+
+  .mode-btn {
+    padding: 20px 15px;
+  }
+
+  .mode-icon {
+    font-size: 2.5rem;
+  }
+
+  .mode-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .mode-info p {
+    font-size: 0.85rem;
+  }
+
+  .register-cta {
+    font-size: 0.85rem;
+  }
+
   .features {
     gap: 15px;
+    padding: 0 15px;
   }
+
   .feature-card {
     width: 100%;
+    padding: 20px;
+  }
+
+  .icon {
+    font-size: 2.5rem;
   }
 }
 </style>

@@ -433,13 +433,15 @@ button:disabled {
 
 .grid-wrapper {
   position: relative;
-  display: block;
   max-width: 500px;
+  width: 100%;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
 }
 
 .overlay {
-  position: absolute; /* Ora è relativo alla griglia per lo Start */
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -451,7 +453,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 8px; /* Match grid radius if any */
+  border-radius: 4px;
 }
 /* Victory/Gameover rimangono fixed full screen o relativi? Meglio Fixed per impatto */
 .victory,
@@ -519,5 +521,59 @@ button:disabled {
   margin-top: 10px;
   font-weight: bold;
   animation: pulse 2s infinite;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .game-container {
+    padding: 0px; /* Rimosso padding extra, usiamo quello di App.vue (10px) */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .header {
+    font-size: 1rem;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  .timer {
+    font-size: 0.9rem;
+    padding: 4px 8px;
+  }
+
+  .controls {
+    margin-bottom: 55px;
+    text-align: center;
+  }
+
+  button {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    margin: 2px !important;
+  }
+
+  .grid-wrapper {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .overlay h3 {
+    font-size: 1.5rem;
+  }
+
+  .overlay p {
+    font-size: 0.9rem;
+  }
+
+  .guest-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+  }
 }
 </style>

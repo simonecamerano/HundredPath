@@ -320,4 +320,102 @@ h2 {
 .leaderboard-column.hidden {
   display: none;
 }
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .leaderboards-container {
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  .tab-switcher {
+    gap: 5px;
+    margin-bottom: 15px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .leaderboard-column {
+    padding: 15px;
+  }
+
+  .period-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+
+  /* Horizontal scroll for table */
+  .leaderboard-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .leaderboard-table thead,
+  .leaderboard-table tbody {
+    display: table;
+    width: 100%;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 8px 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
+  .avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  .medal {
+    font-size: 1.4rem;
+  }
+
+  .user-rank-section h4 {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .tab-btn {
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
+
+  .leaderboard-column {
+    padding: 10px;
+  }
+
+  .period-title {
+    font-size: 1rem;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 6px 4px;
+    font-size: 0.75rem;
+  }
+
+  .avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .medal {
+    font-size: 1.2rem;
+  }
+}
 </style>
