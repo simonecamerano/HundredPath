@@ -5,14 +5,14 @@
     </div>
     <div class="links">
       <template v-if="authStore.isAuthenticated">
-        <div class="user-info">
+        <router-link to="/profile" class="user-info">
           <img
             :src="getAvatarUrl(authStore.user?.avatar)"
             alt="Avatar"
             class="nav-avatar"
           />
           <span class="nav-username">{{ authStore.user?.username }}</span>
-        </div>
+        </router-link>
         <router-link to="/game">Gioca</router-link>
         <router-link to="/leaderboard">Classifica 🏆</router-link>
         <router-link to="/userbestscores">Record 🏆</router-link>
@@ -80,6 +80,12 @@ function logout() {
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.user-info:hover {
+  opacity: 0.8;
 }
 .nav-avatar {
   width: 32px;

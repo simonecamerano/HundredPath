@@ -4,6 +4,7 @@ import Game from './views/Game.vue';
 import Home from './views/Home.vue';
 import Leaderboard from './views/Leaderboard.vue';
 import Login from './views/Login.vue';
+import Profile from './views/Profile.vue';
 import Register from './views/Register.vue';
 import UserBestScores from './views/UserBestScores.vue';
 import Users from './views/Users.vue';
@@ -20,6 +21,11 @@ const routes = [
     path: '/users',
     component: Users,
     meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
+  },
+  {
+    path: '/profile',
+    component: Profile,
+    meta: { requiresAuth: true }
   },
   {
     path: '/leaderboard',
