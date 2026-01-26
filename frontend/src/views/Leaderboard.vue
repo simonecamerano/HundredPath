@@ -20,7 +20,10 @@
 
       <tbody>
         <tr v-for="entry in leaderboardData.top10" :key="entry._id">
-          <td># {{ entry.globalRank }}</td>
+          <td>
+            # {{ entry.globalRank }}
+            <span class="medal">{{ getMedal(entry.globalRank) }}</span>
+          </td>
           <td>
             <img :src="getAvatarUrl(entry.avatar)" alt="Avatar" />
           </td>
@@ -55,7 +58,12 @@
         </thead>
         <tbody>
           <tr class="highlight-user">
-            <td># {{ leaderboardData.userBest.globalRank }}</td>
+            <td>
+              # {{ leaderboardData.userBest.globalRank }}
+              <span class="medal">{{
+                getMedal(leaderboardData.userBest.globalRank)
+              }}</span>
+            </td>
             <td>
               <img
                 :src="getAvatarUrl(leaderboardData.userBest.avatar)"
@@ -114,6 +122,20 @@ function formatDuration(ms) {
     .toString()
     .padStart(2, "0")}s`;
 }
+
+// Helper per visualizzare medaglie
+function getRankDisplay(rank) {
+  return `# ${rank}`;
+}
+
+// Helper per visualizzare medaglie
+function getMedal(rank) {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return "";
+}
+
 onMounted(async () => {
   try {
     const res = await api.get("/game/leaderboard");
@@ -127,22 +149,31 @@ onMounted(async () => {
 });
 </script>
 <style scoped>
+.medal {
+  font-size: 1.8rem; /* Medaglie più grandi! */
+  margin-left: 5px;
+  vertical-align: middle;
+}
 .leaderboard-container {
   max-width: 600px;
   margin: 0 auto;
 }
 .leaderboard-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate; /* Required for border-radius on table */
+  border-spacing: 0;
   margin-top: 50px;
   background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Softer shadow */
+  border-radius: 16px; /* Rounded corners */
+  overflow: hidden;
 }
 .leaderboard-table th,
 .leaderboard-table td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  vertical-align: middle; /* Allinea icone e testo */
 }
 .leaderboard-table th {
   background-color: #f8f9fa;

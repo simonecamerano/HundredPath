@@ -19,7 +19,10 @@
       </thead>
       <tbody>
         <tr v-for="entry in userBestScores" :key="entry._id">
-          <td># {{ entry.globalRank }}</td>
+          <td>
+            # {{ entry.globalRank }}
+            <span class="medal">{{ getMedal(entry.globalRank) }}</span>
+          </td>
           <td>
             <img :src="getAvatarUrl(entry.avatar)" alt="Avatar" />
           </td>
@@ -68,6 +71,15 @@ function formatDuration(ms) {
     .toString()
     .padStart(2, "0")}s`;
 }
+
+// Helper per visualizzare medaglie
+function getMedal(rank) {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return "";
+}
+
 onMounted(async () => {
   try {
     const res = await api.get("/game/userBestScores");
@@ -81,22 +93,31 @@ onMounted(async () => {
 });
 </script>
 <style scoped>
+.medal {
+  font-size: 1.8rem;
+  margin-left: 5px;
+  vertical-align: middle;
+}
 .userBestScores-container {
   max-width: 600px;
   margin: 0 auto;
 }
 .userBestScores-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-top: 50px;
   background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  overflow: hidden;
 }
 .userBestScores-table th,
 .userBestScores-table td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  vertical-align: middle;
 }
 .userBestScores-table th {
   background-color: #f8f9fa;

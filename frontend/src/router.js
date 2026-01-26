@@ -13,12 +13,12 @@ const routes = [
   {
     path: '/game',
     component: Game,
-    meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
+    // <-- ETICHETTA DI PROTEZIONE RIMOSSA PER GUEST MODE
   },
   {
     path: '/leaderboard',
     component: Leaderboard,
-    meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
+    // <-- ETICHETTA DI PROTEZIONE
   },
   {
     path: '/userbestscores',

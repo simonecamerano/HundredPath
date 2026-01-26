@@ -19,6 +19,7 @@
         <a href="#" @click.prevent="logout">Logout</a>
       </template>
       <template v-else>
+        <router-link to="/leaderboard">Classifica 🏆</router-link>
         <router-link to="/login">Accedi</router-link>
         <router-link to="/register">Registrati</router-link>
       </template>

@@ -17,9 +17,16 @@ import Navbar from "./components/Navbar.vue";
 /* Global styles */
 body {
   margin: 0;
-  font-family: "Arial", sans-serif;
-  background-color: #f0f2f5;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #333;
+  /* CLEAN UI GRID BACKGROUND */
+  background: radial-gradient(circle at center, #ffffff 0%, #f8f9fa 100%);
+  background-image:
+    linear-gradient(#e9ecef 1px, transparent 1px),
+    linear-gradient(90deg, #e9ecef 1px, transparent 1px);
+  background-size: 40px 40px; /* Effetto quadrettato */
+  background-attachment: fixed; /* Lo sfondo sta fermo mentre scrolli */
+  min-height: 100vh;
 }
 .app-container {
   max-width: 900px;

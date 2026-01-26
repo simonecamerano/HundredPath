@@ -3,7 +3,69 @@ const mongoose = require( 'mongoose' );
 
 exports.getLeaderboard = async ( req, res ) => {
   try {
-    const userId = new mongoose.Types.ObjectId( req.user._id );
+    // Gestione utente opzionale
+    let userId = null;
+    if ( req.user && req.user._id ) {
+      userId = new mongoose.Types.ObjectId( req.user._id );
+    }
+
+    // Costruiamo le FACET dinamicamente
+    const facets = {
+      top10: [
+        { $limit: 10 },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "player"
+          }
+        },
+        { $unwind: "$player" },
+        {
+          $project: {
+            _id: 1,
+            globalRank: 1,
+            avatar: "$player.avatar",
+            username: "$player.username",
+            duration: 1,
+            completedAt: 1,
+            updatedAt: 1,
+            currentNumber: { $subtract: ["$currentNumber", 1] }
+          }
+        }
+      ]
+    };
+
+    // Aggiungiamo facet 'userBest' SOLO se c'è un utente loggato
+    if ( userId ) {
+      facets.userBest = [
+        { $match: { userId: userId } },
+        { $sort: { globalRank: 1 } },
+        { $limit: 1 },
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "player"
+          }
+        },
+        { $unwind: "$player" },
+        {
+          $project: {
+            _id: 1,
+            globalRank: 1,
+            avatar: "$player.avatar",
+            username: "$player.username",
+            duration: 1,
+            completedAt: 1,
+            updatedAt: 1,
+            currentNumber: { $subtract: ["$currentNumber", 1] }
+          }
+        }
+      ];
+    }
 
     const results = await Game.aggregate( [
       // 1. Filtra solo 'completed' per tutti
@@ -21,7 +83,7 @@ exports.getLeaderboard = async ( req, res ) => {
         }
       },
 
-      // 3. CALCOLA IL RANK GLOBALE (coerente con UserBestScores)
+      // 3. CALCOLA IL RANK GLOBALE
       {
         $addFields: {
           combinedRankScore: {
@@ -44,66 +106,15 @@ exports.getLeaderboard = async ( req, res ) => {
         }
       },
 
-      // 4. Utilizziamo FACET per separare Top 10 e Record Utente
+      // 4. Eseguiamo le facet costruite dinamicamente
       {
-        $facet: {
-          top10: [
-            { $limit: 10 },
-            {
-              $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "player"
-              }
-            },
-            { $unwind: "$player" },
-            {
-              $project: {
-                _id: 1,
-                globalRank: 1,
-                avatar: "$player.avatar",
-                username: "$player.username",
-                duration: 1,
-                completedAt: 1,
-                updatedAt: 1,
-                currentNumber: { $subtract: ["$currentNumber", 1] }
-              }
-            }
-          ],
-          userBest: [
-            { $match: { userId: userId } },
-            { $sort: { globalRank: 1 } },
-            { $limit: 1 },
-            {
-              $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "player"
-              }
-            },
-            { $unwind: "$player" },
-            {
-              $project: {
-                _id: 1,
-                globalRank: 1,
-                avatar: "$player.avatar",
-                username: "$player.username",
-                duration: 1,
-                completedAt: 1,
-                updatedAt: 1,
-                currentNumber: { $subtract: ["$currentNumber", 1] }
-              }
-            }
-          ]
-        }
+        $facet: facets
       }
     ] );
 
     const finalResult = {
       top10: results[0].top10,
-      userBest: results[0].userBest[0] || null
+      userBest: userId && results[0].userBest ? results[0].userBest[0] || null : null
     };
 
     res.json( finalResult );

@@ -3,9 +3,12 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import Grid from "../components/Grid.vue";
 import api from "../services/api";
+import { useAuthStore } from "../stores/auth"; // Importiamo lo store
 
 const router = useRouter();
+const authStore = useAuthStore(); // Accesso allo stato auth
 
+// STATE
 const grid = ref(Array(100).fill(0));
 const currentNumber = ref(1);
 const lastPosition = ref(-1);
@@ -13,6 +16,8 @@ const gameId = ref(null);
 const undoCount = ref(3);
 const loading = ref(false);
 const isGameActive = ref(false); // La partita è iniziata (timer attivo)?
+
+const localHistory = ref([]); // Per undo in modalità ospite
 
 // TIMER
 const startTime = ref(null);
@@ -43,9 +48,15 @@ function startTimer() {
     const seconds = Math.floor((totalMs % 60000) / 1000);
     const centis = Math.floor((totalMs % 1000) / 10);
 
-    elapsedTime.value = `${minutes.toString().padStart(2, "0")}:${seconds
-      .toString()
-      .padStart(2, "0")}.${centis.toString().padStart(2, "0")}`;
+    if (minutes > 0) {
+      elapsedTime.value = `${minutes}m ${seconds
+        .toString()
+        .padStart(2, "0")}.${centis.toString().padStart(2, "0")}s`;
+    } else {
+      elapsedTime.value = `${seconds.toString().padStart(2, "0")}.${centis
+        .toString()
+        .padStart(2, "0")}s`;
+    }
   }, 50);
 }
 
@@ -65,19 +76,35 @@ onUnmounted(() => {
 async function initGame() {
   try {
     loading.value = true;
-    const res = await api.post("/game/start");
 
-    const game = res.data.game;
-    gameId.value = game._id;
-    grid.value = game.grid;
-    currentNumber.value = game.currentNumber;
-
-    const startPos = game.grid.findIndex((n) => n === 1);
-    lastPosition.value = startPos;
-
+    // RESET STATO COMUNE
     undoCount.value = 3;
-    isGameActive.value = false; // Aspettiamo il click su START
+    isGameActive.value = false;
     elapsedTime.value = "00.00s"; // Reset grafico
+    currentNumber.value = 1; // Reset per sicurezza
+
+    if (authStore.isAuthenticated) {
+      // --- LOGICA UTENTE LOGGATO ---
+      const res = await api.post("/game/start");
+
+      const game = res.data.game;
+      gameId.value = game._id;
+      grid.value = game.grid;
+      currentNumber.value = game.currentNumber;
+
+      const startPos = game.grid.findIndex((n) => n === 1);
+      lastPosition.value = startPos;
+    } else {
+      // --- LOGICA OSPITE (CLIENT ONLY) ---
+      grid.value = Array(100).fill(0);
+      localHistory.value = [];
+
+      // Random start
+      const startPos = Math.floor(Math.random() * 100);
+      grid.value[startPos] = 1;
+      lastPosition.value = startPos;
+      currentNumber.value = 2; // Pronto per il 2
+    }
   } catch (err) {
     console.error("Errore start game:", err);
     alert("Errore init");
@@ -98,38 +125,74 @@ async function handleMove(index) {
   if (!isValidMove(lastPosition.value, index)) return;
   if (loading.value) return;
 
+  // AGGIORNAMENTO OTTIMISTICO / LOCALE
   grid.value[index] = currentNumber.value;
-  lastPosition.value = index;
+
+  if (!authStore.isAuthenticated) {
+    // Salva storia per undo locale
+    localHistory.value.push({
+      position: index,
+      number: currentNumber.value,
+    });
+  }
+
+  const newPos = index;
+  lastPosition.value = newPos;
   currentNumber.value++;
 
-  try {
-    await api.post("/game/move", {
-      gameId: gameId.value,
-      position: index,
-    });
-  } catch (err) {
-    console.error("Errore mossa:", err);
+  if (authStore.isAuthenticated) {
+    // --- SERVER SYNC ---
+    try {
+      await api.post("/game/move", {
+        gameId: gameId.value,
+        position: index,
+      });
+    } catch (err) {
+      console.error("Errore mossa:", err);
+      // In caso di errore bisognerebbe revertare, per ora logghiamo
+    }
   }
 }
 
 async function undo() {
   if (!isGameActive.value) return;
   if (currentNumber.value <= 2 || undoCount.value <= 0) return;
-  try {
-    const res = await api.post("/game/undo", { gameId: gameId.value });
-    const game = res.data.game;
 
-    grid.value = game.grid;
-    currentNumber.value = game.currentNumber;
-    undoCount.value--;
+  if (authStore.isAuthenticated) {
+    // --- SERVER UNDO ---
+    try {
+      const res = await api.post("/game/undo", { gameId: gameId.value });
+      const game = res.data.game;
 
-    if (game.moves.length > 0) {
-      lastPosition.value = game.moves[game.moves.length - 1].position;
-    } else {
-      lastPosition.value = -1;
+      grid.value = game.grid;
+      currentNumber.value = game.currentNumber;
+      undoCount.value--;
+
+      if (game.moves.length > 0) {
+        lastPosition.value = game.moves[game.moves.length - 1].position;
+      } else {
+        lastPosition.value = -1; // Should not happen if check > 2
+      }
+    } catch (err) {
+      console.error("Errore undo:", err);
     }
-  } catch (err) {
-    console.error("Errore undo:", err);
+  } else {
+    // --- LOCAL UNDO ---
+    const lastMove = localHistory.value.pop();
+    if (lastMove) {
+      grid.value[lastMove.position] = 0;
+      currentNumber.value--;
+      undoCount.value--;
+
+      // Ricalcola lastPosition
+      if (localHistory.value.length > 0) {
+        lastPosition.value =
+          localHistory.value[localHistory.value.length - 1].position;
+      } else {
+        // Se abbiamo tolto tutto, dobbiamo ritrovare l'1 (che non è in history)
+        lastPosition.value = grid.value.findIndex((n) => n === 1);
+      }
+    }
   }
 }
 
@@ -139,7 +202,7 @@ async function restartGame() {
 }
 
 async function abandonGame() {
-  if (!confirm("Vuoi abbandonare la partita? (Non verrà salvata)")) return;
+  if (!confirm("Vuoi abbandonare la partita?")) return;
   stopTimer();
   // Non salviamo nulla, usciamo e basta. Il backend pulirà alla prossima partita.
   router.push("/");
@@ -171,10 +234,13 @@ watch(isGameOver, async (newValue) => {
   if (newValue && !hasCalledGameOver.value) {
     stopTimer();
     hasCalledGameOver.value = true;
-    try {
-      await api.post("/game/over", { gameId: gameId.value });
-    } catch (e) {
-      console.error(e);
+
+    if (authStore.isAuthenticated) {
+      try {
+        await api.post("/game/over", { gameId: gameId.value });
+      } catch (e) {
+        console.error(e);
+      }
     }
   } else if (!newValue) {
     hasCalledGameOver.value = false;
@@ -190,6 +256,7 @@ watch(isVictory, (val) => {
   <div class="game-container">
     <div class="header">
       <div class="timer">⏱️ {{ elapsedTime }}</div>
+      <div v-if="!authStore.isAuthenticated" class="guest-badge">Ospite</div>
     </div>
 
     <div class="controls">
@@ -226,7 +293,11 @@ watch(isVictory, (val) => {
 
       <!-- START OVERLAY (SOLO ALL'INIZIO) -->
       <div v-if="!isGameActive && !loading" class="overlay start-overlay">
-        <h3>Pronto?</h3>
+        <h3>
+          Pronto{{
+            authStore.user?.username ? ", " + authStore.user.username : ""
+          }}?
+        </h3>
         <p>La posizione di partenza è casuale.</p>
         <button class="big-start-btn" @click="startGameplay">START ▶️</button>
       </div>
@@ -236,6 +307,14 @@ watch(isVictory, (val) => {
     <div v-if="isVictory" class="overlay victory">
       <h3>🏆 VITTORIA! 🏆</h3>
       <p>Hai completato il percorso in {{ elapsedTime }}!</p>
+
+      <div v-if="!authStore.isAuthenticated" class="guest-msg">
+        <p>Registrati per salvare il tuo record in classifica!</p>
+        <button @click="router.push('/register')" class="cta-btn">
+          Registrati Ora
+        </button>
+      </div>
+
       <button @click="restartGame">Nuova Partita</button>
       <button
         @click="router.push('/leaderboard')"
@@ -249,6 +328,14 @@ watch(isVictory, (val) => {
       <h3>💀 GAME OVER 💀</h3>
       <p>Punteggio Finale: {{ currentNumber - 1 }}</p>
       <p>Tempo: {{ elapsedTime }}</p>
+
+      <div v-if="!authStore.isAuthenticated" class="guest-msg">
+        <p>Non mollare! Registrati per scalare la classifica.</p>
+        <button @click="router.push('/register')" class="cta-btn">
+          Crea Account
+        </button>
+      </div>
+
       <div class="overlay-controls">
         <button
           @click="restartGame"
@@ -369,5 +456,27 @@ button:disabled {
 }
 .overlay-controls {
   margin-top: 20px;
+}
+/* STILI OSPITE */
+.guest-badge {
+  background: #6c757d;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+.guest-msg {
+  background: rgba(0, 0, 0, 0.6);
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.cta-btn {
+  background: #28a745 !important; /* Verde acceso per invito all'azione */
+  margin-top: 10px;
+  font-weight: bold;
+  animation: pulse 2s infinite;
 }
 </style>
