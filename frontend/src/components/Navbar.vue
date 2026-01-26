@@ -14,13 +14,13 @@
           <span class="nav-username">{{ authStore.user?.username }}</span>
         </router-link>
         <router-link to="/game">Gioca</router-link>
-        <router-link to="/leaderboard">Classifica 🏆</router-link>
+        <router-link to="/leaderboard">Classifiche 🏆</router-link>
         <router-link to="/userbestscores">Record 🏆</router-link>
         <router-link to="/users">Utenti</router-link>
         <a href="/" @click.prevent="logout">Logout</a>
       </template>
       <template v-else>
-        <router-link to="/leaderboard">Classifica 🏆</router-link>
+        <router-link to="/leaderboard">Classifiche 🏆</router-link>
         <router-link to="/login">Accedi</router-link>
         <router-link to="/register">Registrati</router-link>
       </template>

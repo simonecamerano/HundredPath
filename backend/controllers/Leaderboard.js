@@ -9,6 +9,19 @@ exports.getLeaderboard = async ( req, res ) => {
       userId = new mongoose.Types.ObjectId( req.user._id );
     }
 
+    // Filtro temporale basato su query param
+    const period = req.query.period || 'all'; // all, week, day
+    let timeFilter = { status: 'completed' };
+
+    const now = new Date();
+    if ( period === 'week' ) {
+      const weekAgo = new Date( now.getTime() - 7 * 24 * 60 * 60 * 1000 );
+      timeFilter.completedAt = { $gte: weekAgo };
+    } else if ( period === 'day' ) {
+      const dayAgo = new Date( now.getTime() - 24 * 60 * 60 * 1000 );
+      timeFilter.completedAt = { $gte: dayAgo };
+    }
+
     // Costruiamo le FACET dinamicamente
     const facets = {
       top10: [
@@ -68,8 +81,8 @@ exports.getLeaderboard = async ( req, res ) => {
     }
 
     const results = await Game.aggregate( [
-      // 1. Filtra solo 'completed' per tutti
-      { $match: { status: 'completed' } },
+      // 1. Filtra per status e periodo temporale
+      { $match: timeFilter },
 
       // 2. Calcola durata
       {
