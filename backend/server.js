@@ -7,6 +7,7 @@ const cors = require('cors');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
 const gameRoutes = require('./routes/game');
+const userRoutes = require('./routes/users');
 // Create Express app
 const app = express();
 // Connect to MongoDB database  
@@ -31,6 +32,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // ===== ROUTES =====
 // Health check - Route to verify server is running
+app.use('/api/users', userRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 

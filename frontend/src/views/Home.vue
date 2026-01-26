@@ -57,7 +57,7 @@ const authStore = useAuthStore();
 
     <!-- FOOTER -->
     <footer>
-      <p>&copy; 2025 HundredPath - Developed with ❤️</p>
+      <p>&copy; 2025 HundredPath - Developed with ❤️ by Simone Camerano</p>
     </footer>
   </div>
 </template>

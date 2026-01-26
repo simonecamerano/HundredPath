@@ -6,6 +6,7 @@ import Leaderboard from './views/Leaderboard.vue';
 import Login from './views/Login.vue';
 import Register from './views/Register.vue';
 import UserBestScores from './views/UserBestScores.vue';
+import Users from './views/Users.vue';
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: Login },
@@ -14,6 +15,11 @@ const routes = [
     path: '/game',
     component: Game,
     // <-- ETICHETTA DI PROTEZIONE RIMOSSA PER GUEST MODE
+  },
+  {
+    path: '/users',
+    component: Users,
+    meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
   },
   {
     path: '/leaderboard',

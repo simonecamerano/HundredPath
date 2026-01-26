@@ -16,7 +16,8 @@
         <router-link to="/game">Gioca</router-link>
         <router-link to="/leaderboard">Classifica 🏆</router-link>
         <router-link to="/userbestscores">Record 🏆</router-link>
-        <a href="#" @click.prevent="logout">Logout</a>
+        <router-link to="/users">Utenti</router-link>
+        <a href="/" @click.prevent="logout">Logout</a>
       </template>
       <template v-else>
         <router-link to="/leaderboard">Classifica 🏆</router-link>
@@ -41,7 +42,7 @@ function getAvatarUrl(seed) {
 
 function logout() {
   authStore.logout();
-  router.push("/login");
+  router.push("/");
 }
 </script>
 <style scoped>
@@ -79,9 +80,6 @@ function logout() {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-right: 15px;
-  padding-right: 15px;
-  border-right: 1px solid #eee;
 }
 .nav-avatar {
   width: 32px;
