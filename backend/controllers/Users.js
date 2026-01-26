@@ -3,9 +3,9 @@ const Game = require( '../models/Game' );
 
 exports.getAllUsers = async ( req, res ) => {
   try {
-    // Step 1: Calcola globalRank per TUTTE le partite completate
+    // Step 1: Calcola globalRank per TUTTE le partite RANKED completate
     const rankedGames = await Game.aggregate( [
-      { $match: { status: 'completed' } },
+      { $match: { status: 'completed', gameMode: 'ranked' } }, // SOLO RANKED
       {
         $addFields: {
           endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
@@ -44,13 +44,20 @@ exports.getAllUsers = async ( req, res ) => {
       }
     ] );
 
-    // Step 2: Raggruppa per utente e calcola le statistiche
+    // Step 2: Raggruppa per utente e calcola le statistiche (SOLO RANKED)
     const usersWithStats = await User.aggregate( [
       {
         $lookup: {
           from: 'games',
-          localField: '_id',
-          foreignField: 'userId',
+          let: { userId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$userId', '$$userId'] },
+                gameMode: 'ranked' // SOLO RANKED
+              }
+            }
+          ],
           as: 'games'
         }
       },

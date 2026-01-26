@@ -1,8 +1,29 @@
 const Game = require( '../models/Game' );
+const User = require( '../models/User' );
 
 exports.startGame = async ( req, res ) => {
   try {
     const userId = req.user._id;
+    const { gameMode } = req.body; // 'tutorial' or 'ranked'
+
+    // VALIDAZIONE GAME MODE
+    const validModes = ['tutorial', 'ranked'];
+    if ( !gameMode || !validModes.includes( gameMode ) ) {
+      return res.status( 400 ).json( { error: 'Invalid game mode. Must be tutorial or ranked.' } );
+    }
+
+    // GUEST CHECK: Guests can only play tutorial
+    if ( req.user.isGuest && gameMode === 'ranked' ) {
+      return res.status( 403 ).json( { error: 'Guests can only play tutorial mode. Please register to unlock ranked.' } );
+    }
+
+    // RANKED UNLOCK CHECK: User must complete tutorial first
+    if ( gameMode === 'ranked' ) {
+      const user = await User.findById( userId );
+      if ( !user.tutorialCompleted ) {
+        return res.status( 403 ).json( { error: 'Complete at least one tutorial game to unlock ranked mode.' } );
+      }
+    }
 
     // 1. PULIZIA: Cancella vecchie partite abbandonate (in_progress)
     // Così salviamo solo Vinte o Perse ufficialmente.
@@ -24,6 +45,7 @@ exports.startGame = async ( req, res ) => {
       grid,
       currentNumber: 2, // Siamo pronti per piazzare il 2
       status: 'in_progress',
+      gameMode, // Salva il mode
       moves: [{ number: 1, position: startPos }], // Salviamo la prima mossa
       moveCount: 1
     } );
@@ -150,9 +172,42 @@ exports.gameOver = async ( req, res ) => {
 
     await game.save();
 
-    res.json( { game, message: "Game Over recorded" } );
+    // UNLOCK RANKED: Se è una partita tutorial completata (anche se persa)
+    if ( game.gameMode === 'tutorial' ) {
+      console.log( '🎓 Tutorial completed! Unlocking ranked for user:', userId );
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { tutorialCompleted: true },
+        { new: true } // Return the updated document
+      );
+      console.log( '✅ User updated. tutorialCompleted:', updatedUser.tutorialCompleted );
+    }
+
+    res.json( { game, message: "Game Over recorded", tutorialCompleted: game.gameMode === 'tutorial' } );
   } catch ( error ) {
     console.error( 'Error ending game:', error );
     res.status( 500 ).json( { error: 'Failed to record Game Over' } );
+  }
+};
+
+exports.deleteGame = async ( req, res ) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const game = await Game.findById( id );
+
+    if ( !game ) return res.status( 404 ).json( { error: 'Game not found' } );
+    if ( game.userId.toString() !== userId.toString() ) {
+      return res.status( 403 ).json( { error: 'Not your game' } );
+    }
+
+    await Game.findByIdAndDelete( id );
+    console.log( '🗑️ Game deleted:', id, 'Mode:', game.gameMode );
+
+    res.json( { message: 'Game deleted successfully' } );
+  } catch ( error ) {
+    console.error( 'Error deleting game:', error );
+    res.status( 500 ).json( { error: 'Failed to delete game' } );
   }
 };

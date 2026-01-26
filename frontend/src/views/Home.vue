@@ -1,6 +1,45 @@
 <script setup>
+import { onMounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
+
 const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
+const rankedUnlocked = ref(false);
+const loadingUser = ref(true);
+
+async function checkRankedUnlock() {
+  if (authStore.isAuthenticated && !authStore.user?.isGuest) {
+    try {
+      const res = await api.get("/profile");
+      rankedUnlocked.value = res.data.tutorialCompleted || false;
+      console.log("🔓 Ranked unlock status:", rankedUnlocked.value);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+    }
+  }
+  loadingUser.value = false;
+}
+
+onMounted(async () => {
+  await checkRankedUnlock();
+});
+
+// Ricarica quando torniamo alla home
+watch(
+  () => route.path,
+  async (newPath) => {
+    if (newPath === "/") {
+      await checkRankedUnlock();
+    }
+  },
+);
+
+function startGame(mode) {
+  router.push(`/game?mode=${mode}`);
+}
 </script>
 
 <template>
@@ -11,27 +50,58 @@ const authStore = useAuthStore();
         <h1 class="title">HundredPath</h1>
         <p class="subtitle">La sfida logica 10x10. Raggiungi il 100.</p>
 
-        <!-- CTA OSPITI -->
-        <div v-if="!authStore.isAuthenticated" class="guest-section">
-          <div class="cta-group">
-            <router-link to="/game" class="btn btn-primary pulse"
-              >Prova Subito 🚀</router-link
+        <!-- GUEST MODE -->
+        <div
+          v-if="!authStore.isAuthenticated || authStore.user?.isGuest"
+          class="guest-section"
+        >
+          <div class="game-modes">
+            <button
+              @click="startGame('tutorial')"
+              class="mode-btn tutorial-btn"
             >
-            <router-link to="/register" class="btn btn-outline"
-              >Registrati</router-link
-            >
+              <div class="mode-icon">🎓</div>
+              <div class="mode-info">
+                <h3>Tutorial</h3>
+                <p>Impara le regole con gli aiuti visivi</p>
+              </div>
+            </button>
           </div>
-          <p class="guest-hint">Non serve registrarsi per provare!</p>
+          <p v-if="!authStore.isAuthenticated" class="register-cta">
+            <router-link to="/register">Registrati</router-link> per sbloccare
+            la modalità Ranked!
+          </p>
+          <p v-else class="register-cta">
+            <router-link to="/register">Crea un account</router-link> per
+            salvare i tuoi progressi!
+          </p>
         </div>
 
-        <!-- CTA LOGGATI -->
-        <div v-else class="cta-group">
-          <router-link to="/game" class="btn btn-primary pulse"
-            >Gioca Ora 🎮</router-link
+        <!-- LOGGED IN USERS -->
+        <div v-else class="game-modes">
+          <button @click="startGame('tutorial')" class="mode-btn tutorial-btn">
+            <div class="mode-icon">🎓</div>
+            <div class="mode-info">
+              <h3>Tutorial</h3>
+              <p>Pratica con gli aiuti visivi</p>
+            </div>
+          </button>
+
+          <button
+            @click="startGame('ranked')"
+            class="mode-btn ranked-btn"
+            :class="{ locked: !rankedUnlocked }"
+            :disabled="!rankedUnlocked"
           >
-          <router-link to="/userbestscores" class="btn btn-outline"
-            >I Miei Record 🏆</router-link
-          >
+            <div class="mode-icon">{{ rankedUnlocked ? "🏆" : "🔒" }}</div>
+            <div class="mode-info">
+              <h3>Ranked</h3>
+              <p v-if="rankedUnlocked">Modalità competitiva</p>
+              <p v-else class="unlock-hint">
+                Completa 1 tutorial per sbloccare
+              </p>
+            </div>
+          </button>
         </div>
       </div>
     </header>
@@ -98,69 +168,95 @@ const authStore = useAuthStore();
   font-weight: 300;
 }
 
-/* CTA BUTTONS */
-.cta-group {
-  display: flex;
+/* GAME MODE BUTTONS */
+.game-modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-  justify-content: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.btn {
-  padding: 15px 30px;
-  font-size: 1.1rem;
-  border-radius: 50px; /* Pill shape */
-  text-decoration: none;
-  font-weight: bold;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-}
-
-.btn-outline {
-  border: 2px solid #007bff;
-  color: #007bff;
+.mode-btn {
   background: white;
+  border: 3px solid transparent;
+  border-radius: 16px;
+  padding: 30px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-.btn-outline:hover {
-  background: #f0f8ff;
+.mode-btn:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.guest-hint {
+.tutorial-btn {
+  border-color: #28a745;
+}
+
+.tutorial-btn:hover {
+  border-color: #28a745;
+  background: #f0fff4;
+}
+
+.ranked-btn {
+  border-color: #ffc107;
+}
+
+.ranked-btn:hover:not(.locked) {
+  border-color: #ffc107;
+  background: #fffbf0;
+}
+
+.ranked-btn.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #dee2e6;
+}
+
+.mode-icon {
+  font-size: 3rem;
+}
+
+.mode-info h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.mode-info p {
+  margin: 5px 0 0;
   font-size: 0.9rem;
-  color: #adb5bd;
-  margin-top: 40px;
+  color: #6c757d;
 }
 
-.pulse {
-  animation: pulse-animation 2s infinite;
+.unlock-hint {
+  color: #dc3545 !important;
+  font-weight: 500;
 }
 
-@keyframes pulse-animation {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
-  }
-  70% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
-  }
+.register-cta {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-top: 20px;
+}
+
+.register-cta a {
+  color: #007bff;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.registerlink a:hover {
+  text-decoration: underline;
 }
 
 /* FEATURES SECTION */

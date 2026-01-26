@@ -6,7 +6,13 @@
       v-for="(cell, index) in grid"
       :key="index"
       class="cell"
-      :class="{ valid: isValid(index), current: index === currentPosition }"
+      :class="{
+        valid: showHints && isValid(index),
+        current: index === currentPosition,
+        ranked: props.gameMode === 'ranked',
+        clicked: clickedCell === index,
+        invalid: invalidCell === index,
+      }"
       @click="onCellClick(index)"
     >
       <!-- Mostra il numero se presente, altrimenti niente -->
@@ -15,15 +21,44 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
-// Definiamo una prop per ricevere la griglia dal genitore (Game.vue)
-const props = defineProps(["grid", "validMoves", "currentPosition"]);
+import { computed, ref } from "vue";
+
+const props = defineProps([
+  "grid",
+  "validMoves",
+  "currentPosition",
+  "gameMode",
+]);
 const emit = defineEmits(["move"]);
-// Per ora usiamo una griglia di test se non passata
-const debugGrid = ref(Array(100).fill(0));
+
+// Tutorial shows hints, Ranked hides them
+const showHints = computed(() => props.gameMode !== "ranked");
+
+// Animation state
+const clickedCell = ref(null);
+const invalidCell = ref(null);
+
 function onCellClick(index) {
-  emit("move", index); // Diciamo al genitore: "Hanno cliccato la cella X"
+  // Check if this is a valid move
+  const isValidMove = isValid(index);
+
+  if (isValidMove) {
+    // Valid move - pulse animation
+    clickedCell.value = index;
+    setTimeout(() => {
+      clickedCell.value = null;
+    }, 300);
+  } else {
+    // Invalid move - red flash
+    invalidCell.value = index;
+    setTimeout(() => {
+      invalidCell.value = null;
+    }, 400);
+  }
+
+  emit("move", index);
 }
+
 function isValid(index) {
   return props.validMoves && props.validMoves.includes(index);
 }
@@ -39,7 +74,7 @@ function isValid(index) {
   padding: 4px;
 }
 .cell {
-  aspect-ratio: 1; /* Mantiene la cella quadrata */
+  aspect-ratio: 1;
   background: white;
   display: flex;
   align-items: center;
@@ -48,24 +83,70 @@ function isValid(index) {
   font-size: 1.2rem;
   cursor: pointer;
   border-radius: 4px;
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
+
+/* RANKED MODE: Numeri più grandi */
+.cell.ranked {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
 .cell:hover {
   background: #e6f7ff;
 }
 
 .valid {
-  background-color: #d4edda; /* Verde chiaro */
+  background-color: #d4edda;
   border: 2px solid #28a745;
   cursor: pointer;
 }
+
 .valid:hover {
   background-color: #c3e6cb;
 }
 
 .current {
-  background-color: #007bff !important; /* Blu */
+  background-color: #007bff !important;
   color: white;
   border: 2px solid #0056b3;
+}
+
+/* CLICK ANIMATION (valid move) */
+.cell.clicked {
+  animation: clickPulse 0.3s ease;
+}
+
+@keyframes clickPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* INVALID MOVE ANIMATION */
+.cell.invalid {
+  animation: invalidShake 0.4s ease;
+  background: #ff4444 !important;
+  color: white;
+}
+
+@keyframes invalidShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
 }
 </style>

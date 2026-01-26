@@ -47,6 +47,12 @@ const gameSchema = new mongoose.Schema({
     enum: ['in_progress', 'completed', 'abandoned'],
     default: 'in_progress'
   },
+  gameMode: {
+    type: String,
+    enum: ['tutorial', 'ranked'],
+    default: 'tutorial',
+    required: true
+  },
   startedAt: {
     type: Date,
     default: Date.now

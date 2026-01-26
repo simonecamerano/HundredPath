@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema( {
     minlength: [6, 'Password must be at least 6 characters'],
     select: false // Not return password in default queries 
   },
+  tutorialCompleted: {
+    type: Boolean,
+    default: false // Unlocks ranked mode after first tutorial win
+  },
   stats: {
     gamesPlayed: {
       type: Number,

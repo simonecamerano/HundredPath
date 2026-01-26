@@ -13,7 +13,6 @@
           />
           <span class="nav-username">{{ authStore.user?.username }}</span>
         </router-link>
-        <router-link to="/game">Gioca</router-link>
         <router-link to="/leaderboard">Classifiche 🏆</router-link>
         <router-link to="/userbestscores">Record 🏆</router-link>
         <router-link to="/users">Utenti</router-link>

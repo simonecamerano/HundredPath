@@ -8,6 +8,9 @@ import { useAuthStore } from "../stores/auth"; // Importiamo lo store
 const router = useRouter();
 const authStore = useAuthStore(); // Accesso allo stato auth
 
+// GAME MODE (from route query)
+const gameMode = ref("tutorial"); // 'tutorial' or 'ranked'
+
 // STATE
 const grid = ref(Array(100).fill(0));
 const currentNumber = ref(1);
@@ -65,6 +68,14 @@ function stopTimer() {
 }
 
 onMounted(async () => {
+  // Read mode from query params (default: tutorial)
+  const queryMode = router.currentRoute.value.query.mode;
+  if (queryMode === "ranked") {
+    gameMode.value = "ranked";
+  } else {
+    gameMode.value = "tutorial";
+  }
+
   // Carichiamo i dati, ma NON facciamo partire il gioco
   await initGame();
 });
@@ -85,9 +96,11 @@ async function initGame() {
 
     if (authStore.isAuthenticated) {
       // --- LOGICA UTENTE LOGGATO ---
-      const res = await api.post("/game/start");
+      console.log("🎮 Starting game with mode:", gameMode.value);
+      const res = await api.post("/game/start", { gameMode: gameMode.value });
 
       const game = res.data.game;
+      console.log("✅ Game created with mode:", game.gameMode, "ID:", game._id);
       gameId.value = game._id;
       grid.value = game.grid;
       currentNumber.value = game.currentNumber;
@@ -204,7 +217,27 @@ async function restartGame() {
 async function abandonGame() {
   if (!confirm("Vuoi abbandonare la partita?")) return;
   stopTimer();
-  // Non salviamo nulla, usciamo e basta. Il backend pulirà alla prossima partita.
+
+  if (authStore.isAuthenticated && gameId.value) {
+    try {
+      if (gameMode.value === "tutorial") {
+        // Tutorial abbandonato → salva come completed (sblocca ranked)
+        console.log(
+          "🏳️ Abandoning TUTORIAL, calling /game/over to unlock ranked",
+        );
+        const response = await api.post("/game/over", { gameId: gameId.value });
+        console.log("📝 Tutorial abandon response:", response.data);
+      } else {
+        // Ranked abbandonato → cancella la partita (non deve contare)
+        console.log("🏳️ Abandoning RANKED, deleting game (won't count)");
+        await api.delete(`/game/${gameId.value}`);
+        console.log("✅ Ranked game deleted");
+      }
+    } catch (e) {
+      console.error("❌ Error on abandon:", e);
+    }
+  }
+
   router.push("/");
 }
 
@@ -237,9 +270,16 @@ watch(isGameOver, async (newValue) => {
 
     if (authStore.isAuthenticated) {
       try {
-        await api.post("/game/over", { gameId: gameId.value });
+        console.log("🏁 Calling /game/over for gameId:", gameId.value);
+        const response = await api.post("/game/over", { gameId: gameId.value });
+        console.log("📝 Game over response:", response.data);
+
+        // Se tutorial completato, forza refresh della home
+        if (response.data.tutorialCompleted) {
+          console.log("🎓 Tutorial completed! Ranked should unlock now.");
+        }
       } catch (e) {
-        console.error(e);
+        console.error("❌ Error calling game/over:", e);
       }
     }
   } else if (!newValue) {
@@ -288,6 +328,7 @@ watch(isVictory, (val) => {
         :grid="grid"
         :validMoves="validMoves"
         :currentPosition="lastPosition"
+        :gameMode="gameMode"
         @move="handleMove"
       />
 

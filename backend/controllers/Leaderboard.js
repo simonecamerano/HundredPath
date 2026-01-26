@@ -11,7 +11,7 @@ exports.getLeaderboard = async ( req, res ) => {
 
     // Filtro temporale basato su query param
     const period = req.query.period || 'all'; // all, week, day
-    let timeFilter = { status: 'completed' };
+    let timeFilter = { status: 'completed', gameMode: 'ranked' }; // ONLY RANKED
 
     const now = new Date();
     if ( period === 'week' ) {

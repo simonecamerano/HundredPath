@@ -75,12 +75,15 @@ exports.getMyProfile = async ( req, res ) => {
       avgDuration = Math.floor( totalDuration / completedGames.length );
     }
 
+    console.log( '📊 [PROFILE] User:', userId, 'tutorialCompleted:', user.tutorialCompleted );
+
     res.json( {
       _id: user._id,
       username: user.username,
       email: user.email,
       avatar: user.avatar,
       createdAt: user.createdAt,
+      tutorialCompleted: user.tutorialCompleted, // ⭐ QUESTO MANCAVA!
       stats: {
         totalGames,
         wins,

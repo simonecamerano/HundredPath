@@ -27,7 +27,7 @@ const error = ref("");
 async function handleLogin() {
   try {
     await authStore.login(email.value, password.value);
-    router.push("/game"); // Vai al gioco dopo il login!
+    router.push("/"); // Vai alla home dopo il login!
   } catch (err) {
     error.value = err;
   }
