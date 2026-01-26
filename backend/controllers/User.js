@@ -126,6 +126,12 @@ exports.deleteUser = async ( req, res ) => {
       return res.status( 403 ).json( { error: 'Unauthorized to delete this profile' } );
     }
 
+    // 1. Delete all user's games FIRST
+    const Game = require( '../models/Game' );
+    await Game.deleteMany( { userId: id } );
+    console.log( `🗑️ Deleted all games for user ${id}` );
+
+    // 2. Delete the user
     const user = await User.findByIdAndDelete( id );
 
     if ( !user ) {
