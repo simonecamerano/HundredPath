@@ -17,6 +17,7 @@
                 v-model="email"
                 type="email"
                 required
+                pattern="^\S+@\S+\.\S+$"
                 class="input"
                 placeholder="youremail@example.com"
                 style="padding-left: 40px"
@@ -34,6 +35,7 @@
                 v-model="password"
                 type="password"
                 required
+                minlength="6"
                 class="input"
                 placeholder="••••••••"
                 style="padding-left: 40px"
@@ -49,6 +51,13 @@
         </form>
 
         <p v-if="error" class="error-message" role="alert" aria-live="polite">{{ error }}</p>
+
+        <div class="forgot-password">
+          <p style="color: var(--color-gray-600); font-size: 0.9rem; text-align: center;">
+            Forgot your password? Contact us at 
+            <a href="mailto:contact@hundredpath.com" style="color: var(--color-purple); text-decoration: underline;">contact@hundredpath.com</a>
+          </p>
+        </div>
 
         <div class="auth-footer">
           <p>Don't have an account?</p>

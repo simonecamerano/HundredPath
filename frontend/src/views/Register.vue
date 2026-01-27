@@ -17,12 +17,16 @@
                 v-model="username"
                 type="text"
                 required
+                minlength="3"
+                maxlength="10"
                 class="input"
                 placeholder="Your username"
                 style="padding-left: 40px"
                 aria-required="true"
+                aria-describedby="username-hint"
               />
             </div>
+            <small id="username-hint" class="input-hint">3-10 characters</small>
           </div>
 
           <div class="avatar-section" role="group" aria-labelledby="avatar-label">
@@ -74,12 +78,15 @@
                 v-model="email"
                 type="email"
                 required
+                pattern="^\S+@\S+\.\S+$"
                 class="input"
                 placeholder="youremail@example.com"
                 style="padding-left: 40px"
                 aria-required="true"
+                aria-describedby="email-hint"
               />
             </div>
+            <small id="email-hint" class="input-hint">Must be a valid email address</small>
           </div>
 
           <div class="input-group">
@@ -90,7 +97,7 @@
                 id="password-input-register"
                 v-model="password"
                 type="password"
-                required
+                minlength="6"
                 class="input"
                 placeholder="At least 6 characters"
                 style="padding-left: 40px"
@@ -98,12 +105,20 @@
                 aria-describedby="password-hint"
               />
             </div>
+            <small id="password-hint" class="input-hint">Minimum 6 characters</small>
           </div>
 
           <button type="submit" class="btn btn-gradient btn-lg">
             <UserPlus :size="20" />
             Register Free
           </button>
+
+          <p style="font-size: 0.85rem; color: var(--color-gray-600); text-align: center; margin-top: var(--space-md);">
+            By registering, you agree to our
+            <router-link to="/terms-of-service" style="color: var(--color-purple); text-decoration: underline;">Terms of Service</router-link>
+            and
+            <router-link to="/privacy-policy" style="color: var(--color-purple); text-decoration: underline;">Privacy Policy</router-link>
+          </p>
         </form>
 
         <div class="auth-footer">

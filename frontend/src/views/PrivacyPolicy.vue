@@ -1,0 +1,279 @@
+<template>
+  <div class="page-wrapper">
+    <div class="container-md">
+      <div class="legal-document">
+        <h1>Privacy Policy</h1>
+        <p class="last-updated">Last updated: January 27, 2026</p>
+
+        <section>
+          <h2>1. Introduction</h2>
+          <p>
+            Welcome to HundredPath. We respect your privacy and are committed to protecting your personal data.
+            This privacy policy explains how we collect, use, and safeguard your information when you use our game.
+          </p>
+        </section>
+
+        <section>
+          <h2>2. Data Controller</h2>
+          <p>
+            The data controller responsible for your personal data is:<br />
+            <strong>Simone Camerano</strong><br />
+            Email: <a href="mailto:info@simonecamerano.dev">info@simonecamerano.dev</a>
+          </p>
+        </section>
+
+        <section>
+          <h2>3. Data We Collect</h2>
+          <p>We collect and process the following personal data:</p>
+          <ul>
+            <li><strong>Account Information:</strong> Username, email address, encrypted password</li>
+            <li><strong>Profile Data:</strong> Selected avatar, game statistics</li>
+            <li><strong>Game Data:</strong> Scores, completion times, game modes played</li>
+            <li><strong>Technical Data:</strong> IP address, browser type, device information (via server logs)</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. How We Use Your Data</h2>
+          <p>We use your personal data for the following purposes:</p>
+          <ul>
+            <li>To create and manage your account</li>
+            <li>To provide game functionality and save your progress</li>
+            <li>To display leaderboards and statistics</li>
+            <li>To communicate with you about your account</li>
+            <li>To improve our services and user experience</li>
+            <li>To ensure security and prevent fraud</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. Legal Basis for Processing</h2>
+          <p>We process your personal data based on:</p>
+          <ul>
+            <li><strong>Contract Performance:</strong> To provide the game service you registered for</li>
+            <li><strong>Legitimate Interest:</strong> To improve our services and ensure security</li>
+            <li><strong>Consent:</strong> Where you have given explicit consent</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>6. Data Storage and Security</h2>
+          <p>
+            Your data is stored securely on MongoDB Atlas servers located in the European Union.
+            We implement appropriate technical and organizational measures to protect your data, including:
+          </p>
+          <ul>
+            <li>Password encryption using bcrypt</li>
+            <li>Secure HTTPS connections</li>
+            <li>JWT token-based authentication</li>
+            <li>Regular security updates</li>
+          </ul>
+          <p>We retain your data for as long as your account is active or as needed to provide services.</p>
+        </section>
+
+        <section>
+          <h2>7. Data Sharing</h2>
+          <p>
+            We do not sell your personal data. We may share your data with:
+          </p>
+          <ul>
+            <li><strong>Service Providers:</strong> MongoDB Atlas (database), Render/Vercel (hosting)</li>
+            <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
+          </ul>
+          <p>Your username and scores are publicly visible on leaderboards.</p>
+        </section>
+
+        <section>
+          <h2>8. Your Rights (GDPR)</h2>
+          <p>Under GDPR, you have the following rights:</p>
+          <ul>
+            <li><strong>Right to Access:</strong> Request a copy of your personal data</li>
+            <li><strong>Right to Rectification:</strong> Correct inaccurate data</li>
+            <li><strong>Right to Erasure:</strong> Request deletion of your account and data</li>
+            <li><strong>Right to Restriction:</strong> Limit how we process your data</li>
+            <li><strong>Right to Portability:</strong> Receive your data in a portable format</li>
+            <li><strong>Right to Object:</strong> Object to certain data processing</li>
+            <li><strong>Right to Withdraw Consent:</strong> Withdraw consent at any time</li>
+          </ul>
+          <p>
+            To exercise these rights, contact us at 
+            <a href="mailto:info@simonecamerano.dev">info@simonecamerano.dev</a>
+          </p>
+        </section>
+
+        <section>
+          <h2>9. Account Deletion</h2>
+          <p>
+            You can delete your account at any time from your Profile page.
+            This will permanently remove all your personal data, including scores and statistics.
+          </p>
+        </section>
+
+        <section>
+          <h2>10. Password Recovery</h2>
+          <p>
+            If you forget your password, please contact us at 
+            <a href="mailto:info@simonecamerano.dev">info@simonecamerano.dev</a>
+            with your registered email address. We will verify your identity and assist with account recovery.
+          </p>
+        </section>
+
+        <section>
+          <h2>11. Cookies and Local Storage</h2>
+          <p>
+            We do not use cookies. We use browser localStorage to store your authentication token (JWT)
+            locally on your device. This is necessary for the game to function and remember your login session.
+            You can clear this data at any time through your browser settings.
+          </p>
+        </section>
+
+        <section>
+          <h2>12. Third-Party Services</h2>
+          <p>We use the following third-party services:</p>
+          <ul>
+            <li><strong>MongoDB Atlas:</strong> Database hosting (Privacy Policy: <a href="https://www.mongodb.com/legal/privacy-policy" target="_blank" rel="noopener">mongodb.com/legal/privacy-policy</a>)</li>
+            <li><strong>DiceBear Avatars:</strong> Avatar generation API</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>13. Children's Privacy</h2>
+          <p>
+            HundredPath is not intended for children under 13 years of age.
+            We do not knowingly collect data from children under 13.
+          </p>
+        </section>
+
+        <section>
+          <h2>14. Changes to This Policy</h2>
+          <p>
+            We may update this privacy policy from time to time. We will notify you of any changes
+            by updating the "Last updated" date at the top of this policy.
+          </p>
+        </section>
+
+        <section>
+          <h2>15. Contact Us</h2>
+          <p>
+            If you have questions about this privacy policy or wish to exercise your rights, contact us:
+          </p>
+          <p>
+            Email: <a href="mailto:info@simonecamerano.dev">info@simonecamerano.dev</a><br />
+            Name: Simone Camerano
+          </p>
+        </section>
+
+        <div class="back-link">
+          <router-link to="/" class="link-gradient">← Back to Home</router-link>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+// No reactive data needed for static page
+</script>
+
+<style scoped>
+.legal-document {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+  margin: var(--space-xl) 0;
+  line-height: 1.7;
+}
+
+.legal-document h1 {
+  font-size: 2.5rem;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+  font-weight: 800;
+}
+
+.last-updated {
+  color: var(--color-gray-500);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-xl);
+  font-style: italic;
+}
+
+.legal-document section {
+  margin-bottom: var(--space-xl);
+}
+
+.legal-document h2 {
+  font-size: 1.5rem;
+  color: var(--color-gray-800);
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-md);
+  font-weight: 700;
+}
+
+.legal-document p {
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-md);
+}
+
+.legal-document ul {
+  margin-left: var(--space-lg);
+  margin-bottom: var(--space-md);
+  color: var(--color-gray-700);
+}
+
+.legal-document li {
+  margin-bottom: var(--space-sm);
+}
+
+.legal-document a {
+  color: var(--color-purple);
+  text-decoration: underline;
+  transition: opacity 0.2s;
+}
+
+.legal-document a:hover {
+  opacity: 0.7;
+}
+
+.legal-document strong {
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.back-link {
+  margin-top: var(--space-2xl);
+  padding-top: var(--space-xl);
+  border-top: 1px solid var(--color-gray-200);
+  text-align: center;
+}
+
+.link-gradient {
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: opacity 0.2s;
+}
+
+.link-gradient:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .legal-document {
+    padding: var(--space-lg);
+  }
+
+  .legal-document h1 {
+    font-size: 2rem;
+  }
+
+  .legal-document h2 {
+    font-size: 1.3rem;
+  }
+}
+</style>

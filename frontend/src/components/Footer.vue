@@ -1,28 +1,26 @@
 <template>
   <footer class="app-footer">
     <div class="footer-content">
-      <p class="footer-text">
-        © {{ currentYear }} HundredPath - The 10x10 Logic Game
+      <p class="footer-credit">
+        Made with ❤️ by Simone Camerano
       </p>
-      <p class="footer-links">
-        <span>Made with ❤️ by Simone Camerano</span>
-      </p>
+      <div class="footer-links">
+        <router-link to="/privacy-policy" class="footer-link">Privacy Policy</router-link>
+        <span class="separator">·</span>
+        <router-link to="/terms-of-service" class="footer-link">Terms</router-link>
+        <span class="separator">·</span>
+        <a href="mailto:info@simonecamerano.dev" class="footer-link">Contact</a>
+      </div>
     </div>
   </footer>
 </template>
 
-<script setup>
-import { computed } from "vue";
-
-const currentYear = computed(() => new Date().getFullYear());
-</script>
-
 <style scoped>
 .app-footer {
   margin-top: 80px;
-  padding: 15px 20px; /* Ridotto: prima era 30px */
+  padding: 20px;
   background-color: hsla(250, 100%, 98%, 1);
-   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
@@ -31,34 +29,48 @@ const currentYear = computed(() => new Date().getFullYear());
   margin: 0 auto;
 }
 
-.footer-text {
+.footer-credit {
   color: #6c757d;
-  font-size: 0.85rem;
-  margin-bottom: 5px;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  font-weight: 500;
 }
 
 .footer-links {
-  color: #adb5bd;
-  font-size: 0.8rem;
-  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.85rem;
 }
 
-.footer-links span {
-  display: inline-block;
+.footer-link {
+  color: #adb5bd;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--color-purple);
+}
+
+.separator {
+  color: #dee2e6;
+  user-select: none;
 }
 
 @media (max-width: 600px) {
   .app-footer {
-    padding: 8px 10px; /* Ultra compact */
+    padding: 15px;
   }
 
-  .footer-text {
-    font-size: 0.75rem;
-    margin-bottom: 2px;
+  .footer-credit {
+    font-size: 0.85rem;
   }
 
   .footer-links {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    gap: 6px;
   }
 }
 </style>

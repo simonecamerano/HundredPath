@@ -4,8 +4,10 @@ import Game from './views/Game.vue';
 import Home from './views/Home.vue';
 import Leaderboard from './views/Leaderboard.vue';
 import Login from './views/Login.vue';
+import PrivacyPolicy from './views/PrivacyPolicy.vue';
 import Profile from './views/Profile.vue';
 import Register from './views/Register.vue';
+import TermsOfService from './views/TermsOfService.vue';
 import UserBestScores from './views/UserBestScores.vue';
 import Users from './views/Users.vue';
 const routes = [
@@ -36,6 +38,14 @@ const routes = [
     path: '/userbestscores',
     component: UserBestScores,
     meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
+  },
+  {
+    path: '/privacy-policy',
+    component: PrivacyPolicy
+  },
+  {
+    path: '/terms-of-service',
+    component: TermsOfService
   },
 ];
 const router = createRouter( {

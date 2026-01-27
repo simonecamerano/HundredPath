@@ -63,6 +63,13 @@
   margin-top: var(--space-md);
 }
 
+.input-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
 /* AVATAR SECTION (For Register page) */
 .avatar-section {
   margin-bottom: var(--space-xl);
