@@ -14,7 +14,7 @@ exports.getMyProfile = async ( req, res ) => {
 
     // 2. Calculate stats (same logic as Users.js but for single user)
     const rankedGames = await Game.aggregate( [
-      { $match: { status: 'completed' } },
+      { $match: { status: 'completed', gameMode: 'ranked' } },
       {
         $addFields: {
           endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
@@ -56,15 +56,15 @@ exports.getMyProfile = async ( req, res ) => {
       }
     ] );
 
-    // 3. Get all user games for basic stats
-    const allGames = await Game.find( { userId } );
+    // 3. Get all user RANKED games for basic stats
+    const allGames = await Game.find( { userId, gameMode: 'ranked' } );
     const totalGames = allGames.length;
     const wins = allGames.filter( g => g.currentNumber === 101 ).length;
     const bestRank = rankedGames.length > 0
       ? Math.min( ...rankedGames.map( g => g.globalRank ) )
       : null;
 
-    // 4. Calculate average time (only for completed games)
+    // 4. Calculate average time (only for completed RANKED games)
     const completedGames = allGames.filter( g => g.status === 'completed' );
     let avgDuration = null;
     if ( completedGames.length > 0 ) {
