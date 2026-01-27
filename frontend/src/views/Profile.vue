@@ -166,21 +166,21 @@
 
 <script setup>
 import {
-    AlertTriangle,
-    BarChart3,
-    Calendar,
-    Clock,
-    Edit2,
-    Gamepad2,
-    GraduationCap,
-    Medal,
-    Save,
-    Shuffle,
-    Swords,
-    Target,
-    Timer,
-    Trash2,
-    Trophy,
+  AlertTriangle,
+  BarChart3,
+  Calendar,
+  Clock,
+  Edit2,
+  Gamepad2,
+  GraduationCap,
+  Medal,
+  Save,
+  Shuffle,
+  Swords,
+  Target,
+  Timer,
+  Trash2,
+  Trophy,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";

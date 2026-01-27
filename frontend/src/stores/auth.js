@@ -32,7 +32,8 @@ export const useAuthStore = defineStore( 'auth', {
     },
     updateAvatar( newAvatar ) {
       if ( this.user ) {
-        this.user.avatar = newAvatar;
+        // Create new object to trigger reactivity
+        this.user = { ...this.user, avatar: newAvatar };
         localStorage.setItem( 'user', JSON.stringify( this.user ) );
       }
     },
@@ -43,9 +44,14 @@ export const useAuthStore = defineStore( 'auth', {
         localStorage.setItem( 'user', JSON.stringify( this.user ) );
       }
     },
-    // Opzionale: recupera profilo all'avvio
-    async fetchUser( id ) {
-      // ... implementeremo se serve
+    async refreshUser() {
+      try {
+        const response = await api.get( '/profile' );
+        this.user = response.data;
+        localStorage.setItem( 'user', JSON.stringify( this.user ) );
+      } catch ( error ) {
+        console.error( 'Error refreshing user:', error );
+      }
     }
   },
 } );

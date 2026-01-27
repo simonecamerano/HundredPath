@@ -1,15 +1,15 @@
 <script setup>
 import {
-  LogOut,
-  Play,
-  RotateCcw,
-  Skull,
-  Target,
-  Timer,
-  Trophy,
-  Undo,
-  User,
-  UserPlus,
+    LogOut,
+    Play,
+    RotateCcw,
+    Skull,
+    Target,
+    Timer,
+    Trophy,
+    Undo,
+    User,
+    UserPlus,
 } from "lucide-vue-next";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -291,10 +291,11 @@ watch(isGameOver, async (newValue) => {
         const response = await api.post("/game/over", { gameId: gameId.value });
         console.log("📝 Game over response:", response.data);
 
-        // If tutorial completed, force home refresh
+        // If tutorial completed, refresh user from server
         if (response.data.tutorialCompleted) {
-          console.log("🎓 Tutorial completed! Ranked should unlock now.");
-          authStore.setTutorialCompleted(true);
+          console.log("🎓 Tutorial completed! Refreshing user data...");
+          await authStore.refreshUser();
+          console.log("✅ User refreshed, ranked should unlock now.");
         }
       } catch (e) {
         console.error("❌ Error calling game/over:", e);
