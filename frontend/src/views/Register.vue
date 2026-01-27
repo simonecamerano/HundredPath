@@ -109,9 +109,11 @@
 import { Lock, Mail, Shuffle, User, UserPlus } from "lucide-vue-next";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
 
 const router = useRouter();
+const { success: notifySuccess, error: notifyError, warning: notifyWarning } = useNotification();
 const username = ref("");
 const email = ref("");
 const password = ref("");
@@ -132,7 +134,7 @@ generateRandomAvatar();
 
 async function register() {
   if (!selectedAvatar.value) {
-    alert("Per favore seleziona un avatar!");
+    notifyWarning("Per favore seleziona un avatar!");
     return;
   }
   try {
@@ -142,11 +144,11 @@ async function register() {
       password: password.value,
       avatar: selectedAvatar.value,
     });
-    alert("Registrazione completata! Ora puoi fare il login.");
+    notifySuccess("Registrazione completata! Ora puoi fare il login.");
     router.push("/login");
   } catch (err) {
     console.error("Error registering:", err);
-    alert(err.response?.data?.error || "Registrazione fallita");
+    notifyError(err.response?.data?.error || "Registrazione fallita");
   }
 }
 </script>

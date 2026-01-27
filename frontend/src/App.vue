@@ -5,11 +5,15 @@
       <router-view></router-view>
     </main>
     <Footer />
+    <NotificationContainer />
+    <ConfirmDialog />
   </div>
 </template>
 <script setup>
+import ConfirmDialog from "./components/ConfirmDialog.vue";
 import Footer from "./components/Footer.vue";
 import Navbar from "./components/Navbar.vue";
+import NotificationContainer from "./components/NotificationContainer.vue";
 </script>
 <style>
 /* Global styles */

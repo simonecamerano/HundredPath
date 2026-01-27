@@ -14,11 +14,15 @@ import {
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import Grid from "../components/Grid.vue";
+import { useConfirm } from "../composables/useConfirm";
+import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth"; // Importiamo lo store
 
 const router = useRouter();
 const authStore = useAuthStore(); // Accesso allo stato auth
+const { error: notifyError } = useNotification();
+const { confirm } = useConfirm();
 
 // GAME MODE (from route query)
 const gameMode = ref("tutorial"); // 'tutorial' or 'ranked'
@@ -132,7 +136,7 @@ async function initGame() {
     }
   } catch (err) {
     console.error("Errore start game:", err);
-    alert("Errore init");
+    notifyError("Errore durante l'inizializzazione della partita");
   } finally {
     loading.value = false;
   }
@@ -227,7 +231,8 @@ async function restartGame() {
 }
 
 async function abandonGame() {
-  if (!confirm("Vuoi abbandonare la partita?")) return;
+  const confirmed = await confirm("Vuoi abbandonare la partita?");
+  if (!confirmed) return;
   stopTimer();
 
   if (authStore.isAuthenticated && gameId.value) {

@@ -142,22 +142,25 @@
 
 <script setup>
 import {
-  BarChart3,
-  Calendar,
-  Clock,
-  Edit2,
-  Gamepad2,
-  GraduationCap,
-  Medal,
-  Save,
-  Shuffle,
-  Swords,
-  Target,
-  Timer,
-  Trophy,
+    BarChart3,
+    Calendar,
+    Clock,
+    Edit2,
+    Gamepad2,
+    GraduationCap,
+    Medal,
+    Save,
+    Shuffle,
+    Swords,
+    Target,
+    Timer,
+    Trophy,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
+import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
+
+const { success: notifySuccess, error: notifyError } = useNotification();
 
 const profile = ref({
   username: "",
@@ -219,10 +222,10 @@ async function saveAvatar() {
     await api.put("/profile/avatar", { avatar: selectedAvatar.value });
     profile.value.avatar = selectedAvatar.value;
     showAvatarPicker.value = false;
-    alert("Avatar aggiornato!");
+    notifySuccess("Avatar aggiornato!");
   } catch (err) {
     console.error("Error saving avatar:", err);
-    alert("Errore nel salvataggio dell'avatar");
+    notifyError("Errore nel salvataggio dell'avatar");
   }
 }
 
