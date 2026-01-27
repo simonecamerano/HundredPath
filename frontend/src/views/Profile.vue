@@ -141,6 +141,24 @@
             </div>
           </div>
         </div>
+
+        <!-- DANGER ZONE -->
+        <div class="danger-zone">
+          <h2 class="section-title danger-title">
+            <AlertTriangle :size="24" />
+            Danger Zone
+          </h2>
+          <div class="danger-card">
+            <div class="danger-info">
+              <h3>Delete Account</h3>
+              <p>Permanently delete your account and all your data. This action cannot be undone.</p>
+            </div>
+            <button @click="handleDeleteAccount" class="btn btn-danger">
+              <Trash2 :size="18" />
+              Delete Account
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -148,6 +166,7 @@
 
 <script setup>
 import {
+    AlertTriangle,
     BarChart3,
     Calendar,
     Clock,
@@ -160,15 +179,20 @@ import {
     Swords,
     Target,
     Timer,
+    Trash2,
     Trophy,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
 
 const { success: notifySuccess, error: notifyError } = useNotification();
+const { confirm } = useConfirm();
 const authStore = useAuthStore();
+const router = useRouter();
 
 const profile = ref({
   username: "",
@@ -235,6 +259,25 @@ async function saveAvatar() {
   } catch (err) {
     console.error("Error saving avatar:", err);
     notifyError("Error saving avatar");
+  }
+}
+
+async function handleDeleteAccount() {
+  const confirmed = await confirm(
+    "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.",
+    "Delete Account"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await api.delete("/profile");
+    notifySuccess("Account deleted successfully");
+    authStore.logout();
+    router.push("/");
+  } catch (err) {
+    console.error("Error deleting account:", err);
+    notifyError("Error deleting account");
   }
 }
 
@@ -476,6 +519,59 @@ onMounted(async () => {
   text-align: center;
 }
 
+/* DANGER ZONE */
+.danger-zone {
+  margin-top: var(--space-2xl);
+}
+
+.danger-title {
+  color: var(--color-error);
+}
+
+.danger-card {
+  background: white;
+  border: 2px solid var(--color-error);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.danger-info h3 {
+  font-size: 1.2rem;
+  color: var(--color-error);
+  margin-bottom: var(--space-xs);
+}
+
+.danger-info p {
+  color: var(--color-gray-600);
+  font-size: 0.95rem;
+}
+
+.btn-danger {
+  background: var(--color-error);
+  color: white;
+  border: none;
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+
 @media (max-width: 768px) {
   .profile-header {
     flex-direction: column;
@@ -488,6 +584,17 @@ onMounted(async () => {
 
   .stats-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .danger-card {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .btn-danger {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

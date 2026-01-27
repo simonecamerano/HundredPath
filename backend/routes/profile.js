@@ -5,5 +5,6 @@ const ProfileController = require( '../controllers/Profile' );
 
 router.get( '/', protect, ProfileController.getMyProfile );
 router.put( '/avatar', protect, ProfileController.updateAvatar );
+router.delete( '/', protect, ProfileController.deleteAccount );
 
 module.exports = router;
