@@ -41,6 +41,21 @@ app.get( '/api/health', ( req, res ) => {
     timestamp: new Date().toISOString()
   } );
 } );
+
+// Health check endpoint for deployment monitoring
+app.get( '/api/health', async ( req, res ) => {
+  const mongoose = require( 'mongoose' );
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  
+  res.json( {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV,
+    database: dbStatus
+  } );
+} );
+
 // Route to test - Respond with a simple message
 app.get( '/', ( req, res ) => {
   res.json( {
