@@ -8,12 +8,16 @@
       </div>
 
       <!-- TAB SWITCHER -->
-      <div class="tab-switcher">
+      <div class="tab-switcher" role="tablist" aria-label="Leaderboard time periods">
         <button
           v-for="period in periods"
           :key="period.value"
           :class="['tab-btn', { active: activePeriod === period.value }]"
           @click="activePeriod = period.value"
+          role="tab"
+          :aria-selected="activePeriod === period.value"
+          :aria-controls="`${period.value}-leaderboard`"
+          :aria-label="`View ${period.label} leaderboard`"
         >
           <component :is="period.iconComponent" :size="18" />
           {{ period.label }}
@@ -44,7 +48,7 @@
 
             <!-- Top 10 Table -->
             <div class="table-wrapper">
-              <table class="table">
+              <table class="table" role="table" :aria-label="`${period.label} leaderboard top 10`">
                 <thead>
                   <tr>
                     <th>Rank</th>
@@ -72,7 +76,7 @@
                     <td>
                       <img
                         :src="getAvatarUrl(entry.avatar)"
-                        alt="Avatar"
+                        :alt="`${entry.username}'s avatar`"
                         class="avatar"
                       />
                     </td>

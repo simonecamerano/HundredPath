@@ -9,31 +9,35 @@
 
         <form @submit.prevent="handleLogin" class="auth-form">
           <div class="input-group">
-            <label class="label">Email</label>
+            <label class="label" for="email-input">Email</label>
             <div style="position: relative">
-              <Mail :size="18" class="input-icon" />
+              <Mail :size="18" class="input-icon" aria-hidden="true" />
               <input
+                id="email-input"
                 v-model="email"
                 type="email"
                 required
                 class="input"
                 placeholder="youremail@example.com"
                 style="padding-left: 40px"
+                aria-required="true"
               />
             </div>
           </div>
 
           <div class="input-group">
-            <label class="label">Password</label>
+            <label class="label" for="password-input">Password</label>
             <div style="position: relative">
-              <Lock :size="18" class="input-icon" />
+              <Lock :size="18" class="input-icon" aria-hidden="true" />
               <input
+                id="password-input"
                 v-model="password"
                 type="password"
                 required
                 class="input"
                 placeholder="••••••••"
                 style="padding-left: 40px"
+                aria-required="true"
               />
             </div>
           </div>
@@ -44,7 +48,7 @@
           </button>
         </form>
 
-        <p v-if="error" class="error-message">{{ error }}</p>
+        <p v-if="error" class="error-message" role="alert" aria-live="polite">{{ error }}</p>
 
         <div class="auth-footer">
           <p>Don't have an account?</p>

@@ -9,27 +9,29 @@
 
         <form @submit.prevent="register" class="auth-form">
           <div class="input-group">
-            <label class="label">Username</label>
+            <label class="label" for="username-input">Username</label>
             <div style="position: relative">
-              <User :size="18" class="input-icon" />
+              <User :size="18" class="input-icon" aria-hidden="true" />
               <input
+                id="username-input"
                 v-model="username"
                 type="text"
                 required
                 class="input"
                 placeholder="Your username"
                 style="padding-left: 40px"
+                aria-required="true"
               />
             </div>
           </div>
 
-          <div class="avatar-section">
-            <label class="label">Choose your Avatar</label>
+          <div class="avatar-section" role="group" aria-labelledby="avatar-label">
+            <label class="label" id="avatar-label">Choose your Avatar</label>
 
             <div v-if="selectedAvatar" class="avatar-preview">
               <img
                 :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedAvatar}`"
-                alt="Avatar Preview"
+                alt="Selected avatar preview"
               />
             </div>
 
@@ -37,53 +39,63 @@
               type="button"
               @click="generateRandomAvatar"
               class="btn btn-secondary btn-sm"
+              aria-label="Generate new random avatars"
             >
-              <Shuffle :size="16" />
+              <Shuffle :size="16" aria-hidden="true" />
               New Random Avatars
             </button>
 
-            <div class="avatar-grid">
+            <div class="avatar-grid" role="radiogroup" aria-label="Avatar selection">
               <div
                 v-for="seed in avatarOptions"
                 :key="seed"
                 class="avatar-option"
                 :class="{ selected: selectedAvatar === seed }"
                 @click="selectedAvatar = seed"
+                role="radio"
+                :aria-checked="selectedAvatar === seed"
+                :aria-label="`Avatar option ${seed}`"
+                tabindex="0"
               >
                 <img
                   :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
-                  alt="Avatar"
+                  :alt="`Avatar option ${seed}`"
                 />
               </div>
             </div>
           </div>
 
           <div class="input-group">
-            <label class="label">Email</label>
+            <label class="label" for="email-input-register">Email</label>
             <div style="position: relative">
-              <Mail :size="18" class="input-icon" />
+              <Mail :size="18" class="input-icon" aria-hidden="true" />
               <input
+                id="email-input-register"
                 v-model="email"
                 type="email"
                 required
                 class="input"
                 placeholder="youremail@example.com"
                 style="padding-left: 40px"
+                aria-required="true"
               />
             </div>
           </div>
 
           <div class="input-group">
-            <label class="label">Password</label>
+            <label class="label" for="password-input-register">Password</label>
             <div style="position: relative">
-              <Lock :size="18" class="input-icon" />
+              <Lock :size="18" class="input-icon" aria-hidden="true" />
               <input
+                id="password-input-register"
                 v-model="password"
                 type="password"
                 required
                 class="input"
                 placeholder="At least 6 characters"
                 style="padding-left: 40px"
+                aria-required="true"
+                aria-describedby="password-hint"
               />
             </div>
           </div>

@@ -6,20 +6,23 @@ const { notifications, removeNotification } = useNotification();
 </script>
 
 <template>
-  <div class="notification-container">
+  <div class="notification-container" aria-live="polite" aria-atomic="false">
     <transition-group name="notification">
       <div
         v-for="notification in notifications"
         :key="notification.id"
         class="notification"
         :class="`notification-${notification.type}`"
+        role="alert"
+        :aria-label="`${notification.type} notification: ${notification.message}`"
       >
         <span class="notification-message">{{ notification.message }}</span>
         <button
           class="notification-close"
           @click="removeNotification(notification.id)"
+          :aria-label="`Close ${notification.type} notification`"
         >
-          <X :size="16" />
+          <X :size="16" aria-hidden="true" />
         </button>
       </div>
     </transition-group>

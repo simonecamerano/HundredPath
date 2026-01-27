@@ -6,13 +6,13 @@ const { state } = useConfirm();
 
 <template>
   <transition name="modal">
-    <div v-if="state.isOpen" class="modal-overlay" @click="state.onCancel">
+    <div v-if="state.isOpen" class="modal-overlay" @click="state.onCancel" role="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message" aria-modal="true">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Confirm</h3>
+          <h3 id="confirm-title">Confirm</h3>
         </div>
         <div class="modal-body">
-          <p>{{ state.message }}</p>
+          <p id="confirm-message">{{ state.message }}</p>
         </div>
         <div class="modal-footer">
           <button class="btn-cancel" @click="state.onCancel">Cancel</button>

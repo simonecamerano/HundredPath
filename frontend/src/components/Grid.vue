@@ -1,5 +1,5 @@
 <template>
-  <div class="game-board">
+  <div class="game-board" role="grid" aria-label="Game board with 100 cells">
     <!-- Loop to create 100 cells -->
     <!-- cellIndex ranges from 0 to 99 -->
     <div
@@ -14,6 +14,9 @@
         invalid: invalidCell === index,
       }"
       @click="onCellClick(index)"
+      role="gridcell"
+      :aria-label="cell !== 0 ? `Cell ${index + 1}, number ${cell}` : `Empty cell ${index + 1}${showHints && isValid(index) ? ', valid move' : ''}`"
+      :tabindex="isValid(index) || cell !== 0 ? 0 : -1"
     >
       <!-- Show the number if present, otherwise nothing -->
       {{ cell !== 0 ? cell : "" }}

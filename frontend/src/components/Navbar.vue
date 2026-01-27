@@ -16,6 +16,9 @@
       class="hamburger"
       @click="menuOpen = !menuOpen"
       :class="{ open: menuOpen }"
+      aria-label="Toggle navigation menu"
+      aria-expanded="menuOpen"
+      aria-controls="mobile-menu"
     >
       <span></span>
       <span></span>
@@ -23,7 +26,7 @@
     </button>
 
     <!-- Desktop Navigation -->
-    <div class="desktop-links">
+    <nav class="desktop-links" aria-label="Main navigation">
       <template v-if="authStore.isAuthenticated">
         <router-link to="/leaderboard" class="desktop-link">
           <Trophy :size="16" />
@@ -37,10 +40,10 @@
           <Users :size="16" />
           <span>Users</span>
         </router-link>
-        <router-link to="/profile" class="user-info-desktop desktop-link">
+        <router-link to="/profile" class="user-info-desktop desktop-link" :aria-label="`Profile of ${authStore.user?.username}`">
           <img
             :src="getAvatarUrl(authStore.user?.avatar)"
-            alt="Avatar"
+            :alt="`${authStore.user?.username}'s avatar`"
             class="nav-avatar-sm"
           />
           <span class="nav-username">{{ authStore.user?.username }}</span>
@@ -64,16 +67,22 @@
           <span>Register</span>
         </router-link>
       </template>
-    </div>
+    </nav>
 
     <!-- Premium Mobile Menu (Overlay) -->
     <div
       class="mobile-menu-overlay"
       :class="{ open: menuOpen }"
       @click="menuOpen = false"
+      aria-hidden="true"
     ></div>
 
-    <div class="mobile-menu" :class="{ open: menuOpen }">
+    <nav 
+      id="mobile-menu"
+      class="mobile-menu" 
+      :class="{ open: menuOpen }"
+      aria-label="Mobile navigation"
+    >
       <!-- HEADER -->
       <div class="menu-header">
         <!-- Decorative blobs -->
@@ -98,8 +107,8 @@
         <!-- MAIN MENU ITEMS -->
         <div class="menu-items">
           <!-- Tutorial -->
-          <button class="menu-card" @click="navigate('/game?mode=tutorial')">
-            <div class="icon-box gradient-1">
+          <button class="menu-card" @click="navigate('/game?mode=tutorial')" aria-label="Play Tutorial mode">
+            <div class="icon-box gradient-1" aria-hidden="true">
               <GraduationCap class="menu-icon" />
             </div>
             <div class="text-box">
@@ -112,8 +121,9 @@
             v-if="authStore.isAuthenticated && rankedUnlocked"
             class="menu-card"
             @click="navigate('/game?mode=ranked')"
+            aria-label="Play Ranked mode"
           >
-            <div class="icon-box gradient-ranked">
+            <div class="icon-box gradient-ranked" aria-hidden="true">
               <Swords class="menu-icon" />
             </div>
             <div class="text-box">
@@ -123,8 +133,8 @@
           </button>
 
           <!-- Classifiche -->
-          <button class="menu-card" @click="navigate('/leaderboard')">
-            <div class="icon-box gradient-2">
+          <button class="menu-card" @click="navigate('/leaderboard')" aria-label="View Leaderboards">
+            <div class="icon-box gradient-2" aria-hidden="true">
               <Trophy class="menu-icon" />
             </div>
             <div class="text-box">
@@ -138,8 +148,9 @@
             v-if="authStore.isAuthenticated"
             class="menu-card"
             @click="navigate('/userbestscores')"
+            aria-label="View your best scores"
           >
-            <div class="icon-box gradient-3">
+            <div class="icon-box gradient-3" aria-hidden="true">
               <Sparkles class="menu-icon" />
             </div>
             <div class="text-box">
@@ -152,8 +163,9 @@
             v-if="authStore.isAuthenticated"
             class="menu-card"
             @click="navigate('/users')"
+            aria-label="View community users"
           >
-            <div class="icon-box gradient-4">
+            <div class="icon-box gradient-4" aria-hidden="true">
               <Users class="menu-icon" />
             </div>
             <div class="text-box">
@@ -168,19 +180,20 @@
         <!-- AUTH SECTION -->
         <div class="auth-section">
           <template v-if="!authStore.isAuthenticated">
-            <button class="btn-outline" @click="navigate('/login')">
-              <LogIn class="btn-icon" /> Log In
+            <button class="btn-outline" @click="navigate('/login')" aria-label="Log in to your account">
+              <LogIn class="btn-icon" aria-hidden="true" /> Log In
             </button>
-            <button class="btn-gradient" @click="navigate('/register')">
-              <UserPlus class="btn-icon" /> Register Free
+            <button class="btn-gradient" @click="navigate('/register')" aria-label="Register a free account">
+              <UserPlus class="btn-icon" aria-hidden="true" /> Register Free
             </button>
           </template>
 
           <template v-else>
             <!-- User Profile Snippet -->
-            <div class="user-profile-card" @click="navigate('/profile')">
+            <div class="user-profile-card" @click="navigate('/profile')" role="button" tabindex="0" :aria-label="`View profile of ${authStore.user?.username}`">
               <img
                 :src="getAvatarUrl(authStore.user?.avatar)"
+                :alt="`${authStore.user?.username}'s avatar`"
                 class="profile-avatar"
               />
               <div class="profile-info">
@@ -189,8 +202,8 @@
               </div>
             </div>
 
-            <button class="btn-outline logout" @click="logout">
-              <LogOut class="btn-icon" /> Logout
+            <button class="btn-outline logout" @click="logout" aria-label="Log out from your account">
+              <LogOut class="btn-icon" aria-hidden="true" /> Logout
             </button>
           </template>
         </div>
@@ -201,7 +214,7 @@
         <div class="blob blob-3"></div>
         <div class="blob blob-4"></div>
       </div>
-    </div>
+    </nav>
   </nav>
 </template>
 

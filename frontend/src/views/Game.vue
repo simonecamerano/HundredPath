@@ -313,17 +313,17 @@ watch(isVictory, (val) => {
 <template>
   <div class="game-container">
     <div class="game-header">
-      <div class="stat-card timer-card">
-        <Timer :size="20" class="stat-icon" />
+      <div class="stat-card timer-card" role="status" aria-label="Game timer">
+        <Timer :size="20" class="stat-icon" aria-hidden="true" />
         <span class="stat-value">{{ elapsedTime }}</span>
       </div>
-      <div class="stat-card score-card">
-        <Target :size="20" class="stat-icon" />
+      <div class="stat-card score-card" role="status" aria-label="Current score">
+        <Target :size="20" class="stat-icon" aria-hidden="true" />
         <span class="stat-value">{{ currentNumber - 1 }}/100</span>
       </div>
-      <div v-if="!authStore.isAuthenticated" class="badge badge-purple">
-        <User :size="14" />
-        Ospite
+      <div v-if="!authStore.isAuthenticated" class="badge badge-purple" role="status" aria-label="Playing as guest">
+        <User :size="14" aria-hidden="true" />
+        Guest
       </div>
     </div>
 
@@ -338,16 +338,17 @@ watch(isVictory, (val) => {
           isGameOver
         "
         class="btn btn-outline btn-sm"
+        :aria-label="`Undo last move, ${undoCount} remaining`"
       >
-        <Undo :size="16" />
+        <Undo :size="16" aria-hidden="true" />
         Undo ({{ undoCount }})
       </button>
-      <button @click="restartGame" class="btn btn-secondary btn-sm">
-        <RotateCcw :size="16" />
+      <button @click="restartGame" class="btn btn-secondary btn-sm" aria-label="Restart game">
+        <RotateCcw :size="16" aria-hidden="true" />
         Restart
       </button>
-      <button @click="abandonGame" class="btn btn-outline btn-sm">
-        <LogOut :size="16" />
+      <button @click="abandonGame" class="btn btn-outline btn-sm" aria-label="Abandon current game">
+        <LogOut :size="16" aria-hidden="true" />
         Abandon
       </button>
     </div>
@@ -362,16 +363,16 @@ watch(isVictory, (val) => {
       />
 
       <!-- START OVERLAY -->
-      <div v-if="!isGameActive && !loading" class="overlay start-overlay">
+      <div v-if="!isGameActive && !loading" class="overlay start-overlay" role="dialog" aria-labelledby="start-title" aria-modal="true">
         <div class="overlay-content">
-          <h2 class="text-gradient-full">
-            Pronto{{
+          <h2 class="text-gradient-full" id="start-title">
+            Ready{{
               authStore.user?.username ? ", " + authStore.user.username : ""
             }}?
           </h2>
-          <p class="overlay-subtitle">La posizione di partenza è casuale.</p>
-          <button class="btn btn-gradient btn-lg" @click="startGameplay">
-            <Play :size="20" />
+          <p class="overlay-subtitle">The starting position is random.</p>
+          <button class="btn btn-gradient btn-lg" @click="startGameplay" aria-label="Start game">
+            <Play :size="20" aria-hidden="true" />
             START
           </button>
         </div>
@@ -379,10 +380,10 @@ watch(isVictory, (val) => {
     </div>
 
     <!-- VICTORY OVERLAY -->
-    <div v-if="isVictory" class="overlay victory-overlay">
+    <div v-if="isVictory" class="overlay victory-overlay" role="dialog" aria-labelledby="victory-title" aria-modal="true">
       <div class="overlay-content">
-        <Trophy :size="64" class="overlay-icon trophy-icon" />
-        <h2 class="text-gradient-full">VICTORY!</h2>
+        <Trophy :size="64" class="overlay-icon trophy-icon" aria-hidden="true" />
+        <h2 class="text-gradient-full" id="victory-title">VICTORY!</h2>
         <p class="overlay-stats">
           Completed in <strong>{{ elapsedTime }}</strong>
         </p>
@@ -409,10 +410,10 @@ watch(isVictory, (val) => {
     </div>
 
     <!-- GAME OVER OVERLAY -->
-    <div v-if="isGameOver" class="overlay gameover-overlay">
+    <div v-if="isGameOver" class="overlay gameover-overlay" role="dialog" aria-labelledby="gameover-title" aria-modal="true">
       <div class="overlay-content">
-        <Skull :size="64" class="overlay-icon gameover-icon" />
-        <h2 class="text-gradient-full">GAME OVER</h2>
+        <Skull :size="64" class="overlay-icon gameover-icon" aria-hidden="true" />
+        <h2 class="text-gradient-full" id="gameover-title">GAME OVER</h2>
         <div class="overlay-stats">
           <p>
             Final Score: <strong>{{ currentNumber - 1 }}</strong>

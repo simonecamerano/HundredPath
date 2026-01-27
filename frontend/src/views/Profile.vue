@@ -13,14 +13,15 @@
             <div class="avatar-wrapper">
               <img
                 :src="getAvatarUrl(profile.avatar)"
-                alt="Avatar"
+                :alt="`${profile.username}'s avatar`"
                 class="profile-avatar"
               />
               <button
                 @click="showAvatarPicker = !showAvatarPicker"
                 class="avatar-edit-btn"
+                aria-label="Change avatar"
               >
-                <Edit2 :size="16" />
+                <Edit2 :size="16" aria-hidden="true" />
               </button>
             </div>
             <div class="profile-info">
@@ -39,22 +40,27 @@
               <button
                 @click="generateRandomAvatar"
                 class="btn btn-secondary btn-sm"
+                aria-label="Generate new random avatars"
               >
-                <Shuffle :size="16" />
+                <Shuffle :size="16" aria-hidden="true" />
                 New Avatars
               </button>
             </div>
-            <div class="avatar-grid">
+            <div class="avatar-grid" role="radiogroup" aria-label="Avatar selection">
               <div
                 v-for="seed in avatarOptions"
                 :key="seed"
                 class="avatar-option"
                 :class="{ selected: selectedAvatar === seed }"
                 @click="selectedAvatar = seed"
+                role="radio"
+                :aria-checked="selectedAvatar === seed"
+                :aria-label="`Avatar option ${seed}`"
+                tabindex="0"
               >
                 <img
                   :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
-                  alt="Avatar"
+                  :alt="`Avatar option ${seed}`"
                 />
               </div>
             </div>
@@ -75,9 +81,9 @@
             <BarChart3 :size="24" />
             Your Statistics
           </h2>
-          <div class="stats-grid">
-            <div class="stat-card card-hover">
-              <Gamepad2 :size="32" class="stat-icon" />
+          <div class="stats-grid" role="list">
+            <div class="stat-card card-hover" role="listitem" aria-label="Games played statistic">
+              <Gamepad2 :size="32" class="stat-icon" aria-hidden="true" />
               <div class="stat-label">Games Played</div>
               <div class="stat-value">{{ profile.stats.totalGames || 0 }}</div>
             </div>
