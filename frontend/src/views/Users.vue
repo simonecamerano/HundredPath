@@ -3,15 +3,15 @@
     <div class="container">
       <div class="page-header">
         <Users :size="48" class="header-icon" />
-        <h1 class="text-gradient">Community HundredPath</h1>
+        <h1 class="text-gradient">HundredPath Community</h1>
         <p class="subtitle">
           <UserCheck :size="18" />
-          {{ users.length }} giocatori registrati
+          {{ users.length }} registered players
         </p>
       </div>
 
       <div v-if="loading" class="flex-center" style="min-height: 400px">
-        <div class="badge badge-purple">Caricamento...</div>
+        <div class="badge badge-purple">Loading...</div>
       </div>
       <div v-else-if="error" class="error-message">{{ error }}</div>
 
@@ -32,21 +32,21 @@
             <div class="stat-row">
               <span class="stat-label">
                 <Gamepad2 :size="14" />
-                Partite
+                Games
               </span>
               <span class="stat-value">{{ user.totalGames }}</span>
             </div>
             <div class="stat-row">
               <span class="stat-label">
                 <Trophy :size="14" />
-                Vittorie
+                Wins
               </span>
               <span class="stat-value">{{ user.wins }}</span>
             </div>
             <div v-if="user.bestRank" class="stat-row best-rank">
               <span class="stat-label">
                 <Medal :size="14" />
-                Miglior Rank
+                Best Rank
               </span>
               <span class="stat-value">
                 <Trophy
@@ -66,12 +66,12 @@
 
 <script setup>
 import {
-  Calendar,
-  Gamepad2,
-  Medal,
-  Trophy,
-  UserCheck,
-  Users,
+    Calendar,
+    Gamepad2,
+    Medal,
+    Trophy,
+    UserCheck,
+    Users,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
@@ -87,7 +87,7 @@ function getAvatarUrl(seed) {
 }
 
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString("it-IT", {
+  return new Date(dateString).toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",

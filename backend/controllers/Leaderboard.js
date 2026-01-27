@@ -3,7 +3,7 @@ const mongoose = require( 'mongoose' );
 
 exports.getLeaderboard = async ( req, res ) => {
   try {
-    // Gestione utente opzionale
+    // Optional user management
     let userId = null;
     if ( req.user && req.user._id ) {
       userId = new mongoose.Types.ObjectId( req.user._id );
@@ -50,7 +50,7 @@ exports.getLeaderboard = async ( req, res ) => {
       ]
     };
 
-    // Aggiungiamo facet 'userBest' SOLO se c'è un utente loggato
+    // Add 'userBest' facet ONLY if there's a logged user
     if ( userId ) {
       facets.userBest = [
         { $match: { userId: userId } },

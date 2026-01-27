@@ -3,8 +3,8 @@
     <div class="container">
       <div class="leaderboard-header">
         <Trophy :size="48" class="header-icon" />
-        <h1 class="text-gradient">Classifiche</h1>
-        <p class="subtitle">Scala la vetta globale</p>
+        <h1 class="text-gradient">Leaderboards</h1>
+        <p class="subtitle">Climb to the global top</p>
       </div>
 
       <!-- TAB SWITCHER -->
@@ -22,7 +22,7 @@
 
       <!-- LOADING/ERROR -->
       <div v-if="loading" class="flex-center" style="min-height: 300px">
-        <div class="badge badge-purple">Caricamento...</div>
+        <div class="badge badge-purple">Loading...</div>
       </div>
       <div v-else-if="error" class="error-message">{{ error }}</div>
 
@@ -47,11 +47,11 @@
               <table class="table">
                 <thead>
                   <tr>
-                    <th>Pos</th>
+                    <th>Rank</th>
                     <th>Avatar</th>
-                    <th>Giocatore</th>
-                    <th>Punteggio</th>
-                    <th>Tempo</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>Time</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -88,7 +88,7 @@
                         :size="32"
                         style="opacity: 0.3; margin-bottom: 8px"
                       />
-                      <p>Nessuna partita completata</p>
+                      <p>No games completed</p>
                     </td>
                   </tr>
                 </tbody>
@@ -105,7 +105,7 @@
             >
               <h4 class="section-title">
                 <User :size="18" />
-                La Tua Posizione
+                Your Position
               </h4>
               <div class="user-rank-card">
                 <div class="rank-badge">
@@ -148,21 +148,21 @@
 
 <script setup>
 import {
-  BarChart3,
-  Calendar,
-  Flame,
-  Target,
-  Timer,
-  Trophy,
-  User,
+    BarChart3,
+    Calendar,
+    Flame,
+    Target,
+    Timer,
+    Trophy,
+    User,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
 
 const periods = [
-  { value: "all", label: "Generale", iconComponent: BarChart3 },
-  { value: "week", label: "Settimanale", iconComponent: Calendar },
-  { value: "day", label: "Giornaliera", iconComponent: Flame },
+  { value: "all", label: "Overall", iconComponent: BarChart3 },
+  { value: "week", label: "Weekly", iconComponent: Calendar },
+  { value: "day", label: "Daily", iconComponent: Flame },
 ];
 
 const activePeriod = ref("all");
@@ -208,7 +208,7 @@ onMounted(async () => {
     };
   } catch (err) {
     console.error("Error fetching leaderboards:", err);
-    error.value = "Errore nel caricamento delle classifiche";
+    error.value = "Error loading leaderboards";
   } finally {
     loading.value = false;
   }

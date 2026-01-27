@@ -3,13 +3,13 @@
     <div class="container-sm">
       <div class="page-header">
         <Sparkles :size="54" class="header-icon" />
-        <h1 class="text-gradient">I Tuoi Record</h1>
-        <p class="subtitle">Le tue migliori prestazioni in modalità Ranked</p>
+        <h1 class="text-gradient">Your Records</h1>
+        <p class="subtitle">Your best performances in Ranked mode</p>
       </div>
 
       <!-- LOADING/ERROR -->
       <div v-if="loading" class="flex-center" style="min-height: 300px">
-        <div class="badge badge-purple">Caricamento...</div>
+        <div class="badge badge-purple">Loading...</div>
       </div>
       <div v-else-if="error" class="error-message">{{ error }}</div>
 
@@ -17,13 +17,13 @@
       <div v-else class="records-container">
         <div v-if="userBestScores.length === 0" class="empty-state-card">
           <Target :size="64" style="opacity: 0.3; margin-bottom: 16px" />
-          <h3>Nessun record ancora</h3>
+          <h3>No records yet</h3>
           <p>
-            Completa delle partite in modalità Ranked per vedere i tuoi record!
+            Complete games in Ranked mode to see your records!
           </p>
           <router-link to="/game?mode=ranked" class="btn btn-gradient">
             <Swords :size="18" />
-            Inizia Partita Ranked
+            Start Ranked Game
           </router-link>
         </div>
 
@@ -59,12 +59,12 @@
               <div class="record-stats">
                 <div class="stat">
                   <Target :size="16" />
-                  <span class="stat-label">Punteggio</span>
+                  <span class="stat-label">Score</span>
                   <span class="stat-value">{{ entry.currentNumber }}</span>
                 </div>
                 <div class="stat">
                   <Timer :size="16" />
-                  <span class="stat-label">Tempo</span>
+                  <span class="stat-label">Time</span>
                   <span class="stat-value">{{
                     formatDuration(entry.duration)
                   }}</span>
@@ -108,7 +108,7 @@ function formatDuration(ms) {
 
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString("it-IT", {
+  return date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -121,7 +121,7 @@ onMounted(async () => {
     userBestScores.value = res.data;
   } catch (err) {
     console.error("Error fetching user best scores:", err);
-    error.value = "Errore nel caricamento dei record";
+    error.value = "Error loading records";
   } finally {
     loading.value = false;
   }

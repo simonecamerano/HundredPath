@@ -3,8 +3,8 @@
     <div class="container-xs">
       <div class="auth-card">
         <div class="auth-header">
-          <h1 class="text-gradient">Crea Account</h1>
-          <p class="auth-subtitle">Inizia la tua avventura su HundredPath</p>
+          <h1 class="text-gradient">Create Account</h1>
+          <p class="auth-subtitle">Start your adventure on HundredPath</p>
         </div>
 
         <form @submit.prevent="register" class="auth-form">
@@ -17,14 +17,14 @@
                 type="text"
                 required
                 class="input"
-                placeholder="Il tuo username"
+                placeholder="Your username"
                 style="padding-left: 40px"
               />
             </div>
           </div>
 
           <div class="avatar-section">
-            <label class="label">Scegli il tuo Avatar</label>
+            <label class="label">Choose your Avatar</label>
 
             <div v-if="selectedAvatar" class="avatar-preview">
               <img
@@ -39,7 +39,7 @@
               class="btn btn-secondary btn-sm"
             >
               <Shuffle :size="16" />
-              Nuovi Avatar Casuali
+              New Random Avatars
             </button>
 
             <div class="avatar-grid">
@@ -67,7 +67,7 @@
                 type="email"
                 required
                 class="input"
-                placeholder="tuaemail@esempio.com"
+                placeholder="youremail@example.com"
                 style="padding-left: 40px"
               />
             </div>
@@ -82,7 +82,7 @@
                 type="password"
                 required
                 class="input"
-                placeholder="Minimo 6 caratteri"
+                placeholder="At least 6 characters"
                 style="padding-left: 40px"
               />
             </div>
@@ -90,14 +90,14 @@
 
           <button type="submit" class="btn btn-gradient btn-lg">
             <UserPlus :size="20" />
-            Registrati Gratis
+            Register Free
           </button>
         </form>
 
         <div class="auth-footer">
-          <p>Hai già un account?</p>
+          <p>Already have an account?</p>
           <router-link to="/login" class="link-gradient">
-            Accedi ora
+            Log in now
           </router-link>
         </div>
       </div>
@@ -134,7 +134,7 @@ generateRandomAvatar();
 
 async function register() {
   if (!selectedAvatar.value) {
-    notifyWarning("Per favore seleziona un avatar!");
+    notifyWarning("Please select an avatar!");
     return;
   }
   try {
@@ -144,11 +144,11 @@ async function register() {
       password: password.value,
       avatar: selectedAvatar.value,
     });
-    notifySuccess("Registrazione completata! Ora puoi fare il login.");
+    notifySuccess("Registration complete! You can now log in.");
     router.push("/login");
   } catch (err) {
     console.error("Error registering:", err);
-    notifyError(err.response?.data?.error || "Registrazione fallita");
+    notifyError(err.response?.data?.error || "Registration failed");
   }
 }
 </script>

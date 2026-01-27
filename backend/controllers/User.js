@@ -41,7 +41,7 @@ exports.registerUser = async ( req, res ) => {
 // Login user
 exports.loginUser = async ( req, res ) => {
   try {
-    const { email, password } = req.body;  // Meglio email che username
+    const { email, password } = req.body;  // Better email than username
 
     const user = await User.findOne( { email } ).select( '+password' );
 
@@ -95,7 +95,7 @@ exports.updateUser = async ( req, res ) => {
       return res.status( 403 ).json( { error: 'Unauthorized to update this profile' } );
     }
 
-    // Aggiorna solo campi forniti
+    // Update only provided fields
     if ( username ) user.username = username;
     if ( email ) user.email = email;
     if ( password ) user.password = password;

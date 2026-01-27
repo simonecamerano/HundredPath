@@ -2,7 +2,7 @@
   <div class="page-wrapper">
     <div class="container-sm">
       <div v-if="loading" class="flex-center" style="min-height: 400px">
-        <div class="badge badge-purple">Caricamento...</div>
+        <div class="badge badge-purple">Loading...</div>
       </div>
       <div v-else-if="error" class="error-message">{{ error }}</div>
 
@@ -27,7 +27,7 @@
               <h1 class="text-gradient">{{ profile.username }}</h1>
               <p class="join-date">
                 <Calendar :size="16" />
-                Membro dal {{ formatDate(profile.createdAt) }}
+                Member since {{ formatDate(profile.createdAt) }}
               </p>
             </div>
           </div>
@@ -35,13 +35,13 @@
           <!-- AVATAR PICKER -->
           <div v-if="showAvatarPicker" class="avatar-picker">
             <div class="picker-header">
-              <h4>Scegli un nuovo avatar</h4>
+              <h4>Choose a new avatar</h4>
               <button
                 @click="generateRandomAvatar"
                 class="btn btn-secondary btn-sm"
               >
                 <Shuffle :size="16" />
-                Nuovi Avatar
+                New Avatars
               </button>
             </div>
             <div class="avatar-grid">
@@ -64,7 +64,7 @@
               :disabled="!selectedAvatar"
             >
               <Save :size="18" />
-              Salva Avatar
+              Save Avatar
             </button>
           </div>
         </div>
@@ -73,27 +73,27 @@
         <div v-if="profile && profile.stats" class="stats-section">
           <h2 class="section-title">
             <BarChart3 :size="24" />
-            Le Tue Statistiche
+            Your Statistics
           </h2>
           <div class="stats-grid">
             <div class="stat-card card-hover">
               <Gamepad2 :size="32" class="stat-icon" />
-              <div class="stat-label">Partite Giocate</div>
+              <div class="stat-label">Games Played</div>
               <div class="stat-value">{{ profile.stats.totalGames || 0 }}</div>
             </div>
             <div class="stat-card card-hover">
               <Trophy :size="32" class="stat-icon trophy-gold" />
-              <div class="stat-label">Vittorie</div>
+              <div class="stat-label">Wins</div>
               <div class="stat-value">{{ profile.stats.wins || 0 }}</div>
             </div>
             <div class="stat-card card-hover" v-if="profile.stats.bestRank">
               <Medal :size="32" class="stat-icon" />
-              <div class="stat-label">Miglior Posizione</div>
+              <div class="stat-label">Best Rank</div>
               <div class="stat-value">#{{ profile.stats.bestRank }}</div>
             </div>
             <div class="stat-card card-hover" v-if="profile.stats.avgDuration">
               <Timer :size="32" class="stat-icon" />
-              <div class="stat-label">Tempo Medio</div>
+              <div class="stat-label">Average Time</div>
               <div class="stat-value">
                 {{ formatDuration(profile.stats.avgDuration) }}
               </div>
@@ -108,7 +108,7 @@
         >
           <h2 class="section-title">
             <Clock :size="24" />
-            Partite Recenti
+            Recent Games
           </h2>
           <div class="games-list">
             <div v-for="game in recentGames" :key="game._id" class="game-card">
@@ -191,7 +191,7 @@ function getAvatarUrl(seed) {
 
 function formatDate(dateString) {
   const date = new Date(dateString);
-  return date.toLocaleDateString("it-IT", {
+  return date.toLocaleDateString("en-US", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -225,23 +225,23 @@ async function saveAvatar() {
     profile.value.avatar = selectedAvatar.value;
     authStore.updateAvatar(selectedAvatar.value);
     showAvatarPicker.value = false;
-    notifySuccess("Avatar aggiornato!");
+    notifySuccess("Avatar updated!");
   } catch (err) {
     console.error("Error saving avatar:", err);
-    notifyError("Errore nel salvataggio dell'avatar");
+    notifyError("Error saving avatar");
   }
 }
 
 onMounted(async () => {
   try {
     const res = await api.get("/profile");
-    // L'API ritorna direttamente l'utente, non sotto .profile
+    // API returns user directly, not under .profile
     profile.value = res.data;
-    // recentGames non è supportato dall'API attuale
+    // recentGames not supported by current API
     recentGames.value = [];
   } catch (err) {
     console.error("Error fetching profile:", err);
-    error.value = "Errore nel caricamento del profilo";
+    error.value = "Error loading profile";
   } finally {
     loading.value = false;
   }

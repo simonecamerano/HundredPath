@@ -1,15 +1,15 @@
 <script setup>
 import {
-    LogOut,
-    Play,
-    RotateCcw,
-    Skull,
-    Target,
-    Timer,
-    Trophy,
-    Undo,
-    User,
-    UserPlus,
+  LogOut,
+  Play,
+  RotateCcw,
+  Skull,
+  Target,
+  Timer,
+  Trophy,
+  Undo,
+  User,
+  UserPlus,
 } from "lucide-vue-next";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -17,7 +17,7 @@ import Grid from "../components/Grid.vue";
 import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
-import { useAuthStore } from "../stores/auth"; // Importiamo lo store
+import { useAuthStore } from "../stores/auth"; // Import auth store
 
 const router = useRouter();
 const authStore = useAuthStore(); // Accesso allo stato auth
@@ -34,9 +34,9 @@ const lastPosition = ref(-1);
 const gameId = ref(null);
 const undoCount = ref(3);
 const loading = ref(false);
-const isGameActive = ref(false); // La partita è iniziata (timer attivo)?
+const isGameActive = ref(false); // Has the game started (timer active)?
 
-const localHistory = ref([]); // Per undo in modalità ospite
+const localHistory = ref([]); // For undo in guest mode
 
 // TIMER
 const startTime = ref(null);
@@ -92,7 +92,7 @@ onMounted(async () => {
     gameMode.value = "tutorial";
   }
 
-  // Carichiamo i dati, ma NON facciamo partire il gioco
+  // Load data, but DO NOT start the game yet
   await initGame();
 });
 
@@ -104,14 +104,14 @@ async function initGame() {
   try {
     loading.value = true;
 
-    // RESET STATO COMUNE
+    // RESET COMMON STATE
     undoCount.value = 3;
     isGameActive.value = false;
-    elapsedTime.value = "00.00s"; // Reset grafico
-    currentNumber.value = 1; // Reset per sicurezza
+    elapsedTime.value = "00.00s"; // Reset display
+    currentNumber.value = 1; // Safety reset
 
     if (authStore.isAuthenticated) {
-      // --- LOGICA UTENTE LOGGATO ---
+      // --- LOGGED USER LOGIC ---
       console.log("🎮 Starting game with mode:", gameMode.value);
       const res = await api.post("/game/start", { gameMode: gameMode.value });
 
@@ -124,7 +124,7 @@ async function initGame() {
       const startPos = game.grid.findIndex((n) => n === 1);
       lastPosition.value = startPos;
     } else {
-      // --- LOGICA OSPITE (CLIENT ONLY) ---
+      // --- GUEST LOGIC (CLIENT ONLY) ---
       grid.value = Array(100).fill(0);
       localHistory.value = [];
 
@@ -132,17 +132,17 @@ async function initGame() {
       const startPos = Math.floor(Math.random() * 100);
       grid.value[startPos] = 1;
       lastPosition.value = startPos;
-      currentNumber.value = 2; // Pronto per il 2
+      currentNumber.value = 2; // Ready for 2
     }
   } catch (err) {
-    console.error("Errore start game:", err);
-    notifyError("Errore durante l'inizializzazione della partita");
+    console.error("Error starting game:", err);
+    notifyError("Error initializing game");
   } finally {
     loading.value = false;
   }
 }
 
-// Chiamata quando l'utente preme "START PARTITA"
+// Called when user presses "START" button
 function startGameplay() {
   isGameActive.value = true;
   startTimer();
@@ -158,7 +158,7 @@ async function handleMove(index) {
   grid.value[index] = currentNumber.value;
 
   if (!authStore.isAuthenticated) {
-    // Salva storia per undo locale
+    // Save history for local undo
     localHistory.value.push({
       position: index,
       number: currentNumber.value,
@@ -177,8 +177,8 @@ async function handleMove(index) {
         position: index,
       });
     } catch (err) {
-      console.error("Errore mossa:", err);
-      // In caso di errore bisognerebbe revertare, per ora logghiamo
+      console.error("Move error:", err);
+      // In case of error we should revert, for now we just log
     }
   }
 }
@@ -203,7 +203,7 @@ async function undo() {
         lastPosition.value = -1; // Should not happen if check > 2
       }
     } catch (err) {
-      console.error("Errore undo:", err);
+      console.error("Undo error:", err);
     }
   } else {
     // --- LOCAL UNDO ---
@@ -213,12 +213,12 @@ async function undo() {
       currentNumber.value--;
       undoCount.value--;
 
-      // Ricalcola lastPosition
+      // Recalculate lastPosition
       if (localHistory.value.length > 0) {
         lastPosition.value =
           localHistory.value[localHistory.value.length - 1].position;
       } else {
-        // Se abbiamo tolto tutto, dobbiamo ritrovare l'1 (che non è in history)
+        // If we removed everything, we need to find the 1 (which is not in history)
         lastPosition.value = grid.value.findIndex((n) => n === 1);
       }
     }
@@ -231,21 +231,21 @@ async function restartGame() {
 }
 
 async function abandonGame() {
-  const confirmed = await confirm("Vuoi abbandonare la partita?");
+  const confirmed = await confirm("Do you want to abandon the game?");
   if (!confirmed) return;
   stopTimer();
 
   if (authStore.isAuthenticated && gameId.value) {
     try {
       if (gameMode.value === "tutorial") {
-        // Tutorial abbandonato → salva come completed (sblocca ranked)
+        // Tutorial abandoned → save as completed (unlocks ranked)
         console.log(
           "🏳️ Abandoning TUTORIAL, calling /game/over to unlock ranked",
         );
         const response = await api.post("/game/over", { gameId: gameId.value });
         console.log("📝 Tutorial abandon response:", response.data);
       } else {
-        // Ranked abbandonato → cancella la partita (non deve contare)
+        // Ranked abandoned → delete game (shouldn't count)
         console.log("🏳️ Abandoning RANKED, deleting game (won't count)");
         await api.delete(`/game/${gameId.value}`);
         console.log("✅ Ranked game deleted");
@@ -272,7 +272,7 @@ const validMoves = computed(() => {
 const isVictory = computed(() => currentNumber.value > 100);
 const isGameOver = computed(
   () =>
-    isGameActive.value && // Solo se attivo
+    isGameActive.value && // Only if active
     !isVictory.value &&
     validMoves.value.length === 0 &&
     lastPosition.value !== -1,
@@ -291,7 +291,7 @@ watch(isGameOver, async (newValue) => {
         const response = await api.post("/game/over", { gameId: gameId.value });
         console.log("📝 Game over response:", response.data);
 
-        // Se tutorial completato, forza refresh della home
+        // If tutorial completed, force home refresh
         if (response.data.tutorialCompleted) {
           console.log("🎓 Tutorial completed! Ranked should unlock now.");
           authStore.setTutorialCompleted(true);
@@ -344,11 +344,11 @@ watch(isVictory, (val) => {
       </button>
       <button @click="restartGame" class="btn btn-secondary btn-sm">
         <RotateCcw :size="16" />
-        Ricomincia
+        Restart
       </button>
       <button @click="abandonGame" class="btn btn-outline btn-sm">
         <LogOut :size="16" />
-        Abbandona
+        Abandon
       </button>
     </div>
 
@@ -382,27 +382,27 @@ watch(isVictory, (val) => {
     <div v-if="isVictory" class="overlay victory-overlay">
       <div class="overlay-content">
         <Trophy :size="64" class="overlay-icon trophy-icon" />
-        <h2 class="text-gradient-full">VITTORIA!</h2>
+        <h2 class="text-gradient-full">VICTORY!</h2>
         <p class="overlay-stats">
-          Completato in <strong>{{ elapsedTime }}</strong>
+          Completed in <strong>{{ elapsedTime }}</strong>
         </p>
 
         <div v-if="!authStore.isAuthenticated" class="guest-cta">
-          <p>Registrati per salvare il tuo record in classifica!</p>
+          <p>Register to save your record on the leaderboard!</p>
           <button @click="router.push('/register')" class="btn btn-gradient">
             <UserPlus :size="18" />
-            Registrati Ora
+            Register Now
           </button>
         </div>
 
         <div class="overlay-actions">
           <button @click="restartGame" class="btn btn-secondary">
             <RotateCcw :size="18" />
-            Nuova Partita
+            New Game
           </button>
           <button @click="router.push('/leaderboard')" class="btn btn-primary">
             <Trophy :size="18" />
-            Classifica
+            Leaderboard
           </button>
         </div>
       </div>
@@ -415,29 +415,29 @@ watch(isVictory, (val) => {
         <h2 class="text-gradient-full">GAME OVER</h2>
         <div class="overlay-stats">
           <p>
-            Punteggio Finale: <strong>{{ currentNumber - 1 }}</strong>
+            Final Score: <strong>{{ currentNumber - 1 }}</strong>
           </p>
           <p>
-            Tempo: <strong>{{ elapsedTime }}</strong>
+            Time: <strong>{{ elapsedTime }}</strong>
           </p>
         </div>
 
         <div v-if="!authStore.isAuthenticated" class="guest-cta">
-          <p>Non mollare! Registrati per scalare la classifica.</p>
+          <p>Don't give up! Register to climb the leaderboard.</p>
           <button @click="router.push('/register')" class="btn btn-gradient">
             <UserPlus :size="18" />
-            Crea Account
+            Create Account
           </button>
         </div>
 
         <div class="overlay-actions">
           <button @click="restartGame" class="btn btn-secondary">
             <RotateCcw :size="18" />
-            Ricomincia
+            Restart
           </button>
           <button @click="router.push('/leaderboard')" class="btn btn-primary">
             <LogOut :size="18" />
-            Esci
+            Exit
           </button>
         </div>
       </div>

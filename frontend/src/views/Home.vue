@@ -51,7 +51,7 @@ function startGame(mode) {
           ><span class="text-gradient-2">Path</span>
         </h1>
         <p class="subtitle">
-          La sfida logica 10×10. Trova il percorso giusto e raggiungi il 100!
+          The 10×10 logic challenge. Find the right path and reach 100!
         </p>
 
         <!-- TUTORIAL CARD (Always visible or for guests) -->
@@ -67,10 +67,10 @@ function startGame(mode) {
               <GraduationCap style="width: 50px; height: 50px" />
             </div>
             <h2>Tutorial</h2>
-            <p>Impara le regole con gli aiuti visivi</p>
+            <p>Learn the rules with visual aids</p>
 
             <button @click="startGame('tutorial')" class="cta-button">
-              Inizia ora
+              Start now
               <ArrowRight
                 style="
                   width: 1rem;
@@ -85,9 +85,9 @@ function startGame(mode) {
 
           <p class="unlock-text">
             <router-link to="/register" class="pink-link"
-              >Registrati</router-link
+              >Register</router-link
             >
-            per sbloccare la modalità Ranked!
+            to unlock Ranked mode!
           </p>
         </div>
 
@@ -98,7 +98,7 @@ function startGame(mode) {
               <GraduationCap style="width: 50px; height: 50px" />
             </div>
             <h3>Tutorial</h3>
-            <p>Pratica con aiuti</p>
+            <p>Practice with aids</p>
           </button>
 
           <button
@@ -118,8 +118,8 @@ function startGame(mode) {
               />
             </div>
             <h3>Ranked</h3>
-            <p v-if="rankedUnlocked">Competitiva</p>
-            <p v-else class="locked-text">Finisci 1 tutorial</p>
+            <p v-if="rankedUnlocked">Competitive</p>
+            <p v-else class="locked-text">Complete 1 tutorial</p>
           </button>
         </div>
       </div>
@@ -131,22 +131,22 @@ function startGame(mode) {
         <div class="feature-icon-box purple-bg">
           <Puzzle style="width: 35px; height: 35px; color: blue" />
         </div>
-        <h3>Griglia 10×10</h3>
-        <p>Muoviti saltando 2 caselle in orizzontale o 1 in diagonale.</p>
+        <h3>10×10 Grid</h3>
+        <p>Move by jumping 2 squares horizontally or 1 diagonally.</p>
       </div>
       <div class="feature-card speed">
         <div class="feature-icon-box pink-bg">
           <Timer style="width: 35px; height: 35px; color: hsla(320 85% 60%)" />
         </div>
         <h3>Speedrun</h3>
-        <p>Completa il percorso nel minor tempo possibile.</p>
+        <p>Complete the path in the shortest time possible.</p>
       </div>
       <div class="feature-card cup">
         <div class="feature-icon-box teal-bg">
           <Trophy style="width: 35px; height: 35px; color: #20c997" />
         </div>
-        <h3>Classifica</h3>
-        <p>Scala la vetta globale e sfida i tuoi amici.</p>
+        <h3>Leaderboard</h3>
+        <p>Climb to the top and challenge your friends.</p>
       </div>
     </section>
   </div>

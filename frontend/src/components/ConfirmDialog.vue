@@ -9,14 +9,14 @@ const { state } = useConfirm();
     <div v-if="state.isOpen" class="modal-overlay" @click="state.onCancel">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Conferma</h3>
+          <h3>Confirm</h3>
         </div>
         <div class="modal-body">
           <p>{{ state.message }}</p>
         </div>
         <div class="modal-footer">
-          <button class="btn-cancel" @click="state.onCancel">Annulla</button>
-          <button class="btn-confirm" @click="state.onConfirm">Conferma</button>
+          <button class="btn-cancel" @click="state.onCancel">Cancel</button>
+          <button class="btn-confirm" @click="state.onConfirm">Confirm</button>
         </div>
       </div>
     </div>

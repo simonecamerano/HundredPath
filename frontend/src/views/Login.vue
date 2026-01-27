@@ -3,8 +3,8 @@
     <div class="container-xs">
       <div class="auth-card">
         <div class="auth-header">
-          <h1 class="text-gradient">Bentornato!</h1>
-          <p class="auth-subtitle">Accedi al tuo account</p>
+          <h1 class="text-gradient">Welcome back!</h1>
+          <p class="auth-subtitle">Log in to your account</p>
         </div>
 
         <form @submit.prevent="handleLogin" class="auth-form">
@@ -17,7 +17,7 @@
                 type="email"
                 required
                 class="input"
-                placeholder="tuaemail@esempio.com"
+                placeholder="youremail@example.com"
                 style="padding-left: 40px"
               />
             </div>
@@ -40,16 +40,16 @@
 
           <button type="submit" class="btn btn-gradient btn-lg">
             <LogIn :size="20" />
-            Accedi
+            Log In
           </button>
         </form>
 
         <p v-if="error" class="error-message">{{ error }}</p>
 
         <div class="auth-footer">
-          <p>Non hai un account?</p>
+          <p>Don't have an account?</p>
           <router-link to="/register" class="link-gradient">
-            Registrati ora
+            Register now
           </router-link>
         </div>
       </div>

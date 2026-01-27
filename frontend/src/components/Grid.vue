@@ -1,7 +1,7 @@
 <template>
   <div class="game-board">
-    <!-- Loop per creare 100 celle -->
-    <!-- cellIndex va da 0 a 99 -->
+    <!-- Loop to create 100 cells -->
+    <!-- cellIndex ranges from 0 to 99 -->
     <div
       v-for="(cell, index) in grid"
       :key="index"
@@ -15,7 +15,7 @@
       }"
       @click="onCellClick(index)"
     >
-      <!-- Mostra il numero se presente, altrimenti niente -->
+      <!-- Show the number if present, otherwise nothing -->
       {{ cell !== 0 ? cell : "" }}
     </div>
   </div>
@@ -87,7 +87,7 @@ function isValid(index) {
   transition: all 0.2s;
 }
 
-/* RANKED MODE: Numeri più grandi */
+/* RANKED MODE: Larger numbers */
 .cell.ranked {
   font-size: 1.5rem;
   font-weight: 700;

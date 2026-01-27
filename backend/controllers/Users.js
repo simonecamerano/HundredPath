@@ -3,9 +3,9 @@ const Game = require( '../models/Game' );
 
 exports.getAllUsers = async ( req, res ) => {
   try {
-    // Step 1: Calcola globalRank per TUTTE le partite RANKED completate
+    // Step 1: Calculate globalRank for ALL RANKED completed games
     const rankedGames = await Game.aggregate( [
-      { $match: { status: 'completed', gameMode: 'ranked' } }, // SOLO RANKED
+      { $match: { status: 'completed', gameMode: 'ranked' } }, // ONLY RANKED
       {
         $addFields: {
           endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
@@ -44,7 +44,7 @@ exports.getAllUsers = async ( req, res ) => {
       }
     ] );
 
-    // Step 2: Raggruppa per utente e calcola le statistiche (SOLO RANKED)
+    // Step 2: Group by user and calculate stats (ONLY RANKED)
     const usersWithStats = await User.aggregate( [
       {
         $lookup: {
@@ -54,7 +54,7 @@ exports.getAllUsers = async ( req, res ) => {
             {
               $match: {
                 $expr: { $eq: ['$userId', '$$userId'] },
-                gameMode: 'ranked' // SOLO RANKED
+                gameMode: 'ranked' // ONLY RANKED
               }
             }
           ],
@@ -99,7 +99,7 @@ exports.getAllUsers = async ( req, res ) => {
       { $sort: { createdAt: -1 } }
     ] );
 
-    // Step 3: Aggiungi bestRank a ogni utente dai rankedGames
+    // Step 3: Add bestRank to each user from rankedGames
     const finalUsers = usersWithStats.map( user => {
       const userRankedGames = rankedGames.filter(
         game => game.userId.toString() === user._id.toString()
@@ -115,8 +115,8 @@ exports.getAllUsers = async ( req, res ) => {
       };
     } );
 
-    // Ordina per bestRank (migliore = più in alto)
-    // Chi non ha rank va alla fine
+    // Sort by bestRank (better = higher)
+    // Users without rank go to the end
     finalUsers.sort( ( a, b ) => {
       if ( a.bestRank === null ) return 1;
       if ( b.bestRank === null ) return -1;
@@ -126,6 +126,6 @@ exports.getAllUsers = async ( req, res ) => {
     res.json( finalUsers );
   } catch ( error ) {
     console.error( 'Error loading users:', error );
-    res.status( 500 ).json( { error: 'Errore caricamento utenti' } );
+    res.status( 500 ).json( { error: 'Error loading users' } );
   }
 };

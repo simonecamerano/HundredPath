@@ -9,7 +9,7 @@ exports.getMyProfile = async ( req, res ) => {
     // 1. Get user basic info
     const user = await User.findById( userId ).select( '-password' );
     if ( !user ) {
-      return res.status( 404 ).json( { error: 'Utente non trovato' } );
+      return res.status( 404 ).json( { error: 'User not found' } );
     }
 
     // 2. Calculate stats (same logic as Users.js but for single user)
@@ -83,7 +83,7 @@ exports.getMyProfile = async ( req, res ) => {
       email: user.email,
       avatar: user.avatar,
       createdAt: user.createdAt,
-      tutorialCompleted: user.tutorialCompleted, // ⭐ QUESTO MANCAVA!
+      tutorialCompleted: user.tutorialCompleted, // ⭐ THIS WAS MISSING!
       stats: {
         totalGames,
         wins,
@@ -93,7 +93,7 @@ exports.getMyProfile = async ( req, res ) => {
     } );
   } catch ( error ) {
     console.error( 'Error fetching profile:', error );
-    res.status( 500 ).json( { error: 'Errore nel caricamento del profilo' } );
+    res.status( 500 ).json( { error: 'Error loading profile' } );
   }
 };
 
@@ -104,7 +104,7 @@ exports.updateAvatar = async ( req, res ) => {
     const { avatar } = req.body;
 
     if ( !avatar ) {
-      return res.status( 400 ).json( { error: 'Avatar richiesto' } );
+      return res.status( 400 ).json( { error: 'Avatar required' } );
     }
 
     const user = await User.findByIdAndUpdate(
@@ -114,11 +114,11 @@ exports.updateAvatar = async ( req, res ) => {
     ).select( '-password' );
 
     res.json( {
-      message: 'Avatar aggiornato con successo',
+      message: 'Avatar updated successfully',
       user
     } );
   } catch ( error ) {
     console.error( 'Error updating avatar:', error );
-    res.status( 500 ).json( { error: 'Errore nell\'aggiornamento dell\'avatar' } );
+    res.status( 500 ).json( { error: 'Error updating avatar' } );
   }
 };

@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema( {
 
   avatar: {
     type: String,
-    required: [true, "L'avatar è obbligatorio"] // Rimosso default, ora è required
+    required: [true, "Avatar is required"] // Rimosso default, ora è required
   },
   username: {
     type: String,

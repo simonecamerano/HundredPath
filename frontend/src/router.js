@@ -15,12 +15,12 @@ const routes = [
   {
     path: '/game',
     component: Game,
-    // <-- ETICHETTA DI PROTEZIONE RIMOSSA PER GUEST MODE
+    // <-- PROTECTION TAG REMOVED FOR GUEST MODE
   },
   {
     path: '/users',
     component: Users,
-    meta: { requiresAuth: true } // <-- ETICHETTA DI PROTEZIONE
+    meta: { requiresAuth: true } // <-- PROTECTION TAG
   },
   {
     path: '/profile',
@@ -42,7 +42,7 @@ const router = createRouter( {
   history: createWebHistory(),
   routes,
 } );
-// IL BUTTAFUORI 🕵️‍♂️
+// THE BOUNCER 🕵️‍♂️
 router.beforeEach( ( to, from, next ) => {
   const authStore = useAuthStore();
 

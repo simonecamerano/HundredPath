@@ -3,15 +3,15 @@ const mongoose = require( 'mongoose' );
 
 exports.getUserBestScores = async ( req, res ) => {
   try {
-    // FIX: Convertiamo esplicitamente in ObjectId per l'aggregazione
+    // FIX: Explicitly convert to ObjectId for aggregation
     const targetUserId = new mongoose.Types.ObjectId( req.user._id );
     console.log( "Searching best scores for user (ObjectId):", targetUserId );
 
     const userBest = await Game.aggregate( [
-      // 1. Filtra solo 'completed' RANKED per TUTTI gli utenti
+      // 1. Filter only 'completed' RANKED games for ALL users
       { $match: { status: 'completed', gameMode: 'ranked' } },
 
-      // 2. Calcola durata per tutti
+      // 2. Calculate duration for all
       {
         $addFields: {
           endTime: { $ifNull: ["$completedAt", "$updatedAt"] },
@@ -23,10 +23,10 @@ exports.getUserBestScores = async ( req, res ) => {
         }
       },
 
-      // 3. CALCOLA IL RANK GLOBALE
-      // Poiché MongoDB $rank richiede un singolo campo di ordinamento in alcune configurazioni,
-      // creiamo un punteggio combinato: (punti * 1 miliardo) - durata_ms.
-      // Più è alto, migliore è la posizione.
+      // 3. CALCULATE GLOBAL RANK
+      // Since MongoDB $rank requires a single sort field in some configurations,
+      // we create a combined score: (points * 1 billion) - duration_ms.
+      // Higher is better position.
       {
         $addFields: {
           combinedRankScore: {
@@ -49,16 +49,16 @@ exports.getUserBestScores = async ( req, res ) => {
         }
       },
 
-      // 4. Ora filtriamo per l'utente target
+      // 4. Now filter for target user
       { $match: { userId: targetUserId } },
 
-      // 5. Ordiniamo i RISULTATI dell'utente (i suoi migliori)
+      // 5. Sort user RESULTS (their best)
       { $sort: { currentNumber: -1, duration: 1 } },
 
-      // 6. Limita a 10 (i top 10 dell'utente con il loro rank globale)
+      // 6. Limit to 10 (user's top 10 with their global rank)
       { $limit: 10 },
 
-      // 7. Join con User per avere username
+      // 7. Join with User to get username
       {
         $lookup: {
           from: "users",
@@ -75,7 +75,7 @@ exports.getUserBestScores = async ( req, res ) => {
       {
         $project: {
           _id: 1,
-          globalRank: 1, // Restituiamo il rank calcolato al punto 3
+          globalRank: 1, // Return rank calculated in step 3
           username: "$player.username",
           avatar: "$player.avatar",
           duration: 1,

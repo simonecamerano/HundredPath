@@ -27,15 +27,15 @@
       <template v-if="authStore.isAuthenticated">
         <router-link to="/leaderboard" class="desktop-link">
           <Trophy :size="16" />
-          <span>Classifiche</span>
+          <span>Leaderboards</span>
         </router-link>
         <router-link to="/userbestscores" class="desktop-link">
           <Sparkles :size="16" />
-          <span>Record</span>
+          <span>Best Scores</span>
         </router-link>
         <router-link to="/users" class="desktop-link">
           <Users :size="16" />
-          <span>Utenti</span>
+          <span>Users</span>
         </router-link>
         <router-link to="/profile" class="user-info-desktop desktop-link">
           <img
@@ -53,15 +53,15 @@
       <template v-else>
         <router-link to="/leaderboard" class="desktop-link">
           <Trophy :size="16" />
-          <span>Classifiche</span>
+          <span>Leaderboards</span>
         </router-link>
         <router-link to="/login" class="desktop-link">
           <LogIn :size="16" />
-          <span>Accedi</span>
+          <span>Log In</span>
         </router-link>
         <router-link to="/register" class="register-btn-desktop">
           <UserPlus :size="16" />
-          <span>Registrati</span>
+          <span>Register</span>
         </router-link>
       </template>
     </div>
@@ -88,7 +88,7 @@
           />
           <div>
             <h2 class="menu-title">HundredPath</h2>
-            <p class="menu-subtitle">Il Gioco Logico 10×10</p>
+            <p class="menu-subtitle">The 10×10 Logic Game</p>
           </div>
         </div>
       </div>
@@ -104,7 +104,7 @@
             </div>
             <div class="text-box">
               <span class="label">Tutorial</span>
-              <span class="desc">Impara le regole</span>
+              <span class="desc">Learn the rules</span>
             </div>
           </button>
 
@@ -118,7 +118,7 @@
             </div>
             <div class="text-box">
               <span class="label">Ranked</span>
-              <span class="desc">Competitiva</span>
+              <span class="desc">Competitive</span>
             </div>
           </button>
 
@@ -128,8 +128,8 @@
               <Trophy class="menu-icon" />
             </div>
             <div class="text-box">
-              <span class="label">Classifiche</span>
-              <span class="desc">Sfida i migliori</span>
+              <span class="label">Leaderboards</span>
+              <span class="desc">Challenge the best</span>
             </div>
           </button>
 
@@ -143,8 +143,8 @@
               <Sparkles class="menu-icon" />
             </div>
             <div class="text-box">
-              <span class="label">I Miei Record</span>
-              <span class="desc">I tuoi punteggi migliori</span>
+              <span class="label">My Best Scores</span>
+              <span class="desc">Your best scores</span>
             </div>
           </button>
           <!-- Users (If Auth) -->
@@ -158,7 +158,7 @@
             </div>
             <div class="text-box">
               <span class="label">Community</span>
-              <span class="desc">Cerca altri giocatori</span>
+              <span class="desc">Find other players</span>
             </div>
           </button>
         </div>
@@ -169,10 +169,10 @@
         <div class="auth-section">
           <template v-if="!authStore.isAuthenticated">
             <button class="btn-outline" @click="navigate('/login')">
-              <LogIn class="btn-icon" /> Accedi
+              <LogIn class="btn-icon" /> Log In
             </button>
             <button class="btn-gradient" @click="navigate('/register')">
-              <UserPlus class="btn-icon" /> Registrati Gratis
+              <UserPlus class="btn-icon" /> Register Free
             </button>
           </template>
 
@@ -185,7 +185,7 @@
               />
               <div class="profile-info">
                 <span class="p-username">{{ authStore.user?.username }}</span>
-                <span class="p-email">Gestisci Profilo</span>
+                <span class="p-email">Manage Profile</span>
               </div>
             </div>
 

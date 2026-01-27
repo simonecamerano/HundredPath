@@ -2,7 +2,7 @@
   <footer class="app-footer">
     <div class="footer-content">
       <p class="footer-text">
-        © {{ currentYear }} HundredPath - Il Gioco Logico 10x10
+        © {{ currentYear }} HundredPath - The 10x10 Logic Game
       </p>
       <p class="footer-links">
         <span>Made with ❤️ by Simone Camerano</span>

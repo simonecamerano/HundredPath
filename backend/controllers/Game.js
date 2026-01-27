@@ -26,7 +26,7 @@ exports.startGame = async ( req, res ) => {
     }
 
     // 1. PULIZIA: Cancella vecchie partite abbandonate (in_progress)
-    // Così salviamo solo Vinte o Perse ufficialmente.
+    // So we only save officially Won or Lost games.
     await Game.deleteMany( { userId, status: 'in_progress' } );
 
     // 2. SETUP GRIGLIA
@@ -39,14 +39,14 @@ exports.startGame = async ( req, res ) => {
     // Piazziamo l'1
     grid[startPos] = 1;
 
-    // 4. CREAZIONE PARTITA
+    // 4. GAME CREATION
     const game = new Game( {
       userId,
       grid,
-      currentNumber: 2, // Siamo pronti per piazzare il 2
+      currentNumber: 2, // Ready to place the 2
       status: 'in_progress',
-      gameMode, // Salva il mode
-      moves: [{ number: 1, position: startPos }], // Salviamo la prima mossa
+      gameMode, // Save the mode
+      moves: [{ number: 1, position: startPos }], // Save first move
       moveCount: 1
     } );
 
@@ -71,7 +71,7 @@ exports.makeMove = async ( req, res ) => {
     if ( game.userId.toString() !== userId.toString() ) return res.status( 403 ).json( { error: 'Not your game' } );
     if ( game.status !== 'in_progress' ) return res.status( 400 ).json( { error: 'Game is over' } );
 
-    // 2. Cella già occupata?
+    // 2. Cell already occupied?
     if ( game.grid[position] !== 0 ) {
       return res.status( 400 ).json( { error: 'Cell already occupied' } );
     }
@@ -84,19 +84,19 @@ exports.makeMove = async ( req, res ) => {
       return res.status( 400 ).json( { error: 'Invalid move' } );
     }
     // 5. APPLICA MOSSA
-    game.grid[position] = game.currentNumber; // Scrivi IL NUMERO CORRENTE (es. 1)
-    game.currentNumber += 1; // Incrementa per il prossimo (es. diventa 2)
+    game.grid[position] = game.currentNumber; // Write CURRENT NUMBER (e.g. 1)
+    game.currentNumber += 1; // Increment for next (e.g. becomes 2)
 
-    // NOTA DIDATTICA: Mongoose non rileva cambiamenti negli array primitivi facilmente.
-    // Dobbiamo dirgli che l'abbiamo modificato:
+    // DIDACTIC NOTE: Mongoose doesn't easily detect changes in primitive arrays.
+    // We need to tell it we modified it:
     game.markModified( 'grid' );
     game.moves.push( {
       number: game.grid[position], // Store what we placed
       position: position
     } );
     game.moveCount += 1;
-    // 6. Controlla Vittoria/Fine
-    // Se currentNumber è diventato 101, vuol dire che abbiamo piazzato il 100.
+    // 6. Check Victory/End
+    // If currentNumber became 101, it means we placed 100.
     if ( game.currentNumber > 100 ) {
       game.status = 'completed';
       game.completedAt = new Date();
@@ -109,7 +109,7 @@ exports.makeMove = async ( req, res ) => {
   }
 };
 
-// Helper: converte indice (0-99) in coordinate (x,y)
+// Helper: convert index (0-99) to coordinates (x,y)
 const toCoords = ( index ) => {
   return {
     x: index % 10,
@@ -163,16 +163,16 @@ exports.gameOver = async ( req, res ) => {
     if ( !game ) return res.status( 404 ).json( { error: 'Game not found' } );
     if ( game.userId.toString() !== userId.toString() ) return res.status( 403 ).json( { error: 'Not your game' } );
 
-    // Se è già finita, amen
+    // If already finished, that's fine
     if ( game.status !== 'in_progress' ) return res.json( { game } );
 
-    // Segna come completata (anche se persa)
+    // Mark as completed (even if lost)
     game.status = 'completed';
     game.completedAt = new Date();
 
     await game.save();
 
-    // UNLOCK RANKED: Se è una partita tutorial completata (anche se persa)
+    // UNLOCK RANKED: If it's a completed tutorial game (even if lost)
     if ( game.gameMode === 'tutorial' ) {
       console.log( '🎓 Tutorial completed! Unlocking ranked for user:', userId );
       const updatedUser = await User.findByIdAndUpdate(
