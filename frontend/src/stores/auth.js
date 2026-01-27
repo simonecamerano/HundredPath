@@ -30,6 +30,18 @@ export const useAuthStore = defineStore( 'auth', {
       localStorage.removeItem( 'token' );
       localStorage.removeItem( 'user' );
     },
+    updateAvatar( newAvatar ) {
+      if ( this.user ) {
+        this.user.avatar = newAvatar;
+        localStorage.setItem( 'user', JSON.stringify( this.user ) );
+      }
+    },
+    setTutorialCompleted( completed ) {
+      if ( this.user ) {
+        this.user.tutorialCompleted = completed;
+        localStorage.setItem( 'user', JSON.stringify( this.user ) );
+      }
+    },
     // Opzionale: recupera profilo all'avvio
     async fetchUser( id ) {
       // ... implementeremo se serve

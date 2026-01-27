@@ -159,8 +159,10 @@ import {
 import { onMounted, ref } from "vue";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
+import { useAuthStore } from "../stores/auth";
 
 const { success: notifySuccess, error: notifyError } = useNotification();
+const authStore = useAuthStore();
 
 const profile = ref({
   username: "",
@@ -221,6 +223,7 @@ async function saveAvatar() {
   try {
     await api.put("/profile/avatar", { avatar: selectedAvatar.value });
     profile.value.avatar = selectedAvatar.value;
+    authStore.updateAvatar(selectedAvatar.value);
     showAvatarPicker.value = false;
     notifySuccess("Avatar aggiornato!");
   } catch (err) {

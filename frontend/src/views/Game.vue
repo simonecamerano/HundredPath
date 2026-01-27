@@ -294,6 +294,7 @@ watch(isGameOver, async (newValue) => {
         // Se tutorial completato, forza refresh della home
         if (response.data.tutorialCompleted) {
           console.log("🎓 Tutorial completed! Ranked should unlock now.");
+          authStore.setTutorialCompleted(true);
         }
       } catch (e) {
         console.error("❌ Error calling game/over:", e);

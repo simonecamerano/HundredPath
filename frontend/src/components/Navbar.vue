@@ -216,47 +216,19 @@ import {
   UserPlus,
   Users,
 } from "lucide-vue-next";
-import { onMounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import api from "../services/api";
+import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
 const authStore = useAuthStore();
 const router = useRouter();
-const route = useRoute();
 const menuOpen = ref(false);
-const rankedUnlocked = ref(false);
 
-async function checkRankedUnlock() {
-  if (authStore.isAuthenticated && !authStore.user?.isGuest) {
-    try {
-      const res = await api.get("/profile");
-      rankedUnlocked.value = res.data.tutorialCompleted || false;
-    } catch (err) {
-      console.error("Error fetching profile:", err);
-    }
-  } else {
-    rankedUnlocked.value = false;
-  }
-}
-
-onMounted(() => {
-  checkRankedUnlock();
+const rankedUnlocked = computed(() => {
+  return authStore.isAuthenticated && 
+         !authStore.user?.isGuest && 
+         (authStore.user?.tutorialCompleted || false);
 });
-
-watch(
-  () => authStore.isAuthenticated,
-  () => {
-    checkRankedUnlock();
-  },
-);
-
-watch(
-  () => route.path,
-  () => {
-    checkRankedUnlock();
-  },
-);
 
 function getAvatarUrl(seed) {
   const safeSeed = seed || "shape_default";
