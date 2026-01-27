@@ -38,7 +38,8 @@ export const useAuthStore = defineStore( 'auth', {
     },
     setTutorialCompleted( completed ) {
       if ( this.user ) {
-        this.user.tutorialCompleted = completed;
+        // Create new object to trigger reactivity
+        this.user = { ...this.user, tutorialCompleted: completed };
         localStorage.setItem( 'user', JSON.stringify( this.user ) );
       }
     },
