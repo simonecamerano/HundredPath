@@ -97,10 +97,12 @@
                 id="password-input-register"
                 v-model="password"
                 type="password"
+                required
                 minlength="6"
                 class="input"
                 placeholder="At least 6 characters"
                 style="padding-left: 40px"
+                autocomplete="new-password"
                 aria-required="true"
                 aria-describedby="password-hint"
               />
