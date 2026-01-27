@@ -142,3 +142,24 @@
     transform: scale(1);
   }
 }
+
+/* RESPONSIVE - Mobile */
+@media (max-width: 768px) {
+  .container-xs {
+    max-width: 100%;
+    padding: 0 var(--space-sm);
+  }
+
+  .auth-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .auth-header h1 {
+    font-size: 2rem;
+  }
+
+  .auth-subtitle {
+    font-size: 1rem;
+  }
+}

@@ -152,13 +152,13 @@
 
 <script setup>
 import {
-    BarChart3,
-    Calendar,
-    Flame,
-    Target,
-    Timer,
-    Trophy,
-    User,
+  BarChart3,
+  Calendar,
+  Flame,
+  Target,
+  Timer,
+  Trophy,
+  User,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
@@ -489,7 +489,8 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 0px;
+    padding: 0 var(--space-sm);
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -501,6 +502,7 @@ onMounted(async () => {
 
   .leaderboard-card {
     border-radius: var(--radius-lg);
+    width: 100%;
   }
 
   .table-wrapper {
