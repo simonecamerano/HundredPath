@@ -5,9 +5,9 @@ import {
   Lock,
   Puzzle,
   Sparkles,
+  Swords,
   Timer,
   Trophy,
-  Swords,
 } from "lucide-vue-next";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -188,7 +188,8 @@ function startGame(mode) {
 
 /* BADGE */
 .badge-container {
-  margin-top: 20px;
+  margin-top: 0;
+  margin-bottom: 40px;
 }
 .daily-badge {
   background: #f3f0ff;
@@ -518,11 +519,21 @@ function startGame(mode) {
   .feature-card {
     width: 90%;
   }
-  .mode-card {
-    width: 190px;
+  .logged-modes {
+    flex-wrap: nowrap;
+    gap: 20px;
+    padding: 0 15px;
   }
-  .badge-container {
-    margin: 0px;
+  .mode-card {
+    width: 160px;
+    min-width: 140px;
+    padding: 20px 15px;
+  }
+  .mode-card h3 {
+    font-size: 1rem;
+  }
+  .mode-card p {
+    font-size: 0.8rem;
   }
 }
 </style>
