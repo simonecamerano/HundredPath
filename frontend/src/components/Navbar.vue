@@ -302,19 +302,6 @@ function logout() {
   margin-right: 8px;
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.text-gradient-2 {
-  background: linear-gradient(135deg, #d63384 0%, #20c997 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
 /* DESKTOP LINKS */
 .desktop-links {
   display: flex;
@@ -624,15 +611,9 @@ function logout() {
   color: #7950f2;
 }
 
-.btn-gradient {
-  background: linear-gradient(135deg, #7950f2, #d63384, #20c997);
-  color: white;
-  box-shadow: 0 4px 15px rgba(121, 80, 242, 0.3);
-}
-.btn-gradient:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(121, 80, 242, 0.4);
+.btn-outline.logout {
+  width: 100%;
+  margin-top: 8px;
 }
 
 .user-profile-card {

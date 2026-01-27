@@ -248,6 +248,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@import '../styles/auth.css';
+
 .profile-content {
   animation: slideUp 0.4s ease-out;
 }
@@ -338,40 +340,6 @@ onMounted(async () => {
 .picker-header h4 {
   color: var(--color-gray-800);
   font-size: 1.1rem;
-}
-
-.avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: var(--space-sm);
-  margin-bottom: var(--space-md);
-}
-
-.avatar-option {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  background: white;
-}
-
-.avatar-option img {
-  width: 100%;
-  height: 100%;
-}
-
-.avatar-option:hover {
-  transform: scale(1.1);
-  border-color: var(--color-gray-300);
-}
-
-.avatar-option.selected {
-  border-color: var(--color-purple);
-  box-shadow: 0 0 0 3px rgba(121, 80, 242, 0.2);
-  transform: scale(1.15);
 }
 
 /* STATS SECTION */

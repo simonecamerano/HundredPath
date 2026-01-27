@@ -1,13 +1,10 @@
 <script setup>
 import {
-  ArrowRight,
-  GraduationCap,
-  Lock,
-  Puzzle,
-  Sparkles,
-  Swords,
-  Timer,
-  Trophy,
+    ArrowRight,
+    GraduationCap,
+    Lock,
+    Sparkles,
+    Swords,
 } from "lucide-vue-next";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -220,19 +217,6 @@ function startGame(mode) {
 .gradient-ranked {
   background: linear-gradient(135deg, #f06595, #ff6b6b);
 } /* Pink-Red (Ranked) */
-
-.text-gradient {
-  background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.text-gradient-2 {
-  background: linear-gradient(135deg, #d63384 0%, #20c997 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
 
 .subtitle {
   font-size: 1.2rem;

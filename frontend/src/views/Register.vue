@@ -118,15 +118,15 @@ const username = ref("");
 const email = ref("");
 const password = ref("");
 
-const avatarOptions = [];
+const avatarOptions = ref([]);
 const selectedAvatar = ref(null);
 
 function generateRandomAvatar() {
-  avatarOptions.length = 0;
+  avatarOptions.value = [];
   for (let i = 0; i < 12; i++) {
-    avatarOptions.push("User_" + Math.floor(Math.random() * 100000));
+    avatarOptions.value.push("User_" + Math.floor(Math.random() * 100000));
   }
-  selectedAvatar.value = avatarOptions[0];
+  selectedAvatar.value = avatarOptions.value[0];
 }
 
 // Generate initial avatars
@@ -153,132 +153,4 @@ async function register() {
 }
 </script>
 
-<style scoped>
-.auth-card {
-  background: white;
-  border-radius: var(--radius-2xl);
-  padding: var(--space-2xl);
-  box-shadow: var(--shadow-lg);
-  animation: slideUp 0.4s ease-out;
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: var(--space-xl);
-}
-
-.auth-header h1 {
-  font-size: 2.5rem;
-  margin-bottom: var(--space-sm);
-  font-weight: 800;
-}
-
-.auth-subtitle {
-  color: var(--color-gray-600);
-  font-size: 1.1rem;
-}
-
-.auth-form {
-  margin-bottom: var(--space-lg);
-}
-
-/* AVATAR SECTION */
-.avatar-section {
-  margin-bottom: var(--space-xl);
-  padding: var(--space-lg);
-  background: linear-gradient(
-    135deg,
-    rgba(121, 80, 242, 0.05),
-    rgba(214, 51, 132, 0.05)
-  );
-  border-radius: var(--radius-lg);
-  border: 2px solid rgba(121, 80, 242, 0.1);
-}
-
-.avatar-preview {
-  text-align: center;
-  margin: var(--space-md) 0;
-}
-
-.avatar-preview img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 3px solid var(--color-purple);
-  box-shadow: 0 4px 15px rgba(121, 80, 242, 0.3);
-  background: white;
-  animation: iconPop 0.3s ease-out;
-}
-
-.avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-
-.avatar-option {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  border: 3px solid transparent;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  background: white;
-}
-
-.avatar-option img {
-  width: 100%;
-  height: 100%;
-}
-
-.avatar-option:hover {
-  transform: scale(1.1);
-  border-color: var(--color-gray-300);
-}
-
-.avatar-option.selected {
-  border-color: var(--color-purple);
-  box-shadow: 0 0 0 3px rgba(121, 80, 242, 0.2);
-  transform: scale(1.15);
-}
-
-.auth-footer {
-  text-align: center;
-  padding-top: var(--space-lg);
-  border-top: 1px solid var(--color-gray-200);
-}
-
-.auth-footer p {
-  color: var(--color-gray-600);
-  margin-bottom: var(--space-sm);
-}
-
-.link-gradient {
-  font-weight: 700;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-decoration: none;
-  font-size: 1.1rem;
-  transition: opacity 0.2s;
-}
-
-.link-gradient:hover {
-  opacity: 0.8;
-}
-
-@keyframes iconPop {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-</style>
+<style scoped src="../styles/auth.css"></style>
