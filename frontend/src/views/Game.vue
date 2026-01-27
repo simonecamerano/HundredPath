@@ -244,6 +244,13 @@ async function abandonGame() {
         );
         const response = await api.post("/game/over", { gameId: gameId.value });
         console.log("📝 Tutorial abandon response:", response.data);
+        
+        // If tutorial completed, refresh user from server
+        if (response.data.tutorialCompleted) {
+          console.log("🎓 Tutorial completed via abandon! Refreshing user data...");
+          await authStore.refreshUser();
+          console.log("✅ User refreshed, ranked should unlock now.");
+        }
       } else {
         // Ranked abandoned → delete game (shouldn't count)
         console.log("🏳️ Abandoning RANKED, deleting game (won't count)");
