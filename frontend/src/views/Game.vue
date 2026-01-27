@@ -1,4 +1,16 @@
 <script setup>
+import {
+    LogOut,
+    Play,
+    RotateCcw,
+    Skull,
+    Target,
+    Timer,
+    Trophy,
+    Undo,
+    User,
+    UserPlus,
+} from "lucide-vue-next";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import Grid from "../components/Grid.vue";
@@ -294,9 +306,19 @@ watch(isVictory, (val) => {
 
 <template>
   <div class="game-container">
-    <div class="header">
-      <div class="timer">⏱️ {{ elapsedTime }}</div>
-      <div v-if="!authStore.isAuthenticated" class="guest-badge">Ospite</div>
+    <div class="game-header">
+      <div class="stat-card timer-card">
+        <Timer :size="20" class="stat-icon" />
+        <span class="stat-value">{{ elapsedTime }}</span>
+      </div>
+      <div class="stat-card score-card">
+        <Target :size="20" class="stat-icon" />
+        <span class="stat-value">{{ currentNumber - 1 }}/100</span>
+      </div>
+      <div v-if="!authStore.isAuthenticated" class="badge badge-purple">
+        <User :size="14" />
+        Ospite
+      </div>
     </div>
 
     <div class="controls">
@@ -309,17 +331,18 @@ watch(isVictory, (val) => {
           isVictory ||
           isGameOver
         "
+        class="btn btn-outline btn-sm"
       >
-        Undo ↩️ ({{ undoCount }})
+        <Undo :size="16" />
+        Undo ({{ undoCount }})
       </button>
-      <button
-        @click="restartGame"
-        style="margin-left: 10px; background: #ff9800"
-      >
-        Ricomincia 🔄
+      <button @click="restartGame" class="btn btn-secondary btn-sm">
+        <RotateCcw :size="16" />
+        Ricomincia
       </button>
-      <button @click="abandonGame" style="margin-left: 10px; background: #666">
-        Abbandona 🏳️
+      <button @click="abandonGame" class="btn btn-outline btn-sm">
+        <LogOut :size="16" />
+        Abbandona
       </button>
     </div>
 
@@ -332,64 +355,85 @@ watch(isVictory, (val) => {
         @move="handleMove"
       />
 
-      <!-- START OVERLAY (SOLO ALL'INIZIO) -->
+      <!-- START OVERLAY -->
       <div v-if="!isGameActive && !loading" class="overlay start-overlay">
-        <h3>
-          Pronto{{
-            authStore.user?.username ? ", " + authStore.user.username : ""
-          }}?
-        </h3>
-        <p>La posizione di partenza è casuale.</p>
-        <button class="big-start-btn" @click="startGameplay">START ▶️</button>
+        <div class="overlay-content">
+          <h2 class="text-gradient-full">
+            Pronto{{
+              authStore.user?.username ? ", " + authStore.user.username : ""
+            }}?
+          </h2>
+          <p class="overlay-subtitle">La posizione di partenza è casuale.</p>
+          <button class="btn btn-gradient btn-lg" @click="startGameplay">
+            <Play :size="20" />
+            START
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- OVERLAYS -->
-    <div v-if="isVictory" class="overlay victory">
-      <h3>🏆 VITTORIA! 🏆</h3>
-      <p>Hai completato il percorso in {{ elapsedTime }}!</p>
+    <!-- VICTORY OVERLAY -->
+    <div v-if="isVictory" class="overlay victory-overlay">
+      <div class="overlay-content">
+        <Trophy :size="64" class="overlay-icon trophy-icon" />
+        <h2 class="text-gradient-full">VITTORIA!</h2>
+        <p class="overlay-stats">
+          Completato in <strong>{{ elapsedTime }}</strong>
+        </p>
 
-      <div v-if="!authStore.isAuthenticated" class="guest-msg">
-        <p>Registrati per salvare il tuo record in classifica!</p>
-        <button @click="router.push('/register')" class="cta-btn">
-          Registrati Ora
-        </button>
+        <div v-if="!authStore.isAuthenticated" class="guest-cta">
+          <p>Registrati per salvare il tuo record in classifica!</p>
+          <button @click="router.push('/register')" class="btn btn-gradient">
+            <UserPlus :size="18" />
+            Registrati Ora
+          </button>
+        </div>
+
+        <div class="overlay-actions">
+          <button @click="restartGame" class="btn btn-secondary">
+            <RotateCcw :size="18" />
+            Nuova Partita
+          </button>
+          <button @click="router.push('/leaderboard')" class="btn btn-primary">
+            <Trophy :size="18" />
+            Classifica
+          </button>
+        </div>
       </div>
-
-      <button @click="restartGame">Nuova Partita</button>
-      <button
-        @click="router.push('/leaderboard')"
-        style="margin-top: 10px; background: #007bff"
-      >
-        Classifica
-      </button>
     </div>
 
-    <div v-if="isGameOver" class="overlay gameover">
-      <h3>💀 GAME OVER 💀</h3>
-      <p>Punteggio Finale: {{ currentNumber - 1 }}</p>
-      <p>Tempo: {{ elapsedTime }}</p>
+    <!-- GAME OVER OVERLAY -->
+    <div v-if="isGameOver" class="overlay gameover-overlay">
+      <div class="overlay-content">
+        <Skull :size="64" class="overlay-icon gameover-icon" />
+        <h2 class="text-gradient-full">GAME OVER</h2>
+        <div class="overlay-stats">
+          <p>
+            Punteggio Finale: <strong>{{ currentNumber - 1 }}</strong>
+          </p>
+          <p>
+            Tempo: <strong>{{ elapsedTime }}</strong>
+          </p>
+        </div>
 
-      <div v-if="!authStore.isAuthenticated" class="guest-msg">
-        <p>Non mollare! Registrati per scalare la classifica.</p>
-        <button @click="router.push('/register')" class="cta-btn">
-          Crea Account
-        </button>
-      </div>
+        <div v-if="!authStore.isAuthenticated" class="guest-cta">
+          <p>Non mollare! Registrati per scalare la classifica.</p>
+          <button @click="router.push('/register')" class="btn btn-gradient">
+            <UserPlus :size="18" />
+            Crea Account
+          </button>
+        </div>
 
-      <div class="overlay-controls">
-        <button
-          @click="restartGame"
-          style="margin-left: 10px; background: #ff9800"
-        >
-          Ricomincia
-        </button>
-        <button
-          @click="router.push('/leaderboard')"
-          style="margin-left: 10px; background: #007bff"
-        >
-          Esci
-        </button>
+        <div class="overlay-actions">
+          <button @click="restartGame" class="btn btn-secondary">
+            <RotateCcw :size="18" />
+            Ricomincia
+          </button>
+          <button @click="router.push('/leaderboard')" class="btn btn-primary">
+            <LogOut :size="18" />
+            Esci
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -397,183 +441,275 @@ watch(isVictory, (val) => {
 
 <style scoped>
 .game-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-lg);
   text-align: center;
 }
-.header {
+
+/* GAME HEADER - Stats Cards */
+.game-header {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 10px;
-  font-family: monospace;
-  font-size: 1.2rem;
-}
-.timer {
-  background: #f0f0f0;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-weight: bold;
-}
-.controls {
-  margin-bottom: 20px;
-}
-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  cursor: pointer;
-  background: #ff4d4f;
-  color: white;
-  border: none;
-  border-radius: 4px;
-}
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
 }
 
+.stat-card {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.timer-card {
+  border: 2px solid rgba(32, 201, 151, 0.3);
+  box-shadow: var(--shadow-glow-teal);
+}
+
+.score-card {
+  border: 2px solid rgba(121, 80, 242, 0.3);
+  box-shadow: var(--shadow-glow-purple);
+}
+
+.stat-icon {
+  color: var(--color-teal);
+}
+
+.score-card .stat-icon {
+  color: var(--color-purple);
+}
+
+.stat-value {
+  color: var(--color-gray-800);
+  font-family: 'Courier New', monospace;
+}
+
+/* CONTROLS */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+
+/* GRID WRAPPER */
 .grid-wrapper {
   position: relative;
-  max-width: 500px;
+  max-width: 550px;
   width: 100%;
   margin: 0 auto;
   display: flex;
   justify-content: center;
 }
 
+/* OVERLAYS */
 .overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  color: white;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 4px;
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-/* Victory/Gameover rimangono fixed full screen o relativi? Meglio Fixed per impatto */
-.victory,
-.gameover {
+
+.overlay-content {
+  text-align: center;
+  padding: var(--space-xl);
+  max-width: 90%;
+}
+
+/* START OVERLAY */
+.start-overlay {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 0 50px rgba(121, 80, 242, 0.1);
+}
+
+.start-overlay h2 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+  font-weight: 800;
+}
+
+.overlay-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-xl);
+}
+
+/* VICTORY & GAMEOVER OVERLAYS */
+.victory-overlay,
+.gameover-overlay {
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
   z-index: 1000;
 }
 
-.start-overlay {
-  background: rgba(255, 255, 255, 0.6); /* Semi-trasparente chiaro */
-  backdrop-filter: blur(2px);
-  color: #333;
-}
-.big-start-btn {
-  font-size: 2rem;
-  padding: 20px 40px;
-  background: #28a745;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  animation: pulse 1.5s infinite;
+.victory-overlay .overlay-content,
+.gameover-overlay .overlay-content {
+  background: white;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  animation: slideUp 0.4s ease-out;
 }
 
-@keyframes pulse {
+.overlay-icon {
+  margin-bottom: var(--space-lg);
+  animation: iconPop 0.5s ease-out;
+}
+
+.trophy-icon {
+  color: #ffd700;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+}
+
+.gameover-icon {
+  color: var(--color-error);
+  filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.5));
+}
+
+.victory-overlay h2,
+.gameover-overlay h2 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-lg);
+  font-weight: 800;
+}
+
+.overlay-stats {
+  font-size: 1.1rem;
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-xl);
+  line-height: 1.8;
+}
+
+.overlay-stats strong {
+  color: var(--color-purple);
+  font-weight: 700;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.overlay-actions .btn {
+  min-width: 160px;
+}
+
+/* GUEST CTA */
+.guest-cta {
+  background: linear-gradient(
+    135deg,
+    rgba(121, 80, 242, 0.1),
+    rgba(214, 51, 132, 0.1)
+  );
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+  border: 2px solid rgba(121, 80, 242, 0.2);
+}
+
+.guest-cta p {
+  color: var(--color-gray-700);
+  margin-bottom: var(--space-md);
+  font-weight: 600;
+}
+
+/* ANIMATIONS */
+@keyframes iconPop {
   0% {
-    transform: scale(1);
+    transform: scale(0);
+    opacity: 0;
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.1);
   }
   100% {
     transform: scale(1);
+    opacity: 1;
   }
 }
 
-.overlay h3 {
-  font-size: 3rem;
-  margin-bottom: 20px;
-}
-.victory h3 {
-  color: #ffd700;
-}
-.gameover h3 {
-  color: #ff4d4f;
-}
-.overlay-controls {
-  margin-top: 20px;
-}
-/* STILI OSPITE */
-.guest-badge {
-  background: #6c757d;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 15px;
-  font-size: 0.8rem;
-  font-weight: bold;
-}
-.guest-msg {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 15px;
-  border-radius: 8px;
-  margin: 15px 0;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-.cta-btn {
-  background: #28a745 !important; /* Verde acceso per invito all'azione */
-  margin-top: 10px;
-  font-weight: bold;
-  animation: pulse 2s infinite;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 600px) {
+/* MOBILE RESPONSIVE */
+@media (max-width: 768px) {
   .game-container {
-    padding: 0px; /* Rimosso padding extra, usiamo quello di App.vue (10px) */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin-top: 20px;
+    padding: var(--space-lg) var(--space-md);
   }
 
-  .header {
+  .game-header {
+    gap: var(--space-sm);
+  }
+
+  .stat-card {
     font-size: 1rem;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 15px;
-  }
-
-  .timer {
-    font-size: 0.9rem;
-    padding: 4px 8px;
+    padding: 10px 16px;
   }
 
   .controls {
-    margin-bottom: 55px;
-    text-align: center;
+    gap: var(--space-sm);
   }
 
-  button {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-    margin: 2px !important;
+  .controls .btn {
+    width: 100%;
+    max-width: 300px;
   }
 
-  .grid-wrapper {
-    max-width: 100%;
-    padding: 0;
+  .start-overlay h2 {
+    font-size: 2rem;
   }
 
-  .overlay h3 {
-    font-size: 1.5rem;
+  .victory-overlay h2,
+  .gameover-overlay h2 {
+    font-size: 2rem;
   }
 
-  .overlay p {
-    font-size: 0.9rem;
+  .overlay-actions {
+    flex-direction: column;
   }
 
-  .guest-badge {
-    font-size: 0.7rem;
-    padding: 3px 8px;
+  .overlay-actions .btn {
+    width: 100%;
+  }
+
+  .victory-overlay .overlay-content,
+  .gameover-overlay .overlay-content {
+    padding: var(--space-xl);
+    max-width: 90%;
   }
 }
 </style>

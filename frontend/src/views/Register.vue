@@ -1,55 +1,112 @@
 <template>
-  <div class="register-container">
-    <h2>Register</h2>
-    <form @submit.prevent="register">
-      <label>Username:</label>
-      <input type="text" v-model="username" placeholder="Username" required />
-<br>
-      <label>Scegli il tuo Avatar:</label>
+  <div class="page-wrapper">
+    <div class="container-xs">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1 class="text-gradient">Crea Account</h1>
+          <p class="auth-subtitle">Inizia la tua avventura su HundredPath</p>
+        </div>
 
-      <!-- PREVIEW AVATAR SELEZIONATO -->
-      <div v-if="selectedAvatar" class="avatar-preview">
-        <img
-          :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedAvatar}`"
-          alt="Avatar Preview"
-        />
-      </div>
-      <div class="avatar-actions">
-        <button type="button" @click="generateRandomAvatar" class="btn-random">
-          🎲 Random Avatar
-        </button>
-      </div>
+        <form @submit.prevent="register" class="auth-form">
+          <div class="input-group">
+            <label class="label">Username</label>
+            <div style="position: relative">
+              <User :size="18" class="input-icon" />
+              <input
+                v-model="username"
+                type="text"
+                required
+                class="input"
+                placeholder="Il tuo username"
+                style="padding-left: 40px"
+              />
+            </div>
+          </div>
 
-      <div class="avatar-grid">
-        <div
-          v-for="seed in avatarOptions"
-          :key="seed"
-          class="avatar-option"
-          :class="{ selected: selectedAvatar === seed }"
-          @click="selectedAvatar = seed"
-        >
-          <img
-            :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
-            alt="Avatar"
-          />
+          <div class="avatar-section">
+            <label class="label">Scegli il tuo Avatar</label>
+
+            <div v-if="selectedAvatar" class="avatar-preview">
+              <img
+                :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedAvatar}`"
+                alt="Avatar Preview"
+              />
+            </div>
+
+            <button
+              type="button"
+              @click="generateRandomAvatar"
+              class="btn btn-secondary btn-sm"
+            >
+              <Shuffle :size="16" />
+              Nuovi Avatar Casuali
+            </button>
+
+            <div class="avatar-grid">
+              <div
+                v-for="seed in avatarOptions"
+                :key="seed"
+                class="avatar-option"
+                :class="{ selected: selectedAvatar === seed }"
+                @click="selectedAvatar = seed"
+              >
+                <img
+                  :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
+                  alt="Avatar"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="label">Email</label>
+            <div style="position: relative">
+              <Mail :size="18" class="input-icon" />
+              <input
+                v-model="email"
+                type="email"
+                required
+                class="input"
+                placeholder="tuaemail@esempio.com"
+                style="padding-left: 40px"
+              />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="label">Password</label>
+            <div style="position: relative">
+              <Lock :size="18" class="input-icon" />
+              <input
+                v-model="password"
+                type="password"
+                required
+                class="input"
+                placeholder="Minimo 6 caratteri"
+                style="padding-left: 40px"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-gradient btn-lg">
+            <UserPlus :size="20" />
+            Registrati Gratis
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Hai già un account?</p>
+          <router-link to="/login" class="link-gradient">
+            Accedi ora
+          </router-link>
         </div>
       </div>
-
-      <label>Email:</label>
-      <input type="email" v-model="email" placeholder="Email" required />
-      <label>Password:</label>
-      <input
-        type="password"
-        v-model="password"
-        placeholder="Password"
-        required
-      />
-      <button type="submit" class="btn-register">Register</button>
-    </form>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { Lock, Mail, Shuffle, User, UserPlus } from "lucide-vue-next";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import api from "../services/api";
@@ -58,19 +115,19 @@ const router = useRouter();
 const username = ref("");
 const email = ref("");
 const password = ref("");
-const error = ref("");
 
-// Opzioni Avatar (Semi random o semi statici per scelta)
 const avatarOptions = [];
 const selectedAvatar = ref(null);
-// Nessun default
+
 function generateRandomAvatar() {
-avatarOptions.length = 0;
-for (let i = 0; i < 12; i++) {
-  avatarOptions.push("User_" + Math.floor(Math.random() * 100000));
+  avatarOptions.length = 0;
+  for (let i = 0; i < 12; i++) {
+    avatarOptions.push("User_" + Math.floor(Math.random() * 100000));
+  }
+  selectedAvatar.value = avatarOptions[0];
 }
-selectedAvatar.value = avatarOptions[0];
-}
+
+// Generate initial avatars
 generateRandomAvatar();
 
 async function register() {
@@ -83,123 +140,143 @@ async function register() {
       username: username.value,
       email: email.value,
       password: password.value,
-      avatar: selectedAvatar.value, // Inviamo la scelta!
+      avatar: selectedAvatar.value,
     });
-    alert("Registration successful! You can now login.");
+    alert("Registrazione completata! Ora puoi fare il login.");
     router.push("/login");
   } catch (err) {
     console.error("Error registering:", err);
-    alert(err.response?.data?.error || "Registration failed");
+    alert(err.response?.data?.error || "Registrazione fallita");
   }
 }
 </script>
 
 <style scoped>
-.register-container {
-  max-width: 350px;
-  margin: 0 auto;
-  text-align: left;
-}
-input {
-  display: block;
-  width: 100%;
-  margin-bottom: 5px; /* ridotto un po' */
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-label {
-  font-weight: bold;
-  font-size: 0.9em;
-  margin-bottom: 2px;
-  display: block;
-}
-.btn-register {
-  width: 100%;
-  padding: 10px;
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-top: 15px;
-  border-radius: 4px;
-  font-weight: bold;
-}
-.error {
-  color: red;
-  margin-top: 10px;
+.auth-card {
+  background: white;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.4s ease-out;
 }
 
-/* Griglia Avatar */
-.avatar-grid {
-  display: flex;
-  gap: 10px;
-  margin: 15px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.avatar-option {
-  width: 60px; /* Un po' più piccoli */
-  height: 60px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  overflow: hidden;
-  transition:
-    transform 0.2s,
-    border-color 0.2s;
-  background: #eee;
-}
-.avatar-option img {
-  width: 100%;
-  height: 100%;
-}
-.avatar-option:hover {
-  transform: scale(1.1);
-}
-.avatar-option.selected {
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
-  transform: scale(1.1);
-}
-
-/* Random & Preview */
-.avatar-actions {
+.auth-header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-xl);
 }
-.btn-random {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 5px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  margin: 20px 0;
+
+.auth-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-sm);
+  font-weight: 800;
 }
-.btn-random:hover {
-  background: #5a6268;
+
+.auth-subtitle {
+  color: var(--color-gray-600);
+  font-size: 1.1rem;
+}
+
+.auth-form {
+  margin-bottom: var(--space-lg);
+}
+
+/* AVATAR SECTION */
+.avatar-section {
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(121, 80, 242, 0.05),
+    rgba(214, 51, 132, 0.05)
+  );
+  border-radius: var(--radius-lg);
+  border: 2px solid rgba(121, 80, 242, 0.1);
 }
 
 .avatar-preview {
   text-align: center;
-  margin: 15px;
-  background: #f8f9fa;
-  padding: 10px;
-  border-radius: 10px;
+  margin: var(--space-md) 0;
 }
+
 .avatar-preview img {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  border: 3px solid #007bff;
+  border: 3px solid var(--color-purple);
+  box-shadow: 0 4px 15px rgba(121, 80, 242, 0.3);
+  background: white;
+  animation: iconPop 0.3s ease-out;
+}
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.avatar-option {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.2s ease;
   background: white;
 }
-.preview-label {
-  margin: 5px 0 0;
-  font-size: 0.8rem;
-  color: #666;
-  font-family: monospace;
+
+.avatar-option img {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-option:hover {
+  transform: scale(1.1);
+  border-color: var(--color-gray-300);
+}
+
+.avatar-option.selected {
+  border-color: var(--color-purple);
+  box-shadow: 0 0 0 3px rgba(121, 80, 242, 0.2);
+  transform: scale(1.15);
+}
+
+.auth-footer {
+  text-align: center;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.auth-footer p {
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-sm);
+}
+
+.link-gradient {
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: opacity 0.2s;
+}
+
+.link-gradient:hover {
+  opacity: 0.8;
+}
+
+@keyframes iconPop {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 </style>

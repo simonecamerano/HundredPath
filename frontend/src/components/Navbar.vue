@@ -25,10 +25,19 @@
     <!-- Desktop Navigation -->
     <div class="desktop-links">
       <template v-if="authStore.isAuthenticated">
-        <router-link to="/leaderboard">Classifiche 🏆</router-link>
-        <router-link to="/userbestscores">Record 🏆</router-link>
-        <router-link to="/users">Utenti</router-link>
-        <router-link to="/profile" class="user-info-desktop">
+        <router-link to="/leaderboard" class="desktop-link">
+          <Trophy :size="16" />
+          <span>Classifiche</span>
+        </router-link>
+        <router-link to="/userbestscores" class="desktop-link">
+          <Sparkles :size="16" />
+          <span>Record</span>
+        </router-link>
+        <router-link to="/users" class="desktop-link">
+          <Users :size="16" />
+          <span>Utenti</span>
+        </router-link>
+        <router-link to="/profile" class="user-info-desktop desktop-link">
           <img
             :src="getAvatarUrl(authStore.user?.avatar)"
             alt="Avatar"
@@ -36,14 +45,24 @@
           />
           <span class="nav-username">{{ authStore.user?.username }}</span>
         </router-link>
-        <a href="/" @click.prevent="logout" class="logout-link">Logout</a>
+        <a href="/" @click.prevent="logout" class="logout-link desktop-link">
+          <LogOut :size="16" />
+          <span>Logout</span>
+        </a>
       </template>
       <template v-else>
-        <router-link to="/leaderboard">Classifiche 🏆</router-link>
-        <router-link to="/login">Accedi</router-link>
-        <router-link to="/register" class="register-btn-desktop"
-          >Registrati</router-link
-        >
+        <router-link to="/leaderboard" class="desktop-link">
+          <Trophy :size="16" />
+          <span>Classifiche</span>
+        </router-link>
+        <router-link to="/login" class="desktop-link">
+          <LogIn :size="16" />
+          <span>Accedi</span>
+        </router-link>
+        <router-link to="/register" class="register-btn-desktop">
+          <UserPlus :size="16" />
+          <span>Registrati</span>
+        </router-link>
       </template>
     </div>
 
@@ -278,12 +297,40 @@ function logout() {
   color: #7950f2;
 }
 
+/* Desktop link with icon */
+.desktop-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.desktop-link:hover {
+  background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(121, 80, 242, 0.3);
+}
+
 .register-btn-desktop {
   background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
   color: white !important;
-  padding: 8px 20px;
+  padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(121, 80, 242, 0.2);
+}
+.register-btn-desktop:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(121, 80, 242, 0.3);
 }
 .nav-avatar-sm {
   width: 30px;

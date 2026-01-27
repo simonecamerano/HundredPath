@@ -1,61 +1,97 @@
 <template>
-  <div class="users-container">
-    <h2>👥 Community HundredPath</h2>
-    <p class="subtitle">{{ users.length }} giocatori registrati</p>
-    <div v-if="loading">Caricamento...</div>
-    <div v-else-if="error">{{ error }}</div>
-    <div v-else class="users-grid">
-      <div v-for="user in users" :key="user._id" class="user-card">
-        <img :src="getAvatarUrl(user.avatar)" alt="Avatar" class="avatar" />
-        <h3>{{ user.username }}</h3>
-        <p class="join-date">Membro dal {{ formatDate(user.createdAt) }}</p>
+  <div class="page-wrapper">
+    <div class="container">
+      <div class="page-header">
+        <Users :size="48" class="header-icon" />
+        <h1 class="text-gradient">Community HundredPath</h1>
+        <p class="subtitle">
+          <UserCheck :size="18" />
+          {{ users.length }} giocatori registrati
+        </p>
+      </div>
 
-        <!-- STATISTICHE -->
-        <div class="stats">
-          <div class="stat-item">
-            <span class="stat-label">Partite</span>
-            <span class="stat-value">{{ user.totalGames }}</span>
+      <div v-if="loading" class="flex-center" style="min-height: 400px">
+        <div class="badge badge-purple">Caricamento...</div>
+      </div>
+      <div v-else-if="error" class="error-message">{{ error }}</div>
+
+      <div v-else class="users-grid">
+        <div v-for="user in users" :key="user._id" class="user-card card-hover">
+          <div class="user-header">
+            <img :src="getAvatarUrl(user.avatar)" alt="Avatar" class="avatar" />
+            <div class="user-info">
+              <h3 class="username">{{ user.username }}</h3>
+              <p class="join-date">
+                <Calendar :size="14" />
+                {{ formatDate(user.createdAt) }}
+              </p>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">Vittorie</span>
-            <span class="stat-value">{{ user.wins }}</span>
-          </div>
-          <div v-if="user.bestRank" class="stat-item best-rank">
-            <span class="stat-label">Miglior Rank</span>
-            <span class="stat-value">
-              <span class="medal">{{ getMedal(user.bestRank) }}</span> #{{
-                user.bestRank
-              }}
-            </span>
+
+          <div class="user-stats">
+            <div class="stat-row">
+              <span class="stat-label">
+                <Gamepad2 :size="14" />
+                Partite
+              </span>
+              <span class="stat-value">{{ user.totalGames }}</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">
+                <Trophy :size="14" />
+                Vittorie
+              </span>
+              <span class="stat-value">{{ user.wins }}</span>
+            </div>
+            <div v-if="user.bestRank" class="stat-row best-rank">
+              <span class="stat-label">
+                <Medal :size="14" />
+                Miglior Rank
+              </span>
+              <span class="stat-value">
+                <Trophy
+                  v-if="user.bestRank <= 3"
+                  :size="16"
+                  :class="'trophy-' + user.bestRank"
+                />
+                #{{ user.bestRank }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
 <script setup>
+import {
+  Calendar,
+  Gamepad2,
+  Medal,
+  Trophy,
+  UserCheck,
+  Users,
+} from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
+
 const users = ref([]);
 const loading = ref(true);
 const error = ref(null);
+
 function getAvatarUrl(seed) {
   const safeSeed = seed || "shape_default";
   const style = safeSeed.startsWith("shape_") ? "shapes" : "adventurer";
   return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
 }
+
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString("it-IT", {
+    day: "numeric",
     month: "short",
     year: "numeric",
   });
-}
-
-function getMedal(rank) {
-  if (rank === 1) return "🥇";
-  if (rank === 2) return "🥈";
-  if (rank === 3) return "🥉";
-  return "";
 }
 
 onMounted(async () => {
@@ -70,135 +106,196 @@ onMounted(async () => {
   }
 });
 </script>
+
 <style scoped>
-.users-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.subtitle {
-  color: #6c757d;
-  margin-bottom: 30px;
+.page-header {
   text-align: center;
-}
-.users-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-}
-.user-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  transition: transform 0.2s;
-  border: 1px solid #f1f3f5;
-}
-.user-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-}
-.avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin-bottom: 10px;
-  border: 3px solid #007bff;
-}
-.user-card h3 {
-  margin: 10px 0 5px;
-  color: #333;
-  font-size: 1.1rem;
-}
-.join-date {
-  font-size: 0.8rem;
-  color: #adb5bd;
-  margin-bottom: 15px;
+  margin-bottom: var(--space-2xl);
 }
 
-/* STATISTICHE */
-.stats {
-  margin-top: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #f1f3f5;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.header-icon {
+  color: var(--color-teal);
+  margin-bottom: var(--space-md);
+  filter: drop-shadow(0 0 20px rgba(32, 201, 151, 0.5));
+  animation: iconPop 0.5s ease-out;
 }
-.stat-item {
+
+.page-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-md);
+  font-weight: 800;
+}
+
+.subtitle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-gray-600);
+  font-size: 1.1rem;
+  background: white;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.error-message {
+  background: #fff5f5;
+  color: var(--color-error);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid #ffcccc;
+  text-align: center;
+}
+
+/* USERS GRID */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--space-lg);
+  animation: fadeIn 0.4s ease-in;
+}
+
+.user-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-md);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.user-card:hover {
+  border-color: rgba(32, 201, 151, 0.3);
+  box-shadow: var(--shadow-glow-teal);
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--color-gray-200);
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--color-gray-200);
+  transition: all 0.3s ease;
+}
+
+.user-card:hover .avatar {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.2);
+}
+
+.user-info {
+  flex: 1;
+}
+
+.username {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: 4px;
+}
+
+.join-date {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+/* USER STATS */
+.user-stats {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  padding: var(--space-sm);
+  background: var(--color-gray-100);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
 }
+
+.stat-row:hover {
+  background: var(--color-gray-200);
+}
+
 .stat-label {
-  color: #6c757d;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  font-weight: 600;
 }
+
+.stat-label svg {
+  color: var(--color-purple);
+}
+
 .stat-value {
-  color: #333;
-  font-weight: bold;
-}
-.best-rank .stat-value {
-  color: #007bff;
-  font-size: 0.95rem;
-}
-.medal {
-  font-size: 1.5rem;
-  vertical-align: middle;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-gray-900);
+  font-family: "Courier New", monospace;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
-/* ===== MOBILE RESPONSIVE ===== */
+.best-rank {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.1),
+    rgba(255, 215, 0, 0.05)
+  );
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.trophy-1 {
+  color: #ffd700;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+}
+
+.trophy-2 {
+  color: #c0c0c0;
+  filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.5));
+}
+
+.trophy-3 {
+  color: #cd7f32;
+  filter: drop-shadow(0 0 4px rgba(205, 127, 50, 0.5));
+}
+
+@keyframes iconPop {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
 @media (max-width: 768px) {
-  .users-container {
-    padding: 10px;
+  .page-header h1 {
+    font-size: 2rem;
   }
 
-  .users-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-  }
-
-  .user-card {
-    padding: 15px;
-  }
-
-  .avatar {
-    width: 60px;
-    height: 60px;
-    border-width: 2px;
-  }
-
-  .user-card h3 {
-    font-size: 1rem;
-  }
-
-  .join-date {
-    font-size: 0.7rem;
-  }
-
-  .stat-item {
-    font-size: 0.75rem;
-  }
-
-  .medal {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
   .users-grid {
     grid-template-columns: 1fr;
-  }
-
-  .user-card {
-    padding: 20px;
-  }
-
-  .avatar {
-    width: 70px;
-    height: 70px;
   }
 }
 </style>

@@ -1,111 +1,145 @@
 <template>
-  <div class="leaderboards-container">
-    <h2>🏆 Classifiche</h2>
+  <div class="page-wrapper">
+    <div class="container">
+      <div class="leaderboard-header">
+        <Trophy :size="48" class="header-icon" />
+        <h1 class="text-gradient">Classifiche</h1>
+        <p class="subtitle">Scala la vetta globale</p>
+      </div>
 
-    <!-- TAB SWITCHER (Mobile) -->
-    <div class="tab-switcher">
-      <button
-        v-for="period in periods"
-        :key="period.value"
-        :class="['tab-btn', { active: activePeriod === period.value }]"
-        @click="activePeriod = period.value"
-      >
-        {{ period.icon }} {{ period.label }}
-      </button>
-    </div>
+      <!-- TAB SWITCHER -->
+      <div class="tab-switcher">
+        <button
+          v-for="period in periods"
+          :key="period.value"
+          :class="['tab-btn', { active: activePeriod === period.value }]"
+          @click="activePeriod = period.value"
+        >
+          <component :is="period.iconComponent" :size="18" />
+          {{ period.label }}
+        </button>
+      </div>
 
-    <!-- LOADING/ERROR -->
-    <div v-if="loading" class="loading">Caricamento...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
+      <!-- LOADING/ERROR -->
+      <div v-if="loading" class="flex-center" style="min-height: 300px">
+        <div class="badge badge-purple">Caricamento...</div>
+      </div>
+      <div v-else-if="error" class="error-message">{{ error }}</div>
 
-    <!-- LEADERBOARDS GRID (Desktop: 3 colonne, Mobile: mostra solo quella attiva) -->
-    <div v-else class="leaderboards-grid">
-      <div
-        v-for="period in periods"
-        :key="period.value"
-        :class="[
-          'leaderboard-column',
-          { hidden: activePeriod !== period.value },
-        ]"
-      >
-        <h3 class="period-title">{{ period.icon }} {{ period.label }}</h3>
+      <!-- LEADERBOARDS GRID -->
+      <div v-else class="leaderboards-grid">
+        <div
+          v-for="period in periods"
+          :key="period.value"
+          :class="[
+            'leaderboard-column',
+            { hidden: activePeriod !== period.value },
+          ]"
+        >
+          <div class="leaderboard-card">
+            <div class="card-header">
+              <component :is="period.iconComponent" :size="24" />
+              <h3>{{ period.label }}</h3>
+            </div>
 
-        <!-- Top 10 -->
-        <table class="leaderboard-table">
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Avatar</th>
-              <th>Giocatore</th>
-              <th>Punteggio</th>
-              <th>Tempo</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="entry in leaderboards[period.value].top10"
-              :key="entry._id"
+            <!-- Top 10 Table -->
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Pos</th>
+                    <th>Avatar</th>
+                    <th>Giocatore</th>
+                    <th>Punteggio</th>
+                    <th>Tempo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="entry in leaderboards[period.value]?.top10 || []"
+                    :key="entry._id"
+                    :class="{ 'podium-row': entry.globalRank <= 3 }"
+                  >
+                    <td class="rank-cell">
+                      <span class="rank-number">#{{ entry.globalRank }}</span>
+                      <component
+                        v-if="entry.globalRank <= 3"
+                        :is="Trophy"
+                        :size="16"
+                        :class="'trophy-' + entry.globalRank"
+                      />
+                    </td>
+                    <td>
+                      <img
+                        :src="getAvatarUrl(entry.avatar)"
+                        alt="Avatar"
+                        class="avatar"
+                      />
+                    </td>
+                    <td class="username-cell">{{ entry.username }}</td>
+                    <td class="score-cell">{{ entry.currentNumber }}</td>
+                    <td class="time-cell">
+                      {{ formatDuration(entry.duration) }}
+                    </td>
+                  </tr>
+                  <tr v-if="leaderboards[period.value].top10.length === 0">
+                    <td colspan="5" class="empty-state">
+                      <Target
+                        :size="32"
+                        style="opacity: 0.3; margin-bottom: 8px"
+                      />
+                      <p>Nessuna partita completata</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- User Best (se fuori Top 10) -->
+            <div
+              v-if="
+                leaderboards[period.value].userBest &&
+                leaderboards[period.value].userBest.globalRank > 10
+              "
+              class="user-rank-section"
             >
-              <td>
-                # {{ entry.globalRank }}
-                <span class="medal">{{ getMedal(entry.globalRank) }}</span>
-              </td>
-              <td>
+              <h4 class="section-title">
+                <User :size="18" />
+                La Tua Posizione
+              </h4>
+              <div class="user-rank-card">
+                <div class="rank-badge">
+                  #{{ leaderboards[period.value].userBest.globalRank }}
+                </div>
                 <img
-                  :src="getAvatarUrl(entry.avatar)"
+                  :src="
+                    getAvatarUrl(leaderboards[period.value].userBest.avatar)
+                  "
                   alt="Avatar"
                   class="avatar"
                 />
-              </td>
-              <td>{{ entry.username }}</td>
-              <td>{{ entry.currentNumber }}</td>
-              <td>{{ formatDuration(entry.duration) }}</td>
-            </tr>
-            <tr v-if="leaderboards[period.value].top10.length === 0">
-              <td colspan="5" class="empty-state">
-                Nessuna partita completata
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- User Best (se fuori Top 10) -->
-        <div
-          v-if="
-            leaderboards[period.value].userBest &&
-            leaderboards[period.value].userBest.globalRank > 10
-          "
-          class="user-rank-section"
-        >
-          <h4>La Tua Posizione</h4>
-          <table class="leaderboard-table">
-            <tbody>
-              <tr class="highlight-user">
-                <td>
-                  # {{ leaderboards[period.value].userBest.globalRank }}
-                  <span class="medal">{{
-                    getMedal(leaderboards[period.value].userBest.globalRank)
-                  }}</span>
-                </td>
-                <td>
-                  <img
-                    :src="
-                      getAvatarUrl(leaderboards[period.value].userBest.avatar)
-                    "
-                    alt="Avatar"
-                    class="avatar"
-                  />
-                </td>
-                <td>{{ leaderboards[period.value].userBest.username }}</td>
-                <td>{{ leaderboards[period.value].userBest.currentNumber }}</td>
-                <td>
-                  {{
-                    formatDuration(leaderboards[period.value].userBest.duration)
-                  }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                <div class="user-stats">
+                  <p class="username">
+                    {{ leaderboards[period.value].userBest.username }}
+                  </p>
+                  <div class="stats-row">
+                    <span>
+                      <Target :size="14" />
+                      {{ leaderboards[period.value].userBest.currentNumber }}
+                    </span>
+                    <span>
+                      <Timer :size="14" />
+                      {{
+                        formatDuration(
+                          leaderboards[period.value].userBest.duration,
+                        )
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -113,13 +147,22 @@
 </template>
 
 <script setup>
+import {
+  BarChart3,
+  Calendar,
+  Flame,
+  Target,
+  Timer,
+  Trophy,
+  User,
+} from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
 
 const periods = [
-  { value: "all", label: "Generale", icon: "📊" },
-  { value: "week", label: "Settimanale", icon: "📅" },
-  { value: "day", label: "Giornaliera", icon: "🔥" },
+  { value: "all", label: "Generale", iconComponent: BarChart3 },
+  { value: "week", label: "Settimanale", iconComponent: Calendar },
+  { value: "day", label: "Giornaliera", iconComponent: Flame },
 ];
 
 const activePeriod = ref("all");
@@ -149,28 +192,23 @@ function formatDuration(ms) {
   return `${seconds.toString().padStart(2, "0")}.${centis.toString().padStart(2, "0")}s`;
 }
 
-function getMedal(rank) {
-  if (rank === 1) return "🥇";
-  if (rank === 2) return "🥈";
-  if (rank === 3) return "🥉";
-  return "";
-}
-
 onMounted(async () => {
   try {
-    // Fetch tutte e 3 le classifiche in parallelo
-    const [allTime, weekly, daily] = await Promise.all([
+    loading.value = true;
+    // Fetch all three periods
+    const [allRes, weekRes, dayRes] = await Promise.all([
       api.get("/game/leaderboard?period=all"),
       api.get("/game/leaderboard?period=week"),
       api.get("/game/leaderboard?period=day"),
     ]);
-
-    leaderboards.value.all = allTime.data;
-    leaderboards.value.week = weekly.data;
-    leaderboards.value.day = daily.data;
+    leaderboards.value = {
+      all: allRes.data,
+      week: weekRes.data,
+      day: dayRes.data,
+    };
   } catch (err) {
-    console.error(err);
-    error.value = "Impossibile caricare le classifiche";
+    console.error("Error fetching leaderboards:", err);
+    error.value = "Errore nel caricamento delle classifiche";
   } finally {
     loading.value = false;
   }
@@ -178,244 +216,267 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.leaderboards-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-h2 {
+.leaderboard-header {
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 2rem;
+  margin-bottom: var(--space-2xl);
 }
 
-/* TAB SWITCHER (Solo su mobile) */
+.header-icon {
+  color: #ffd700;
+  margin-bottom: var(--space-md);
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+  animation: iconPop 0.5s ease-out;
+}
+
+.leaderboard-header h1 {
+  font-size: 3rem;
+  margin-bottom: var(--space-sm);
+  font-weight: 800;
+}
+
+.subtitle {
+  color: var(--color-gray-600);
+  font-size: 1.2rem;
+}
+
+/* TAB SWITCHER */
 .tab-switcher {
   display: flex;
-  gap: 10px;
+  gap: var(--space-sm);
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
 }
 
 .tab-btn {
-  padding: 10px 20px;
-  border: 2px solid #e9ecef;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 12px 24px;
   background: white;
-  border-radius: 25px;
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-weight: 600;
+  color: var(--color-gray-700);
+  transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
-  border-color: #007bff;
+  border-color: var(--color-purple);
+  background: rgba(121, 80, 242, 0.05);
 }
 
 .tab-btn.active {
-  background: #007bff;
+  background: var(--gradient-primary);
   color: white;
-  border-color: #007bff;
+  border-color: transparent;
+  box-shadow: var(--shadow-glow-purple);
 }
 
 /* LEADERBOARDS GRID */
 .leaderboards-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 30px;
+  gap: var(--space-xl);
 }
 
-.leaderboard-column {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-.period-title {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 1.3rem;
-}
-
-/* TABLE */
-.leaderboard-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.leaderboard-table th,
-.leaderboard-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  vertical-align: middle;
-}
-
-.leaderboard-table th {
-  background-color: #f8f9fa;
-  font-weight: bold;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #6c757d;
-}
-
-.leaderboard-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-}
-
-.medal {
-  font-size: 1.5rem;
-  margin-left: 5px;
-  vertical-align: middle;
-}
-
-.empty-state {
-  text-align: center;
-  color: #adb5bd;
-  font-style: italic;
-  padding: 40px !important;
-}
-
-/* USER RANK */
-.user-rank-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 2px dashed #e9ecef;
-}
-
-.user-rank-section h4 {
-  margin-bottom: 10px;
-  color: #007bff;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.highlight-user {
-  background: #f0f8ff;
-  font-weight: bold;
-}
-
-.loading,
-.error {
-  text-align: center;
-  padding: 40px;
-}
-
-.error {
-  color: #dc3545;
-}
-
-/* Nascondi colonne non attive */
 .leaderboard-column.hidden {
   display: none;
 }
 
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-  .leaderboards-container {
-    padding: 10px;
-  }
+.leaderboard-card {
+  background: white;
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+}
 
-  h2 {
-    font-size: 1.8rem;
-    margin-bottom: 20px;
-  }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--gradient-primary);
+  color: white;
+}
 
-  .tab-switcher {
-    gap: 5px;
-    margin-bottom: 15px;
-  }
+.card-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
 
-  .tab-btn {
-    padding: 8px 12px;
-    font-size: 0.85rem;
-  }
+/* TABLE */
+.table-wrapper {
+  overflow-x: auto;
+}
 
-  .leaderboard-column {
-    padding: 15px;
-  }
+.table {
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
 
-  .period-title {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-  }
+.table thead {
+  background: var(--gradient-secondary);
+}
 
-  /* Horizontal scroll for table */
-  .leaderboard-table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
+.podium-row {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 215, 0, 0.05),
+    rgba(255, 215, 0, 0.01)
+  );
+  font-weight: 600;
+}
 
-  .leaderboard-table thead,
-  .leaderboard-table tbody {
-    display: table;
-    width: 100%;
-  }
+.rank-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
 
-  .leaderboard-table th,
-  .leaderboard-table td {
-    padding: 8px 6px;
-    font-size: 0.85rem;
-    white-space: nowrap;
-  }
+.rank-number {
+  font-weight: 700;
+  color: var(--color-gray-800);
+}
 
-  .avatar {
-    width: 35px;
-    height: 35px;
-  }
+.trophy-1 {
+  color: #ffd700;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+}
 
-  .medal {
-    font-size: 1.4rem;
-  }
+.trophy-2 {
+  color: #c0c0c0;
+  filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.5));
+}
 
-  .user-rank-section h4 {
-    font-size: 0.85rem;
+.trophy-3 {
+  color: #cd7f32;
+  filter: drop-shadow(0 0 4px rgba(205, 127, 50, 0.5));
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--color-gray-200);
+}
+
+.username-cell {
+  font-weight: 600;
+  color: var(--color-gray-800);
+}
+
+.score-cell {
+  font-weight: 700;
+  color: var(--color-purple);
+  font-family: "Courier New", monospace;
+}
+
+.time-cell {
+  font-family: "Courier New", monospace;
+  color: var(--color-gray-600);
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl) !important;
+  color: var(--color-gray-500);
+}
+
+/* USER RANK SECTION */
+.user-rank-section {
+  padding: var(--space-lg);
+  background: linear-gradient(
+    135deg,
+    rgba(121, 80, 242, 0.05),
+    rgba(214, 51, 132, 0.05)
+  );
+  border-top: 2px solid var(--color-gray-200);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 1.1rem;
+  color: var(--color-gray-800);
+  margin-bottom: var(--space-md);
+}
+
+.user-rank-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background: white;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.rank-badge {
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+}
+
+.user-stats {
+  flex: 1;
+}
+
+.user-stats .username {
+  font-weight: 700;
+  color: var(--color-gray-800);
+  margin-bottom: var(--space-xs);
+}
+
+.stats-row {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: 0.9rem;
+  color: var(--color-gray-600);
+}
+
+.stats-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ANIMATIONS */
+@keyframes iconPop {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
   }
 }
 
-@media (max-width: 480px) {
-  h2 {
-    font-size: 1.5rem;
+/* RESPONSIVE - Rimosso layout 3 colonne desktop, manteniamo i tab */
+
+@media (max-width: 768px) {
+  .leaderboard-header h1 {
+    font-size: 2rem;
   }
 
-  .tab-btn {
-    font-size: 0.75rem;
-    padding: 6px 10px;
-  }
-
-  .leaderboard-column {
-    padding: 10px;
-  }
-
-  .period-title {
-    font-size: 1rem;
-  }
-
-  .leaderboard-table th,
-  .leaderboard-table td {
-    padding: 6px 4px;
-    font-size: 0.75rem;
+  .table {
+    font-size: 0.875rem;
   }
 
   .avatar {
-    width: 30px;
-    height: 30px;
-  }
-
-  .medal {
-    font-size: 1.2rem;
+    width: 32px;
+    height: 32px;
   }
 }
 </style>

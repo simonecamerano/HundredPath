@@ -1,84 +1,137 @@
 <template>
-  <div class="profile-container">
-    <h2>👤 Il Mio Profilo</h2>
-
-    <div v-if="loading" class="loading">Caricamento...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-
-    <div v-else class="profile-content">
-      <!-- SEZIONE AVATAR & INFO -->
-      <div class="profile-header">
-        <img
-          :src="getAvatarUrl(profile.avatar)"
-          alt="Avatar"
-          class="profile-avatar"
-        />
-        <h3>{{ profile.username }}</h3>
-        <p class="join-date">Membro dal {{ formatDate(profile.createdAt) }}</p>
-
-        <button
-          @click="showAvatarPicker = !showAvatarPicker"
-          class="btn-change-avatar"
-        >
-          {{ showAvatarPicker ? "Chiudi" : "✏️ Cambia Avatar" }}
-        </button>
+  <div class="page-wrapper">
+    <div class="container-sm">
+      <div v-if="loading" class="flex-center" style="min-height: 400px">
+        <div class="badge badge-purple">Caricamento...</div>
       </div>
+      <div v-else-if="error" class="error-message">{{ error }}</div>
 
-      <!-- AVATAR PICKER (togglabile) -->
-      <div v-if="showAvatarPicker" class="avatar-picker">
-        <h4>Scegli un nuovo avatar:</h4>
-        <button @click="generateRandomAvatar" class="btn-random">
-          🎲 Random Avatar
-        </button>
-        <div class="avatar-grid">
-          <div
-            v-for="seed in avatarOptions"
-            :key="seed"
-            class="avatar-option"
-            :class="{ selected: selectedAvatar === seed }"
-            @click="selectedAvatar = seed"
-          >
-            <img
-              :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
-              alt="Avatar"
-            />
+      <div v-else class="profile-content">
+        <!-- PROFILE HEADER -->
+        <div v-if="profile && profile.username" class="profile-card">
+          <div class="profile-header">
+            <div class="avatar-wrapper">
+              <img
+                :src="getAvatarUrl(profile.avatar)"
+                alt="Avatar"
+                class="profile-avatar"
+              />
+              <button
+                @click="showAvatarPicker = !showAvatarPicker"
+                class="avatar-edit-btn"
+              >
+                <Edit2 :size="16" />
+              </button>
+            </div>
+            <div class="profile-info">
+              <h1 class="text-gradient">{{ profile.username }}</h1>
+              <p class="join-date">
+                <Calendar :size="16" />
+                Membro dal {{ formatDate(profile.createdAt) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- AVATAR PICKER -->
+          <div v-if="showAvatarPicker" class="avatar-picker">
+            <div class="picker-header">
+              <h4>Scegli un nuovo avatar</h4>
+              <button
+                @click="generateRandomAvatar"
+                class="btn btn-secondary btn-sm"
+              >
+                <Shuffle :size="16" />
+                Nuovi Avatar
+              </button>
+            </div>
+            <div class="avatar-grid">
+              <div
+                v-for="seed in avatarOptions"
+                :key="seed"
+                class="avatar-option"
+                :class="{ selected: selectedAvatar === seed }"
+                @click="selectedAvatar = seed"
+              >
+                <img
+                  :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
+                  alt="Avatar"
+                />
+              </div>
+            </div>
+            <button
+              @click="saveAvatar"
+              class="btn btn-gradient"
+              :disabled="!selectedAvatar"
+            >
+              <Save :size="18" />
+              Salva Avatar
+            </button>
           </div>
         </div>
-        <button
-          @click="saveAvatar"
-          class="btn-save"
-          :disabled="!selectedAvatar"
-        >
-          💾 Salva Avatar
-        </button>
-      </div>
 
-      <!-- STATISTICHE -->
-      <div class="stats-section">
-        <h3>📊 Le Tue Statistiche</h3>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">🎮</div>
-            <div class="stat-label">Partite Giocate</div>
-            <div class="stat-value">{{ profile.stats.totalGames }}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">🏆</div>
-            <div class="stat-label">Vittorie</div>
-            <div class="stat-value">{{ profile.stats.wins }}</div>
-          </div>
-          <div class="stat-card" v-if="profile.stats.bestRank">
-            <div class="stat-icon">
-              {{ getRankIcon(profile.stats.bestRank) }}
+        <!-- STATS GRID -->
+        <div v-if="profile && profile.stats" class="stats-section">
+          <h2 class="section-title">
+            <BarChart3 :size="24" />
+            Le Tue Statistiche
+          </h2>
+          <div class="stats-grid">
+            <div class="stat-card card-hover">
+              <Gamepad2 :size="32" class="stat-icon" />
+              <div class="stat-label">Partite Giocate</div>
+              <div class="stat-value">{{ profile.stats.totalGames || 0 }}</div>
             </div>
-            <div class="stat-label">Miglior Posizione</div>
-            <div class="stat-value"># {{ profile.stats.bestRank }}</div>
+            <div class="stat-card card-hover">
+              <Trophy :size="32" class="stat-icon trophy-gold" />
+              <div class="stat-label">Vittorie</div>
+              <div class="stat-value">{{ profile.stats.wins || 0 }}</div>
+            </div>
+            <div class="stat-card card-hover" v-if="profile.stats.bestRank">
+              <Medal :size="32" class="stat-icon" />
+              <div class="stat-label">Miglior Posizione</div>
+              <div class="stat-value">#{{ profile.stats.bestRank }}</div>
+            </div>
+            <div class="stat-card card-hover" v-if="profile.stats.avgDuration">
+              <Timer :size="32" class="stat-icon" />
+              <div class="stat-label">Tempo Medio</div>
+              <div class="stat-value">
+                {{ formatDuration(profile.stats.avgDuration) }}
+              </div>
+            </div>
           </div>
-          <div class="stat-card" v-if="profile.stats.avgDuration">
-            <div class="stat-icon">⏱️</div>
-            <div class="stat-label">Tempo Medio</div>
-            <div class="stat-value">
-              {{ formatDuration(profile.stats.avgDuration) }}
+        </div>
+
+        <!-- RECENT GAMES -->
+        <div
+          class="recent-games-section"
+          v-if="recentGames && recentGames.length > 0"
+        >
+          <h2 class="section-title">
+            <Clock :size="24" />
+            Partite Recenti
+          </h2>
+          <div class="games-list">
+            <div v-for="game in recentGames" :key="game._id" class="game-card">
+              <div class="game-mode">
+                <component
+                  :is="game.gameMode === 'ranked' ? Swords : GraduationCap"
+                  :size="20"
+                />
+                <span>{{
+                  game.gameMode === "ranked" ? "Ranked" : "Tutorial"
+                }}</span>
+              </div>
+              <div class="game-stats-row">
+                <span>
+                  <Target :size="14" />
+                  {{ game.currentNumber }}
+                </span>
+                <span>
+                  <Timer :size="14" />
+                  {{ formatDuration(game.duration) }}
+                </span>
+                <span class="game-date">{{ formatDate(game.createdAt) }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -88,37 +141,42 @@
 </template>
 
 <script setup>
+import {
+  BarChart3,
+  Calendar,
+  Clock,
+  Edit2,
+  Gamepad2,
+  GraduationCap,
+  Medal,
+  Save,
+  Shuffle,
+  Swords,
+  Target,
+  Timer,
+  Trophy,
+} from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
-import { useAuthStore } from "../stores/auth";
 
-const authStore = useAuthStore();
-const profile = ref({});
+const profile = ref({
+  username: "",
+  avatar: "",
+  createdAt: "",
+  stats: {
+    totalGames: 0,
+    wins: 0,
+    bestRank: null,
+    avgDuration: null,
+  },
+});
+const recentGames = ref([]);
 const loading = ref(true);
 const error = ref(null);
-const showAvatarPicker = ref(false);
-const selectedAvatar = ref(null);
 
-const avatarOptions = ref([
-  "Freddy",
-  "Felix",
-  "Aneka",
-  "Willow",
-  "Midnight",
-  "Shadow",
-  "Daria",
-  "Simone",
-  "Marina",
-  "Leo",
-  "Riccardo",
-  "Serena",
-  "Luna",
-  "Kai",
-  "Zara",
-  "Atlas",
-  "Nova",
-  "Phoenix",
-]);
+const showAvatarPicker = ref(false);
+const avatarOptions = ref([]);
+const selectedAvatar = ref(null);
 
 function getAvatarUrl(seed) {
   const safeSeed = seed || "shape_default";
@@ -127,9 +185,10 @@ function getAvatarUrl(seed) {
 }
 
 function formatDate(dateString) {
-  return new Date(dateString).toLocaleDateString("it-IT", {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("it-IT", {
     day: "numeric",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 }
@@ -143,162 +202,157 @@ function formatDuration(ms) {
   if (minutes > 0) {
     return `${minutes}m ${seconds.toString().padStart(2, "0")}s`;
   }
-  return `${seconds.toString().padStart(2, "0")}.${centis.toString().padStart(2, "0")}s`;
-}
-
-function getRankIcon(rank) {
-  if (rank === 1) return "🥇";
-  if (rank === 2) return "🥈";
-  if (rank === 3) return "🥉";
-  return "🏅";
+  return `${seconds.toString().padStart(2, "0")}s`;
 }
 
 function generateRandomAvatar() {
   avatarOptions.value = [];
-  for (let i = 0; i < 18; i++) {
+  for (let i = 0; i < 12; i++) {
     avatarOptions.value.push("User_" + Math.floor(Math.random() * 100000));
   }
   selectedAvatar.value = avatarOptions.value[0];
 }
 
 async function saveAvatar() {
+  if (!selectedAvatar.value) return;
   try {
     await api.put("/profile/avatar", { avatar: selectedAvatar.value });
     profile.value.avatar = selectedAvatar.value;
-    authStore.user.avatar = selectedAvatar.value; // Update store
     showAvatarPicker.value = false;
-    alert("Avatar aggiornato con successo!");
+    alert("Avatar aggiornato!");
   } catch (err) {
-    console.error(err);
-    alert("Errore nell'aggiornamento dell'avatar");
+    console.error("Error saving avatar:", err);
+    alert("Errore nel salvataggio dell'avatar");
   }
 }
 
 onMounted(async () => {
   try {
     const res = await api.get("/profile");
+    // L'API ritorna direttamente l'utente, non sotto .profile
     profile.value = res.data;
-    selectedAvatar.value = profile.value.avatar;
+    // recentGames non è supportato dall'API attuale
+    recentGames.value = [];
   } catch (err) {
-    console.error(err);
-    error.value = "Impossibile caricare il profilo";
+    console.error("Error fetching profile:", err);
+    error.value = "Errore nel caricamento del profilo";
   } finally {
     loading.value = false;
   }
+
+  generateRandomAvatar();
 });
 </script>
 
 <style scoped>
-.profile-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+.profile-content {
+  animation: slideUp 0.4s ease-out;
 }
 
-.profile-content {
+/* PROFILE CARD */
+.profile-card {
   background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-lg);
+  margin-bottom: var(--space-2xl);
 }
 
 .profile-header {
-  text-align: center;
-  padding: 40px 20px;
-  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
-  color: white;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  margin-bottom: var(--space-lg);
+}
+
+.avatar-wrapper {
+  position: relative;
 }
 
 .profile-avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  border: 4px solid white;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 4px solid var(--color-purple);
+  box-shadow: 0 8px 24px rgba(121, 80, 242, 0.3);
 }
 
-.profile-header h3 {
-  margin: 10px 0 5px;
-  font-size: 1.8rem;
-}
-
-.join-date {
-  opacity: 0.9;
-  font-size: 0.9rem;
-  margin-bottom: 20px;
-}
-
-.btn-change-avatar {
-  background: white;
-  color: #007bff;
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: var(--gradient-primary);
+  color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-weight: bold;
+  box-shadow: var(--shadow-md);
   transition: transform 0.2s;
 }
 
-.btn-change-avatar:hover {
-  transform: scale(1.05);
+.avatar-edit-btn:hover {
+  transform: scale(1.1);
+}
+
+.profile-info h1 {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-sm);
+  font-weight: 800;
+}
+
+.join-date {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-gray-600);
+  font-size: 1rem;
 }
 
 /* AVATAR PICKER */
 .avatar-picker {
-  padding: 30px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  padding: var(--space-xl);
+  background: linear-gradient(
+    135deg,
+    rgba(121, 80, 242, 0.05),
+    rgba(214, 51, 132, 0.05)
+  );
+  border-radius: var(--radius-lg);
+  border: 2px dashed rgba(121, 80, 242, 0.3);
 }
 
-.avatar-picker h4 {
-  margin-bottom: 15px;
-  color: #333;
+.picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
 }
 
-.btn-random {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-}
-
-.btn-random:hover {
-  background: #5a6268;
+.picker-header h4 {
+  color: var(--color-gray-800);
+  font-size: 1.1rem;
 }
 
 .avatar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-  gap: 10px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
 }
 
 .avatar-option {
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: 3px solid transparent;
   cursor: pointer;
   overflow: hidden;
-  transition:
-    transform 0.2s,
-    border-color 0.2s;
-  background: #eee;
-}
-
-.avatar-option:hover {
-  transform: scale(1.1);
-}
-
-.avatar-option.selected {
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
-  transform: scale(1.1);
+  transition: all 0.2s ease;
+  background: white;
 }
 
 .avatar-option img {
@@ -306,75 +360,154 @@ onMounted(async () => {
   height: 100%;
 }
 
-.btn-save {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1rem;
+.avatar-option:hover {
+  transform: scale(1.1);
+  border-color: var(--color-gray-300);
 }
 
-.btn-save:hover:not(:disabled) {
-  background: #218838;
+.avatar-option.selected {
+  border-color: var(--color-purple);
+  box-shadow: 0 0 0 3px rgba(121, 80, 242, 0.2);
+  transform: scale(1.15);
 }
 
-.btn-save:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* STATISTICHE */
+/* STATS SECTION */
 .stats-section {
-  padding: 40px 30px;
+  margin-bottom: var(--space-2xl);
 }
 
-.stats-section h3 {
-  margin-bottom: 25px;
-  color: #333;
-  text-align: center;
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-gray-800);
+  margin-bottom: var(--space-lg);
+}
+
+.section-title svg {
+  color: var(--color-purple);
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-lg);
 }
 
 .stat-card {
-  background: #f8f9fa;
-  padding: 25px;
-  border-radius: 12px;
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
   text-align: center;
-  border: 1px solid #e9ecef;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(121, 80, 242, 0.3);
 }
 
 .stat-icon {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  color: var(--color-purple);
+  margin-bottom: var(--space-md);
+}
+
+.trophy-gold {
+  color: #ffd700;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
 }
 
 .stat-label {
-  font-size: 0.85rem;
-  color: #6c757d;
-  margin-bottom: 8px;
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
 }
 
 .stat-value {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #007bff;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-gray-900);
+  font-family: "Courier New", monospace;
 }
 
-.loading,
-.error {
+/* RECENT GAMES */
+.recent-games-section {
+  background: white;
+  border-radius: var(--radius-2xl);
+  padding: var(--space-2xl);
+  box-shadow: var(--shadow-md);
+}
+
+.games-list {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.game-card {
+  background: var(--color-gray-100);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+
+.game-card:hover {
+  background: var(--color-gray-200);
+  transform: translateX(4px);
+}
+
+.game-mode {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 700;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+}
+
+.game-stats-row {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: 0.875rem;
+  color: var(--color-gray-600);
+}
+
+.game-stats-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.game-date {
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.error-message {
+  background: #fff5f5;
+  color: var(--color-error);
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  border: 1px solid #ffcccc;
   text-align: center;
-  padding: 40px;
 }
 
-.error {
-  color: #dc3545;
+@media (max-width: 768px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-info h1 {
+    font-size: 2rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>
