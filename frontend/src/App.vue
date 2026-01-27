@@ -18,10 +18,7 @@ body {
   font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: #333;
   /* CLEAN UI GRID BACKGROUND */
-  background: radial-gradient(circle at center, #ffffff 0%, #f8f9fa 100%);
-  background-image:
-    linear-gradient(#e9ecef 1px, transparent 1px),
-    linear-gradient(90deg, #e9ecef 1px, transparent 1px);
+  background-color: hsla(250, 100%, 98%, 1);
   background-size: 40px 40px;
   background-attachment: fixed;
   min-height: 100vh;

@@ -5,7 +5,7 @@
         © {{ currentYear }} HundredPath - Il Gioco Logico 10x10
       </p>
       <p class="footer-links">
-        <span>Made with ❤️ by Simone</span>
+        <span>Made with ❤️ by Simone Camerano</span>
       </p>
     </div>
   </footer>
@@ -19,10 +19,10 @@ const currentYear = computed(() => new Date().getFullYear());
 
 <style scoped>
 .app-footer {
-  margin-top: auto;
+  margin-top: 80px;
   padding: 15px 20px; /* Ridotto: prima era 30px */
-  background: linear-gradient(to top, #f8f9fa, white);
-  border-top: 1px solid #e9ecef;
+  background-color: hsla(250, 100%, 98%, 1);
+   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
 
@@ -49,15 +49,16 @@ const currentYear = computed(() => new Date().getFullYear());
 
 @media (max-width: 600px) {
   .app-footer {
-    padding: 10px 15px; /* Ancora più compatto su mobile */
+    padding: 8px 10px; /* Ultra compact */
   }
 
   .footer-text {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    margin-bottom: 2px;
   }
 
   .footer-links {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 }
 </style>

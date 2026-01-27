@@ -3,6 +3,14 @@ import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
+import {
+  Puzzle,
+  Timer,
+  Trophy,
+  GraduationCap,
+  ArrowRight,
+  Sparkles,
+} from "lucide-vue-next";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -15,7 +23,6 @@ async function checkRankedUnlock() {
     try {
       const res = await api.get("/profile");
       rankedUnlocked.value = res.data.tutorialCompleted || false;
-      console.log("🔓 Ranked unlock status:", rankedUnlocked.value);
     } catch (err) {
       console.error("Error fetching profile:", err);
     }
@@ -27,7 +34,6 @@ onMounted(async () => {
   await checkRankedUnlock();
 });
 
-// Ricarica quando torniamo alla home
 watch(
   () => route.path,
   async (newPath) => {
@@ -44,63 +50,72 @@ function startGame(mode) {
 
 <template>
   <div class="home-container">
+    <div class="badge-container">
+      <div class="daily-badge"><Sparkles style="width: 1rem; height: 1rem; margin-right: 0.5rem; color: hsla(320 85% 60%)"/> Alpha release!</div>
+    </div>
+
     <!-- HERO SECTION -->
     <header class="hero">
       <div class="hero-content">
-        <h1 class="title">HundredPath</h1>
-        <p class="subtitle">La sfida logica 10x10. Raggiungi il 100.</p>
+        <h1 class="title">
+          <span class="text-gradient">Hundred</span
+          ><span class="text-gradient-2">Path</span>
+        </h1>
+        <p class="subtitle">
+          La sfida logica 10×10. Trova il percorso giusto e raggiungi il 100!
+        </p>
 
-        <!-- GUEST MODE -->
+        <!-- TUTORIAL CARD (Always visible or for guests) -->
+        <!-- Logic: If guest/not logged in -> Big Tutorial Card. -->
+        <!-- If logged in -> Show both options but styled nicely. -->
+
         <div
           v-if="!authStore.isAuthenticated || authStore.user?.isGuest"
-          class="guest-section"
+          class="tutorial-card-wrapper"
         >
-          <div class="game-modes">
-            <button
-              @click="startGame('tutorial')"
-              class="mode-btn tutorial-btn"
-            >
-              <div class="mode-icon">🎓</div>
-              <div class="mode-info">
-                <h3>Tutorial</h3>
-                <p>Impara le regole con gli aiuti visivi</p>
-              </div>
+          <div class="tutorial-card">
+            <div class="card-icon-wrapper blue-gradient">
+              <GraduationCap style="width: 50px; height: 50px" />
+            </div>
+            <h2>Tutorial</h2>
+            <p>Impara le regole con gli aiuti visivi</p>
+
+            <button @click="startGame('tutorial')" class="cta-button">
+              Inizia ora
+              <ArrowRight style="width: 1rem; height: 1rem; margin-left: 0.5rem; position:relative; top:3px" />
             </button>
           </div>
-          <p v-if="!authStore.isAuthenticated" class="register-cta">
-            <router-link to="/register">Registrati</router-link> per sbloccare
-            la modalità Ranked!
-          </p>
-          <p v-else class="register-cta">
-            <router-link to="/register">Crea un account</router-link> per
-            salvare i tuoi progressi!
+
+          <p class="unlock-text">
+            <router-link to="/register" class="pink-link"
+              >Registrati</router-link
+            >
+            per sbloccare la modalità Ranked!
           </p>
         </div>
 
-        <!-- LOGGED IN USERS -->
-        <div v-else class="game-modes">
-          <button @click="startGame('tutorial')" class="mode-btn tutorial-btn">
-            <div class="mode-icon">🎓</div>
-            <div class="mode-info">
-              <h3>Tutorial</h3>
-              <p>Pratica con gli aiuti visivi</p>
+        <!-- LOGGED IN VIEW (Classic 2 buttons but better styled) -->
+        <div v-else class="logged-modes">
+          <button @click="startGame('tutorial')" class="mode-card">
+            <div class="card-icon-wrapper blue-gradient">
+              <GraduationCap style="width: 50px; height: 50px" />
             </div>
+            <h3>Tutorial</h3>
+            <p>Pratica con aiuti</p>
           </button>
 
           <button
             @click="startGame('ranked')"
-            class="mode-btn ranked-btn"
+            class="mode-card"
             :class="{ locked: !rankedUnlocked }"
             :disabled="!rankedUnlocked"
           >
-            <div class="mode-icon">{{ rankedUnlocked ? "🏆" : "🔒" }}</div>
-            <div class="mode-info">
-              <h3>Ranked</h3>
-              <p v-if="rankedUnlocked">Modalità competitiva</p>
-              <p v-else class="unlock-hint">
-                Completa 1 tutorial per sbloccare
-              </p>
+            <div class="card-icon-wrapper pink-gradient">
+              {{ rankedUnlocked ? "🏆" : "🔒" }}
             </div>
+            <h3>Ranked</h3>
+            <p v-if="rankedUnlocked">Competitiva</p>
+            <p v-else class="locked-text">Finisci 1 tutorial</p>
           </button>
         </div>
       </div>
@@ -108,18 +123,24 @@ function startGame(mode) {
 
     <!-- FEATURES -->
     <section class="features">
-      <div class="feature-card">
-        <div class="icon">🧩</div>
-        <h3>Griglia 10x10</h3>
+      <div class="feature-card grid">
+        <div class="feature-icon-box purple-bg">
+          <Puzzle style="width: 35px; height: 35px; color: blue" />
+        </div>
+        <h3>Griglia 10×10</h3>
         <p>Muoviti saltando 2 caselle in orizzontale o 1 in diagonale.</p>
       </div>
-      <div class="feature-card">
-        <div class="icon">⏱️</div>
+      <div class="feature-card speed">
+        <div class="feature-icon-box pink-bg">
+          <Timer style="width: 35px; height: 35px; color: hsla(320 85% 60%)" />
+        </div>
         <h3>Speedrun</h3>
         <p>Completa il percorso nel minor tempo possibile.</p>
       </div>
-      <div class="feature-card">
-        <div class="icon">🏆</div>
+      <div class="feature-card cup">
+        <div class="feature-icon-box teal-bg">
+          <Trophy style="width: 35px; height: 35px; color: #20c997" />
+        </div>
         <h3>Classifica</h3>
         <p>Scala la vetta globale e sfida i tuoi amici.</p>
       </div>
@@ -135,223 +156,304 @@ function startGame(mode) {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding-top: 0px; /* Ridotto drasticamente */
+  padding-top: 40px;
 }
 
-/* HERO SECTION */
+/* BADGE */
+.badge-container {
+  margin-top: 20px;
+}
+.daily-badge {
+  background: #f3f0ff;
+  color: #7950f2;
+  padding: 8px 20px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid #e5dbff;
+}
+
+/* HERO */
 .hero {
   text-align: center;
-  padding: 0 20px 40px; /* Tolto padding top: 0, laterale 20, sotto 40 */
+  padding: 0 20px 60px;
   max-width: 800px;
+  width: 100%;
 }
 
 .title {
-  font-size: 4rem;
+  font-size: 4.5rem;
   margin-bottom: 10px;
   font-weight: 800;
-  background: -webkit-linear-gradient(45deg, #007bff, #6610f2);
+  letter-spacing: -2px;
+  line-height: 1.1;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  letter-spacing: -2px;
+}
+.text-gradient-2 {
+  background: linear-gradient(135deg, #d63384 0%, #20c997 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: #6c757d;
-  margin-bottom: 40px;
-  font-weight: 300;
-}
-
-/* GAME MODE BUTTONS */
-.game-modes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 20px;
-  max-width: 600px;
+  margin-bottom: 50px;
+  font-weight: 400;
+  max-width: 500px;
   margin-left: auto;
   margin-right: auto;
 }
 
-.mode-btn {
-  background: white;
-  border: 3px solid transparent;
-  border-radius: 16px;
-  padding: 30px 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* TUTORIAL CARD */
+.tutorial-card-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  gap: 20px;
 }
 
-.mode-btn:hover:not(:disabled) {
+.tutorial-card {
+  background: white;
+  border: 2px solid #63e6be; /* Light teal border */
+  border-radius: 24px;
+  padding: 40px 60px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(32, 201, 151, 0.15); /* Teal shadow glow */
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s;
+}
+
+.tutorial-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 15px 50px rgba(32, 201, 151, 0.25);
 }
 
-.tutorial-btn {
-  border-color: #28a745;
+.card-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 2.5rem;
 }
 
-.tutorial-btn:hover {
-  border-color: #28a745;
-  background: #f0fff4;
+.blue-gradient {
+  background: linear-gradient(90deg, #20c997 0%, #4c6ef5 100%);
+  color: white;
+  box-shadow: 0 5px 15px rgba(51, 154, 240, 0.3);
 }
 
-.ranked-btn {
-  border-color: #ffc107;
+.tutorial-card h2 {
+  font-size: 1.8rem;
+  color: #212529;
+  margin: 0 0 10px 0;
+  font-weight: 700;
 }
 
-.ranked-btn:hover:not(.locked) {
-  border-color: #ffc107;
-  background: #fffbf0;
+.tutorial-card p {
+  color: #868e96;
+  margin: 0 0 30px 0;
 }
 
-.ranked-btn.locked {
-  opacity: 0.5;
-  cursor: not-allowed;
-  border-color: #dee2e6;
+.cta-button {
+  background: linear-gradient(90deg, #20c997 0%, #4c6ef5 100%);
+  border: none;
+  padding: 15px 40px;
+  color: white;
+  font-weight: 700;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  width: 100%;
+  box-shadow: 0 5px 15px rgba(76, 110, 245, 0.3);
 }
 
-.mode-icon {
-  font-size: 3rem;
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(76, 110, 245, 0.4);
 }
 
-.mode-info h3 {
-  margin: 0;
-  font-size: 1.3rem;
-  color: #333;
-}
-
-.mode-info p {
-  margin: 5px 0 0;
+.unlock-text {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #adb5bd;
 }
 
-.unlock-hint {
-  color: #dc3545 !important;
-  font-weight: 500;
-}
-
-.register-cta {
-  font-size: 0.95rem;
-  color: #6c757d;
-  margin-top: 20px;
-}
-
-.register-cta a {
-  color: #007bff;
-  font-weight: bold;
+.pink-link {
+  color: #d63384;
+  font-weight: 700;
   text-decoration: none;
 }
-
-.registerlink a:hover {
+.pink-link:hover {
   text-decoration: underline;
 }
 
-/* FEATURES SECTION */
+/* LOGGED IN MODES */
+.logged-modes {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mode-card {
+  background: white;
+  border: none;
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  width: 350px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mode-card:hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.mode-card h3 {
+  margin: 15px 0 5px;
+  color: #343a40;
+}
+.mode-card p {
+  margin: 0;
+  color: #adb5bd;
+  font-size: 0.9rem;
+}
+.pink-gradient {
+  background: linear-gradient(135deg, #f06595 0%, #d63384 100%);
+  color: white;
+  box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
+}
+
+.locked {
+  opacity: 0.7;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+.locked-text {
+  color: #e03131 !important;
+  font-weight: 600;
+  font-size: 0.8rem !important;
+}
+
+/* FEATURES */
 .features {
   display: flex;
   gap: 30px;
   flex-wrap: wrap;
   justify-content: center;
+  max-width: 10000px;
 }
 
 .feature-card {
   background: white;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  width: 250px;
+  padding: 40px 30px;
+  border-radius: 24px;
+
+  width: 280px;
   text-align: center;
-  border: 1px solid #f1f3f5;
+  border: 1px solid #ececec;
   transition: transform 0.3s;
 }
 
-.feature-card:hover {
+.grid:hover {
   transform: translateY(-5px);
+  box-shadow: 0 15px 25px hsla(250, 90%, 90%);
 }
 
-.icon {
-  font-size: 3rem;
-  margin-bottom: 20px;
+.speed:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px hsla(320, 50%, 85%);
+}
+
+.cup:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px hsla(170, 50%, 85%);
+}
+
+.feature-icon-box {
+  width: 70px;
+  height: 70px;
+  border-radius: 18px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.purple-bg {
+  background: linear-gradient(
+    135deg,
+    hsla(250, 90%, 90%) 0%,
+    hsla(320, 85%, 90%) 100%
+  );
+}
+.pink-bg {
+  background: linear-gradient(
+    135deg,
+    hsla(320, 90%, 85%) 0%,
+    hsla(170, 85%, 85%) 100%
+  );
+}
+.teal-bg {
+  background: linear-gradient(
+    135deg,
+    hsla(170, 85%, 85%) 0%,
+    hsla(250, 90%, 90%) 100%
+  );
 }
 
 .feature-card h3 {
   margin-bottom: 10px;
-  color: #343a40;
+  font-size: 1.3rem;
+  color: #212529;
+  font-weight: 700;
 }
 
 .feature-card p {
-  color: #6c757d;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  color: #868e96;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 /* MOBILE */
-@media (max-width: 600px) {
-  .home-container {
-    padding-top: 0;
-  }
-
-  .hero {
-    padding: 0 15px 30px;
-  }
-
+@media (max-width: 768px) {
   .title {
-    font-size: 2.5rem;
-    margin-bottom: 15px;
+    font-size: 3rem;
   }
-
-  .subtitle {
-    font-size: 1.1rem;
-    margin-bottom: 30px;
+  .tutorial-card {
+    padding: 30px 20px;
+    width: 90%;
   }
-
-  /* Stack mode buttons vertically */
-  .game-modes {
-    grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 0 10px;
-  }
-
-  .mode-btn {
-    padding: 20px 15px;
-  }
-
-  .mode-icon {
-    font-size: 2.5rem;
-  }
-
-  .mode-info h3 {
-    font-size: 1.1rem;
-  }
-
-  .mode-info p {
-    font-size: 0.85rem;
-  }
-
-  .register-cta {
-    font-size: 0.85rem;
-  }
-
-  .features {
-    gap: 15px;
-    padding: 0 15px;
-  }
-
   .feature-card {
-    width: 100%;
-    padding: 20px;
+    width: 90%;
   }
-
-  .icon {
-    font-size: 2.5rem;
+  .mode-card {
+    width: 190px;
+  }
+  .badge-container {
+    margin: 0px;
   }
 }
 </style>

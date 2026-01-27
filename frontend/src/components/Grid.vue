@@ -155,10 +155,10 @@ function isValid(index) {
 @media (max-width: 600px) {
   .game-board {
     max-width: 100%;
-    width: 100%;
+    width: 96%; /* Leave space on sides */
     gap: 2px;
     padding: 2px;
-    margin: 20px 0 10px 0; /* Aumentato margin-top a 20px */
+    margin: 20px auto 10px auto; /* Center with auto margins */
   }
 
   .cell {

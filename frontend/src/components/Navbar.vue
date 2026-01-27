@@ -1,7 +1,14 @@
 <template>
   <nav class="navbar">
     <div class="logo">
-      <router-link to="/">HundredPath 💯</router-link>
+      <router-link to="/"
+        ><img
+          src="../assets/hundredpath-logo.png"
+          alt="HundredPath"
+          class="logo-img"
+        /><span class="text-gradient">Hundred</span
+        ><span class="text-gradient-2">Path</span></router-link
+      >
     </div>
 
     <!-- Hamburger menu button (mobile only) -->
@@ -36,11 +43,14 @@
         <a href="/" @click.prevent="logout">Logout</a>
       </template>
       <template v-else>
-        <router-link to="/leaderboard" @click="menuOpen = false"
-          >Classifiche 🏆</router-link
+        <router-link to="/leaderboard" @click="menuOpen = false" class="register-btn"
+          ><Trophy style="width: 1rem; height: 1rem; margin-right: 0.5rem; position: relative; top: 2px"/>Classifiche</router-link
         >
-        <router-link to="/login" @click="menuOpen = false">Accedi</router-link>
-        <router-link to="/register" @click="menuOpen = false"
+        <router-link to="/login" @click="menuOpen = false" class="register-btn">Accedi</router-link>
+        <router-link
+          to="/register"
+          class="register-btn"
+          @click="menuOpen = false"
           >Registrati</router-link
         >
       </template>
@@ -52,6 +62,9 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
+import {
+  Trophy,
+} from "lucide-vue-next"; 
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -75,18 +88,29 @@ function logout() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 20rem;
-  background-color: white;
+  padding: 1rem 5rem;
+  background-color: hsla(250, 100%, 98%, 1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 0rem;
   position: relative;
 }
 
+.logo-img {
+  width: 40px;
+  height: 40px;
+}
+
 .logo a {
-  font-weight: bold;
+  font-weight: 800;
   font-size: 1.5rem;
   text-decoration: none;
   color: #333;
+  display: flex;
+  align-items: center;
+  /* gap: 8px; REMOVED per user request */
+}
+.logo a:hover {
+  color: #7950f2;
 }
 
 .links {
@@ -98,12 +122,31 @@ function logout() {
 .links a {
   margin-left: 20px;
   text-decoration: none;
-  color: #666;
+  color: #6c757d;
   font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.2s;
 }
 
 .links a:hover {
-  color: #007bff;
+  color: #7950f2;
+}
+
+.register-btn {
+  background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
+  color: white !important;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 10px rgba(121, 80, 242, 0.3);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.register-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(121, 80, 242, 0.4);
 }
 
 .user-info {
@@ -153,7 +196,7 @@ function logout() {
 }
 
 .hamburger.open span:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 4px);
+  transform: translateY(7px) rotate(45deg);
 }
 
 .hamburger.open span:nth-child(2) {
@@ -161,14 +204,26 @@ function logout() {
 }
 
 .hamburger.open span:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -4px);
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-2 {
+  background: linear-gradient(135deg, #d63384 0%, #20c997 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
-    margin-bottom: 2rem;
   }
 
   .logo a {
@@ -185,16 +240,19 @@ function logout() {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 75%;
+    width: 80%; /* Slightly wider for better card feel */
     max-width: 320px;
     height: 100vh;
-    background: white;
+    /* Stronger Gradient to be visible */
+    background: linear-gradient(160deg, #ffffff 0%, #f3f0ff 60%, #e0cfff 100%);
+    border-left: 1px solid white;
+    border-radius: 24px 0 0 24px; /* Rounded corners on left */
     flex-direction: column;
     align-items: flex-start;
-    padding: 80px 1.5rem 2rem;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-    transition: right 0.3s ease;
-    gap: 0;
+    padding: 80px 2rem 2rem; /* More padding */
+    box-shadow: -10px 0 40px rgba(121, 80, 242, 0.15); /* Purple tinted shadow */
+    transition: right 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); /* Smooth spring-like */
+    gap: 5px; /* Spacing between links */
     z-index: 1000;
   }
 
@@ -205,15 +263,18 @@ function logout() {
   .links a {
     margin-left: 0;
     width: 100%;
-    padding: 16px 12px;
-    font-size: 1rem;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background 0.2s;
-    color: white;
+    padding: 14px 16px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    border-bottom: none; /* Removed line separator */
+    border-radius: 12px; /* Rounded item */
+    transition: all 0.2s;
+    color: white /* Darker gray */
   }
 
   .links a:hover {
-    background: #f8f9fa;
+    background: rgba(121, 80, 242, 0.05);
+    color: #7950f2;
   }
 
   .user-info {
@@ -231,7 +292,7 @@ function logout() {
   .nav-username {
     font-size: 1rem;
     font-weight: 600;
-    color: white
+    color: #333;
   }
 }
 
