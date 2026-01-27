@@ -1,16 +1,18 @@
 <script setup>
+import {
+  ArrowRight,
+  GraduationCap,
+  Lock,
+  Puzzle,
+  Sparkles,
+  Timer,
+  Trophy,
+  Swords,
+} from "lucide-vue-next";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
-import {
-  Puzzle,
-  Timer,
-  Trophy,
-  GraduationCap,
-  ArrowRight,
-  Sparkles,
-} from "lucide-vue-next";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -51,7 +53,17 @@ function startGame(mode) {
 <template>
   <div class="home-container">
     <div class="badge-container">
-      <div class="daily-badge"><Sparkles style="width: 1rem; height: 1rem; margin-right: 0.5rem; color: hsla(320 85% 60%)"/> Alpha release!</div>
+      <div class="daily-badge">
+        <Sparkles
+          style="
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            color: hsla(320 85% 60%);
+          "
+        />
+        Alpha release!
+      </div>
     </div>
 
     <!-- HERO SECTION -->
@@ -82,7 +94,15 @@ function startGame(mode) {
 
             <button @click="startGame('tutorial')" class="cta-button">
               Inizia ora
-              <ArrowRight style="width: 1rem; height: 1rem; margin-left: 0.5rem; position:relative; top:3px" />
+              <ArrowRight
+                style="
+                  width: 1rem;
+                  height: 1rem;
+                  margin-left: 0.5rem;
+                  position: relative;
+                  top: 3px;
+                "
+              />
             </button>
           </div>
 
@@ -110,8 +130,15 @@ function startGame(mode) {
             :class="{ locked: !rankedUnlocked }"
             :disabled="!rankedUnlocked"
           >
-            <div class="card-icon-wrapper pink-gradient">
-              {{ rankedUnlocked ? "🏆" : "🔒" }}
+            <div class="card-icon-wrapper gradient-ranked">
+              <Swords
+                v-if="rankedUnlocked"
+                style="width: 50px; height: 50px; color: white"
+              />
+              <Lock
+                v-else
+                style="width: 50px; height: 50px; color: white; opacity: 0.8"
+              />
             </div>
             <h3>Ranked</h3>
             <p v-if="rankedUnlocked">Competitiva</p>
@@ -188,6 +215,10 @@ function startGame(mode) {
   letter-spacing: -2px;
   line-height: 1.1;
 }
+
+.gradient-ranked {
+  background: linear-gradient(135deg, #f06595, #ff6b6b);
+} /* Pink-Red (Ranked) */
 
 .text-gradient {
   background: linear-gradient(135deg, #7950f2 0%, #d63384 100%);
@@ -312,7 +343,7 @@ function startGame(mode) {
 
 .mode-card {
   background: white;
-  border: none;
+  border: 2px solid #e9ecef; /* Default subtle border */
   border-radius: 20px;
   padding: 30px;
   text-align: center;
@@ -325,24 +356,62 @@ function startGame(mode) {
   align-items: center;
 }
 
-.mode-card:hover:not(:disabled) {
+/* Tutorial Mode Styling (Blue/Teal) */
+.mode-card:first-child {
+  border-color: #63e6be;
+  box-shadow: 0 10px 30px rgba(32, 201, 151, 0.1);
+}
+.mode-card:first-child:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 40px rgba(32, 201, 151, 0.2);
+}
+
+/* Ranked Mode Styling (Pink/Red) - Matching Tutorial Card Structure */
+.mode-card:nth-child(2) {
+  border: 2px solid #f7a8a8; /* Red/Pink Border like Tutorial */
+  background: linear-gradient(
+    180deg,
+    #fff,
+    #fff0f6
+  ); /* Subtle pink tint at bottom */
+  box-shadow: 0 10px 30px rgba(240, 101, 149, 0.15); /* Pink Glow */
+}
+
+/* Hover effect for Ranked Card */
+.mode-card:nth-child(2):hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(240, 101, 149, 0.25); /* Stronger Pink Glow */
 }
 
 .mode-card h3 {
   margin: 15px 0 5px;
   color: #343a40;
+  font-weight: 700;
+  font-size: 1.4rem;
 }
 .mode-card p {
   margin: 0;
-  color: #adb5bd;
-  font-size: 0.9rem;
+  color: #868e96;
+  font-size: 0.95rem;
 }
 .pink-gradient {
-  background: linear-gradient(135deg, #f06595 0%, #d63384 100%);
+  background: linear-gradient(135deg, #d63384 0%, #20c997 100%);
   color: white;
-  box-shadow: 0 5px 15px rgba(214, 51, 132, 0.3);
+  box-shadow: 0 5px 15px rgba(240, 101, 149, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Specific Hover for Ranked Card */
+.mode-card:hover .pink-gradient {
+  transform: scale(1.1);
+  transition: transform 0.3s;
+}
+
+.mode-card:nth-child(2):hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(240, 101, 149, 0.2);
 }
 
 .locked {
