@@ -2,7 +2,7 @@
   <div class="page-wrapper">
     <div class="container-sm">
       <div class="page-header">
-        <Sparkles :size="48" class="header-icon" />
+        <Sparkles :size="54" class="header-icon" />
         <h1 class="text-gradient">I Tuoi Record</h1>
         <p class="subtitle">Le tue migliori prestazioni in modalità Ranked</p>
       </div>

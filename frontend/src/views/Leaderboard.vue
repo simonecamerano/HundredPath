@@ -253,6 +253,7 @@ onMounted(async () => {
   align-items: center;
   gap: var(--space-sm);
   padding: 12px 24px;
+  margin-bottom: 40px;
   background: white;
   border: 2px solid var(--color-gray-300);
   border-radius: var(--radius-md);
@@ -315,9 +316,16 @@ onMounted(async () => {
 }
 
 .table {
-  margin: 0;
+  margin: 0 auto;
   box-shadow: none;
   border-radius: 0;
+  width: 100%;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: center;
 }
 
 .table thead {
@@ -334,9 +342,17 @@ onMounted(async () => {
 }
 
 .rank-cell {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
+  white-space: nowrap;
+}
+
+.rank-cell .rank-number,
+.rank-cell svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.rank-cell svg {
+  margin-left: 4px;
 }
 
 .rank-number {
@@ -367,6 +383,8 @@ onMounted(async () => {
 }
 
 .username-cell {
+  text-align: left;
+  padding-left: 12px;
   font-weight: 600;
   color: var(--color-gray-800);
 }
@@ -466,17 +484,48 @@ onMounted(async () => {
 /* RESPONSIVE - Rimosso layout 3 colonne desktop, manteniamo i tab */
 
 @media (max-width: 768px) {
+  .container {
+    padding: 0 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .leaderboard-header h1 {
     font-size: 2rem;
   }
 
-  .table {
-    font-size: 0.875rem;
+  .leaderboard-card {
+    border-radius: var(--radius-lg);
   }
 
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table {
+    font-size: 0.75rem;
+    min-width: 100%;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px 6px;
+    white-space: nowrap;
+  }
+
+  /* Removed rank-cell override to use desktop style (inline-block) */
+
   .avatar {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .tab-btn {
+    padding: 10px 16px;
+    font-size: 0.875rem;
+    margin: 0;
   }
 }
 </style>
