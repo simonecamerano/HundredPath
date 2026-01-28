@@ -46,7 +46,7 @@
 
 6. Click **Create Web Service**
 7. Wait for deployment (5-10 minutes)
-8. Copy your backend URL: `https://hundredpath-backend.onrender.com`
+8. Copy your backend URL: `https://hundredpath.onrender.com`
 
 **⚠️ Important**: Free tier sleeps after 15 minutes of inactivity. First request after sleep takes ~1 minute.
 
@@ -65,7 +65,7 @@
 
 5. Add Environment Variable:
    ```
-   VITE_API_URL=https://hundredpath-backend.onrender.com
+   VITE_API_URL=https://hundredpath.onrender.com
    ```
 
 6. Click **Deploy**
