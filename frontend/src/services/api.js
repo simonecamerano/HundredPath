@@ -42,15 +42,17 @@ api.interceptors.response.use(
 function checkColdStart(duration) {
   // Se la richiesta impiega più di 5 secondi, probabile cold start
   if (duration > 5000) {
-    const coldStartShown = localStorage.getItem('coldStartNotificationShown');
+    const lastShown = localStorage.getItem('coldStartNotificationShown');
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000; // 24 ore in millisecondi
     
-    if (!coldStartShown) {
-      // Mostra notifica una sola volta (permanente)
+    // Mostra se non è mai stato mostrato O se è passato più di un giorno
+    if (!lastShown || (now - parseInt(lastShown)) > oneDay) {
       window.dispatchEvent(new CustomEvent('cold-start-detected', {
         detail: { duration: Math.round(duration / 1000) }
       }));
       
-      localStorage.setItem('coldStartNotificationShown', 'true');
+      localStorage.setItem('coldStartNotificationShown', now.toString());
     }
   }
 }
