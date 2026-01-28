@@ -72,7 +72,7 @@
 }
 
 .footer-link {
-  color: #6c757d;
+  color: #495057;
   text-decoration: none;
   transition: color 0.2s;
 }

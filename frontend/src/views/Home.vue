@@ -346,7 +346,7 @@ function dismissBanner() {
 
 .unlock-text {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #495057;
 }
 
 .login-link-text {

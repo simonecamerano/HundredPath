@@ -280,6 +280,7 @@ function logout() {
   text-decoration: none;
   font-weight: 800;
   font-size: 1.5rem;
+  color: #6639cc;
 }
 .logo-img {
   width: 40px;
