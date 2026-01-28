@@ -259,7 +259,7 @@ function dismissBanner() {
 
 .subtitle {
   font-size: 1.2rem;
-  color: #6c757d;
+  color: #495057;
   margin-bottom: 50px;
   font-weight: 400;
   max-width: 500px;
@@ -321,7 +321,7 @@ function dismissBanner() {
 }
 
 .tutorial-card p {
-  color: #868e96;
+  color: #495057;
   margin: 0 0 30px 0;
 }
 
@@ -346,12 +346,12 @@ function dismissBanner() {
 
 .unlock-text {
   font-size: 0.9rem;
-  color: #adb5bd;
+  color: #6c757d;
 }
 
 .login-link-text {
   font-size: 0.9rem;
-  color: #868e96;
+  color: #495057;
   margin-top: 0.25rem;
   display: none;
 }
@@ -369,7 +369,7 @@ function dismissBanner() {
 }
 
 .pink-link {
-  color: #d63384;
+  color: #c02965;
   font-weight: 700;
   text-decoration: none;
 }
@@ -545,7 +545,7 @@ function dismissBanner() {
 }
 
 .feature-card p {
-  color: #868e96;
+  color: #495057;
   font-size: 1rem;
   line-height: 1.6;
 }

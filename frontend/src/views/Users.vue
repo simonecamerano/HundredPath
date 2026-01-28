@@ -130,7 +130,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
-  color: var(--color-gray-600);
+  color: var(--color-gray-700);
   font-size: 1.1rem;
   background: white;
   padding: var(--space-sm) var(--space-lg);

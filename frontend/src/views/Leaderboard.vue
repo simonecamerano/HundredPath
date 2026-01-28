@@ -243,7 +243,7 @@ onMounted(async () => {
 }
 
 .subtitle {
-  color: var(--color-gray-600);
+  color: var(--color-gray-700);
   font-size: 1.2rem;
 }
 
