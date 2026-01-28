@@ -30,7 +30,7 @@
 }
 
 .footer-credit {
-  color: #6c757d;
+  color: #495057;
   font-size: 0.9rem;
   margin-bottom: 8px;
   font-weight: 500;
@@ -72,7 +72,7 @@
 }
 
 .footer-link {
-  color: #adb5bd;
+  color: #6c757d;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -82,7 +82,7 @@
 }
 
 .separator {
-  color: #dee2e6;
+  color: #adb5bd;
   user-select: none;
 }
 
