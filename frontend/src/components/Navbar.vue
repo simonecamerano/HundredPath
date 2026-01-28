@@ -4,7 +4,7 @@
       <router-link to="/"
         ><img
           src="../assets/hundredpath-logo.png"
-          alt="HundredPath"
+          alt=""
           class="logo-img"
         /><span class="text-gradient">Hundred</span
         ><span class="text-gradient-2">Path</span></router-link
