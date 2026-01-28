@@ -80,7 +80,11 @@
                         class="avatar"
                       />
                     </td>
-                    <td class="username-cell">{{ entry.username }}</td>
+                    <td class="username-cell">
+                      <router-link :to="`/user/${entry.username}`" class="username-link">
+                        {{ entry.username }}
+                      </router-link>
+                    </td>
                     <td class="score-cell">{{ entry.currentNumber }}</td>
                     <td class="time-cell">
                       {{ formatDuration(entry.duration) }}
@@ -152,13 +156,13 @@
 
 <script setup>
 import {
-  BarChart3,
-  Calendar,
-  Flame,
-  Target,
-  Timer,
-  Trophy,
-  User,
+    BarChart3,
+    Calendar,
+    Flame,
+    Target,
+    Timer,
+    Trophy,
+    User,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
@@ -391,6 +395,19 @@ onMounted(async () => {
   padding-left: 12px;
   font-weight: 600;
   color: var(--color-gray-800);
+}
+
+.username-link {
+  color: var(--color-purple);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.username-link:hover {
+  color: var(--color-pink);
+  text-decoration: underline;
 }
 
 .score-cell {

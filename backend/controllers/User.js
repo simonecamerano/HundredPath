@@ -162,3 +162,58 @@ exports.getUserProfile = async ( req, res ) => {
     res.status( 500 ).json( { error: 'Failed to get user' } );
   }
 };
+
+// Get public user profile by username (NO AUTH REQUIRED)
+exports.getPublicProfile = async ( req, res ) => {
+  try {
+    const { username } = req.params;
+    const Game = require( '../models/Game' );
+
+    // Find user by username (case insensitive)
+    const user = await User.findOne( { 
+      username: { $regex: new RegExp(`^${username}$`, 'i') }
+    } );
+
+    if ( !user ) {
+      return res.status( 404 ).json( { error: 'User not found' } );
+    }
+
+    // Get user's stats
+    const totalGames = await Game.countDocuments( { userId: user._id, isCompleted: true } );
+    const wins = await Game.countDocuments( { userId: user._id, isCompleted: true, gameMode: 'ranked' } );
+    
+    // Get recent games (last 5)
+    const recentGames = await Game.find( { userId: user._id, isCompleted: true } )
+      .sort( { createdAt: -1 } )
+      .limit( 5 )
+      .select( 'gameMode duration currentNumber createdAt' );
+
+    // Calculate average duration
+    const completedGames = await Game.find( { userId: user._id, isCompleted: true, duration: { $exists: true } } );
+    const avgDuration = completedGames.length > 0
+      ? Math.round( completedGames.reduce( ( sum, game ) => sum + game.duration, 0 ) / completedGames.length )
+      : null;
+
+    // Get best rank from leaderboard
+    const Leaderboard = require( '../models/Leaderboard' );
+    const bestScore = await Leaderboard.findOne( { userId: user._id } ).sort( { rank: 1 } );
+
+    res.json( {
+      profile: {
+        username: user.username,
+        avatar: user.avatar,
+        createdAt: user.createdAt,
+        stats: {
+          totalGames,
+          wins,
+          avgDuration,
+          bestRank: bestScore ? bestScore.rank : null
+        }
+      },
+      recentGames
+    } );
+  } catch ( error ) {
+    console.error( 'Error getting public profile:', error );
+    res.status( 500 ).json( { error: 'Failed to get profile' } );
+  }
+};

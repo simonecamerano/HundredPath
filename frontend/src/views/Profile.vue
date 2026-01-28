@@ -17,6 +17,7 @@
                 class="profile-avatar"
               />
               <button
+                v-if="!isPublicProfile"
                 @click="showAvatarPicker = !showAvatarPicker"
                 class="avatar-edit-btn"
                 aria-label="Change avatar"
@@ -34,7 +35,7 @@
           </div>
 
           <!-- AVATAR PICKER -->
-          <div v-if="showAvatarPicker" class="avatar-picker">
+          <div v-if="showAvatarPicker && !isPublicProfile" class="avatar-picker">
             <div class="picker-header">
               <h4>Choose a new avatar</h4>
               <button
@@ -143,7 +144,7 @@
         </div>
 
         <!-- DANGER ZONE -->
-        <div class="danger-zone">
+        <div v-if="!isPublicProfile" class="danger-zone">
           <h2 class="section-title danger-title">
             <AlertTriangle :size="24" />
             Danger Zone
@@ -183,7 +184,7 @@ import {
     Trophy,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
@@ -193,6 +194,11 @@ const { success: notifySuccess, error: notifyError } = useNotification();
 const { confirm } = useConfirm();
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
+
+// Check if viewing public profile (has username param)
+const isPublicProfile = ref(false);
+const viewedUsername = ref(null);
 
 const profile = ref({
   username: "",
@@ -283,11 +289,22 @@ async function handleDeleteAccount() {
 
 onMounted(async () => {
   try {
-    const res = await api.get("/profile");
-    // API returns user directly, not under .profile
-    profile.value = res.data;
-    // recentGames not supported by current API
-    recentGames.value = [];
+    // Check if viewing someone else's profile via username
+    if (route.params.username) {
+      isPublicProfile.value = true;
+      viewedUsername.value = route.params.username;
+      
+      // Fetch public profile
+      const res = await api.get(`/user/${route.params.username}`);
+      profile.value = res.data.profile;
+      recentGames.value = res.data.recentGames || [];
+    } else {
+      // Fetch own profile
+      isPublicProfile.value = false;
+      const res = await api.get("/profile");
+      profile.value = res.data;
+      recentGames.value = [];
+    }
   } catch (err) {
     console.error("Error fetching profile:", err);
     error.value = "Error loading profile";

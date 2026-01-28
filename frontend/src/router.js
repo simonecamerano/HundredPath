@@ -30,6 +30,11 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/user/:username',
+    component: Profile,
+    // Public profile view - no auth required
+  },
+  {
     path: '/leaderboard',
     component: Leaderboard,
     // <-- ETICHETTA DI PROTEZIONE
