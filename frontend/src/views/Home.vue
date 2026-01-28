@@ -288,6 +288,7 @@ function dismissBanner() {
   flex-direction: column;
   align-items: center;
   transition: transform 0.3s;
+  margin-bottom: 20px;
 }
 
 .tutorial-card:hover {
@@ -352,6 +353,7 @@ function dismissBanner() {
   font-size: 0.9rem;
   color: #868e96;
   margin-top: 0.25rem;
+  display: none;
 }
 
 .login-link {
@@ -549,7 +551,7 @@ function dismissBanner() {
 }
 
 /* MOBILE */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .title {
     font-size: 3rem;
   }

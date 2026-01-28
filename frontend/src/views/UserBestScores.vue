@@ -323,7 +323,7 @@ onMounted(async () => {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .page-header h1 {
     font-size: 2rem;
   }

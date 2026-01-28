@@ -601,7 +601,7 @@ onMounted(async () => {
 }
 
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .profile-header {
     flex-direction: column;
     text-align: center;

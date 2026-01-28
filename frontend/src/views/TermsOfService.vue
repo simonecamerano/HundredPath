@@ -257,7 +257,7 @@
   opacity: 0.8;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .legal-document {
     padding: var(--space-lg);
   }

@@ -681,7 +681,7 @@ watch(isVictory, (val) => {
 }
 
 /* MOBILE RESPONSIVE */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .game-container {
     padding: var(--space-lg) var(--space-md);
   }

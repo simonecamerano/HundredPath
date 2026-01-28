@@ -132,7 +132,7 @@ const { state } = useConfirm();
   transform: scale(0.9);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .modal-content {
     max-width: 90%;
   }

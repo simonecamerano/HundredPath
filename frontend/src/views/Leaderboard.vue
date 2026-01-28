@@ -504,7 +504,7 @@ onMounted(async () => {
 
 /* RESPONSIVE - Rimosso layout 3 colonne desktop, manteniamo i tab */
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .container {
     padding: 0 var(--space-sm);
     max-width: 100%;
