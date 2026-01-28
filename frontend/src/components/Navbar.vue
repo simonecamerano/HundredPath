@@ -17,7 +17,7 @@
       @click="menuOpen = !menuOpen"
       :class="{ open: menuOpen }"
       aria-label="Toggle navigation menu"
-      aria-expanded="menuOpen"
+      :aria-expanded="menuOpen ? 'true' : 'false'"
       aria-controls="mobile-menu"
     >
       <span></span>
@@ -220,14 +220,14 @@
 
 <script setup>
 import {
-    GraduationCap,
-    LogIn,
-    LogOut,
-    Sparkles,
-    Swords,
-    Trophy,
-    UserPlus,
-    Users,
+  GraduationCap,
+  LogIn,
+  LogOut,
+  Sparkles,
+  Swords,
+  Trophy,
+  UserPlus,
+  Users,
 } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -546,7 +546,7 @@ function logout() {
 }
 .desc {
   font-size: 0.8rem;
-  color: #adb5bd;
+  color: #6c757d;
 }
 .menu-card:hover .label {
   color: #7950f2;
@@ -669,7 +669,7 @@ function logout() {
     display: flex;
   }
 }
-@media (min-width: 769px) {
+@media (min-width: 1101px) {
   .mobile-menu,
   .mobile-menu-overlay {
     display: none;
