@@ -190,14 +190,35 @@ exports.getPublicProfile = async ( req, res ) => {
       gameMode: 'ranked'
     } );
     
-    // Get recent games (last 5 - all modes)
-    const recentGames = await Game.find( { 
-      userId: user._id,
-      status: 'completed'
-    } )
-      .sort( { createdAt: -1 } )
-      .limit( 5 )
-      .select( 'gameMode duration currentNumber createdAt' );
+    // Get recent games (last 5 - all modes) with calculated duration
+    const recentGames = await Game.aggregate( [
+      { 
+        $match: { 
+          userId: user._id,
+          status: 'completed'
+        } 
+      },
+      {
+        $addFields: {
+          endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
+        }
+      },
+      {
+        $addFields: {
+          duration: { $subtract: ['$endTime', '$startedAt'] }
+        }
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: 5 },
+      {
+        $project: {
+          gameMode: 1,
+          duration: 1,
+          currentNumber: 1,
+          createdAt: 1
+        }
+      }
+    ] );
 
     // Calculate average duration (ranked only)
     const completedGames = await Game.find( { 
