@@ -1,15 +1,16 @@
 <script setup>
 import {
+    AlertCircle,
     ArrowRight,
     GraduationCap,
     Lock,
     Puzzle,
-    Sparkles,
     Swords,
     Timer,
     Trophy,
+    X,
 } from "lucide-vue-next";
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
@@ -25,22 +26,35 @@ const rankedUnlocked = computed(() => {
 function startGame(mode) {
   router.push(`/game?mode=${mode}`);
 }
+
+// Banner Cold Start
+const showColdStartBanner = ref(false);
+
+onMounted(() => {
+  const dismissed = localStorage.getItem('coldStartBannerDismissed');
+  if (!dismissed) {
+    showColdStartBanner.value = true;
+  }
+});
+
+function dismissBanner() {
+  showColdStartBanner.value = false;
+  localStorage.setItem('coldStartBannerDismissed', 'true');
+}
 </script>
 
 <template>
   <div class="home-container">
-    <div class="badge-container">
-      <div class="daily-badge">
-        <Sparkles
-          style="
-            width: 1rem;
-            height: 1rem;
-            margin-right: 0.5rem;
-            color: hsla(320 85% 60%);
-          "
-        />
-        Alpha release!
-      </div>
+    <!-- Cold Start Warning Banner -->
+    <div v-if="showColdStartBanner" class="cold-start-banner">
+      <AlertCircle style="width: 1.2rem; height: 1.2rem; flex-shrink: 0;" />
+      <p>
+        <strong>⚠️ Alpha Demo Notice:</strong> This app runs on a free server that goes to sleep after inactivity. 
+        <strong>Your first request may take up to 60 seconds</strong> to wake it up. After that, everything will be instant! ⚡
+      </p>
+      <button @click="dismissBanner" class="dismiss-btn" aria-label="Dismiss">
+        <X style="width: 1rem; height: 1rem;" />
+      </button>
     </div>
 
     <!-- HERO SECTION -->
@@ -160,28 +174,69 @@ function startGame(mode) {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding-top: 40px;
+  padding-top: 20px;
 }
 
-/* BADGE */
-.badge-container {
-  margin-top: 0;
-  margin-bottom: 40px;
+/* COLD START BANNER */
+.cold-start-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe7a0 100%);
+  border: 2px solid #ffb020;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 30px;
+  max-width: 700px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(255, 176, 32, 0.2);
+  animation: slideDown 0.3s ease-out;
+  color: #856404;
 }
-.daily-badge {
-  background: #f3f0ff;
-  color: #7950f2;
-  padding: 8px 20px;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 1px solid #e5dbff;
+
+.cold-start-banner p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.cold-start-banner strong {
+  color: #664d03;
+}
+
+.dismiss-btn {
+  background: transparent;
+  border: none;
+  color: #856404;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dismiss-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* HERO */
 .hero {
   text-align: center;
-  padding: 0 20px 60px;
+  padding: 0 20px 40px;
   max-width: 800px;
   width: 100%;
 }

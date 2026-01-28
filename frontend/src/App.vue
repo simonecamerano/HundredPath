@@ -10,10 +10,25 @@
   </div>
 </template>
 <script setup>
+import { onMounted } from "vue";
 import ConfirmDialog from "./components/ConfirmDialog.vue";
 import Footer from "./components/Footer.vue";
 import Navbar from "./components/Navbar.vue";
 import NotificationContainer from "./components/NotificationContainer.vue";
+import { useNotification } from "./composables/useNotification";
+
+const { info } = useNotification();
+
+// Listener per cold start detection
+onMounted(() => {
+  window.addEventListener('cold-start-detected', (event) => {
+    const duration = event.detail.duration;
+    info(
+      `Server awakening completed in ${duration}s. Next requests will be instant! ⚡`,
+      5000
+    );
+  });
+});
 </script>
 <style>
 /* Global styles */
