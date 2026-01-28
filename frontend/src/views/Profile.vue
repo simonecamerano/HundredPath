@@ -80,7 +80,7 @@
         <div v-if="profile && profile.stats" class="stats-section">
           <h2 class="section-title">
             <BarChart3 :size="24" />
-            Your Statistics
+            {{ isPublicProfile ? 'Statistics' : 'Your Statistics' }}
           </h2>
           <div class="stats-grid" role="list">
             <div class="stat-card card-hover" role="listitem" aria-label="Games played statistic">
