@@ -100,4 +100,16 @@
     gap: 6px;
   }
 }
+
+@media (min-width: 768px) {
+  .app-footer {
+    margin-top: 60px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-footer {
+    margin-top: 80px;
+  }
+}
 </style>
