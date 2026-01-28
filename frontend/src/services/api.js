@@ -40,8 +40,8 @@ api.interceptors.response.use(
 
 // Funzione helper per rilevare cold start
 function checkColdStart(duration) {
-  // Se la richiesta impiega più di 5 secondi, probabile cold start
-  if (duration > 5000) {
+  // Se la richiesta impiega più di 10 secondi, probabile cold start
+  if (duration > 10000) {
     const lastShown = localStorage.getItem('coldStartNotificationShown');
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000; // 24 ore in millisecondi
