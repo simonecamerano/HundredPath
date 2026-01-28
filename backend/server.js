@@ -32,13 +32,11 @@ if ( process.env.NODE_ENV === 'development' ) {
 }
 
 // ===== ROUTES =====
-// Health check - Route to verify server is running
-app.use( '/api/users', userRoutes );
-app.get( '/api/health', ( req, res ) => {
+// Root - Welcome message
+app.get( '/', ( req, res ) => {
   res.json( {
-    status: 'OK',
-    message: 'HundredPath API is running',
-    timestamp: new Date().toISOString()
+    message: 'Welcome to HundredPath API!',
+    version: '1.0.0'
   } );
 } );
 
@@ -49,6 +47,7 @@ app.get( '/api/health', async ( req, res ) => {
   
   res.json( {
     status: 'ok',
+    message: 'HundredPath API is running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV,
@@ -56,13 +55,8 @@ app.get( '/api/health', async ( req, res ) => {
   } );
 } );
 
-// Route to test - Respond with a simple message
-app.get( '/', ( req, res ) => {
-  res.json( {
-    message: 'Welcome to HundredPath API!',
-    version: '1.0.0'
-  } );
-} );
+// API Routes
+app.use( '/api/users', userRoutes );
 
 // Auth routes
 app.use( '/api/auth', authRoutes );
