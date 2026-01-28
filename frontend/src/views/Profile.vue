@@ -493,6 +493,7 @@ onMounted(async () => {
   padding: var(--space-md);
   border-radius: var(--radius-md);
   transition: all 0.2s;
+  min-width: 0;
 }
 
 .game-card:hover {
@@ -615,6 +616,21 @@ onMounted(async () => {
 
   .stats-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  /* Expand game cards on mobile */
+  .game-card {
+    padding: var(--space-lg);
+  }
+
+  .game-stats-row {
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  .game-date {
+    margin-left: 0;
+    flex-basis: 100%;
   }
 
   .danger-card {
