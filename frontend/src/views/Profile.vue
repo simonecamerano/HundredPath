@@ -183,7 +183,7 @@ import {
     Trash2,
     Trophy,
 } from "lucide-vue-next";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
@@ -287,7 +287,10 @@ async function handleDeleteAccount() {
   }
 }
 
-onMounted(async () => {
+async function loadProfile() {
+  loading.value = true;
+  error.value = null;
+  
   try {
     // Check if viewing someone else's profile via username
     if (route.params.username) {
@@ -311,7 +314,15 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+}
 
+// Watch for route changes to reload profile when navigating between profiles
+watch(() => route.params.username, () => {
+  loadProfile();
+});
+
+onMounted(async () => {
+  await loadProfile();
   generateRandomAvatar();
 });
 </script>
