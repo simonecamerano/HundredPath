@@ -10,7 +10,7 @@ import {
     Trophy,
     X,
 } from "lucide-vue-next";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
@@ -27,19 +27,12 @@ function startGame(mode) {
   router.push(`/game?mode=${mode}`);
 }
 
-// Banner Cold Start
-const showColdStartBanner = ref(false);
-
-onMounted(() => {
-  const dismissed = localStorage.getItem('coldStartBannerDismissed');
-  if (!dismissed) {
-    showColdStartBanner.value = true;
-  }
-});
+// Banner Cold Start - Dismissible per session
+const showColdStartBanner = ref(true);
 
 function dismissBanner() {
   showColdStartBanner.value = false;
-  localStorage.setItem('coldStartBannerDismissed', 'true');
+  // Non salviamo in localStorage, quindi riapparirà al prossimo refresh
 }
 </script>
 

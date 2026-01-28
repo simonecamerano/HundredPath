@@ -295,7 +295,7 @@ onMounted(async () => {
       viewedUsername.value = route.params.username;
       
       // Fetch public profile
-      const res = await api.get(`/user/${route.params.username}`);
+      const res = await api.get(`/auth/user/${route.params.username}`);
       profile.value = res.data.profile;
       recentGames.value = res.data.recentGames || [];
     } else {
