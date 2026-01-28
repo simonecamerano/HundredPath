@@ -17,7 +17,7 @@
 
 <style scoped>
 .app-footer {
-  margin-top: 80px;
+  margin-top: 40px;
   padding: 20px;
   background-color: hsla(250, 100%, 98%, 1);
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
