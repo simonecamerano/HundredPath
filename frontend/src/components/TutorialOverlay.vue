@@ -32,7 +32,7 @@ const steps = [
   {
     title: "Diagonal Move",
     description:
-      "Or you can jump 2 cells diagonally (in any direction).",
+      "Or you can jump 1 cell diagonally (in any direction).",
     icon: Move,
     animation: "diagonal",
   },
