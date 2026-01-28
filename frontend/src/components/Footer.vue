@@ -2,7 +2,7 @@
   <footer class="app-footer">
     <div class="footer-content">
       <p class="footer-credit">
-        Made with ❤️ by Simone Camerano
+        Made with ❤️ by <a href="https://www.simonecamerano.dev" target="_blank" rel="noopener noreferrer">Simone Camerano</a>
       </p>
       <div class="footer-links">
         <router-link to="/privacy-policy" class="footer-link">Privacy Policy</router-link>
