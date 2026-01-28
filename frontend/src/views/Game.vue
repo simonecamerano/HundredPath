@@ -14,6 +14,7 @@ import {
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import Grid from "../components/Grid.vue";
+import TutorialOverlay from "../components/TutorialOverlay.vue";
 import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
@@ -35,6 +36,10 @@ const gameId = ref(null);
 const undoCount = ref(3);
 const loading = ref(false);
 const isGameActive = ref(false); // Has the game started (timer active)?
+
+// TUTORIAL STATE
+const showTutorial = ref(false);
+const hasSeenTutorial = ref(localStorage.getItem("tutorialSeen") === "true");
 
 const localHistory = ref([]); // For undo in guest mode
 
@@ -94,6 +99,11 @@ onMounted(async () => {
 
   // Load data, but DO NOT start the game yet
   await initGame();
+
+  // Show tutorial in tutorial mode (always for now, for testing)
+  if (gameMode.value === "tutorial") {
+    showTutorial.value = true;
+  }
 });
 
 onUnmounted(() => {
@@ -244,10 +254,12 @@ async function abandonGame() {
         );
         const response = await api.post("/game/over", { gameId: gameId.value });
         console.log("📝 Tutorial abandon response:", response.data);
-        
+
         // If tutorial completed, refresh user from server
         if (response.data.tutorialCompleted) {
-          console.log("🎓 Tutorial completed via abandon! Refreshing user data...");
+          console.log(
+            "🎓 Tutorial completed via abandon! Refreshing user data...",
+          );
           await authStore.refreshUser();
           console.log("✅ User refreshed, ranked should unlock now.");
         }
@@ -320,16 +332,32 @@ watch(isVictory, (val) => {
 
 <template>
   <div class="game-container">
+    <!-- Tutorial Overlay for first-time users -->
+    <TutorialOverlay
+      v-model="showTutorial"
+      @complete="hasSeenTutorial = true"
+      @skip="hasSeenTutorial = true"
+    />
+
     <div class="game-header">
       <div class="stat-card timer-card" role="status" aria-label="Game timer">
         <Timer :size="20" class="stat-icon" aria-hidden="true" />
         <span class="stat-value">{{ elapsedTime }}</span>
       </div>
-      <div class="stat-card score-card" role="status" aria-label="Current score">
+      <div
+        class="stat-card score-card"
+        role="status"
+        aria-label="Current score"
+      >
         <Target :size="20" class="stat-icon" aria-hidden="true" />
         <span class="stat-value">{{ currentNumber - 1 }}/100</span>
       </div>
-      <div v-if="!authStore.isAuthenticated" class="badge badge-purple" role="status" aria-label="Playing as guest">
+      <div
+        v-if="!authStore.isAuthenticated"
+        class="badge badge-purple"
+        role="status"
+        aria-label="Playing as guest"
+      >
         <User :size="14" aria-hidden="true" />
         Guest
       </div>
@@ -351,11 +379,19 @@ watch(isVictory, (val) => {
         <Undo :size="16" aria-hidden="true" />
         Undo ({{ undoCount }})
       </button>
-      <button @click="restartGame" class="btn btn-secondary btn-sm" aria-label="Restart game">
+      <button
+        @click="restartGame"
+        class="btn btn-secondary btn-sm"
+        aria-label="Restart game"
+      >
         <RotateCcw :size="16" aria-hidden="true" />
         Restart
       </button>
-      <button @click="abandonGame" class="btn btn-outline btn-sm" aria-label="Abandon current game">
+      <button
+        @click="abandonGame"
+        class="btn btn-outline btn-sm"
+        aria-label="Abandon current game"
+      >
         <LogOut :size="16" aria-hidden="true" />
         Abandon
       </button>
@@ -371,7 +407,13 @@ watch(isVictory, (val) => {
       />
 
       <!-- START OVERLAY -->
-      <div v-if="!isGameActive && !loading" class="overlay start-overlay" role="dialog" aria-labelledby="start-title" aria-modal="true">
+      <div
+        v-if="!isGameActive && !loading"
+        class="overlay start-overlay"
+        role="dialog"
+        aria-labelledby="start-title"
+        aria-modal="true"
+      >
         <div class="overlay-content">
           <h2 class="text-gradient-full" id="start-title">
             Ready{{
@@ -379,7 +421,11 @@ watch(isVictory, (val) => {
             }}?
           </h2>
           <p class="overlay-subtitle">The starting position is random.</p>
-          <button class="btn btn-gradient btn-lg" @click="startGameplay" aria-label="Start game">
+          <button
+            class="btn btn-gradient btn-lg"
+            @click="startGameplay"
+            aria-label="Start game"
+          >
             <Play :size="20" aria-hidden="true" />
             START
           </button>
@@ -388,9 +434,19 @@ watch(isVictory, (val) => {
     </div>
 
     <!-- VICTORY OVERLAY -->
-    <div v-if="isVictory" class="overlay victory-overlay" role="dialog" aria-labelledby="victory-title" aria-modal="true">
+    <div
+      v-if="isVictory"
+      class="overlay victory-overlay"
+      role="dialog"
+      aria-labelledby="victory-title"
+      aria-modal="true"
+    >
       <div class="overlay-content">
-        <Trophy :size="64" class="overlay-icon trophy-icon" aria-hidden="true" />
+        <Trophy
+          :size="64"
+          class="overlay-icon trophy-icon"
+          aria-hidden="true"
+        />
         <h2 class="text-gradient-full" id="victory-title">VICTORY!</h2>
         <p class="overlay-stats">
           Completed in <strong>{{ elapsedTime }}</strong>
@@ -418,9 +474,19 @@ watch(isVictory, (val) => {
     </div>
 
     <!-- GAME OVER OVERLAY -->
-    <div v-if="isGameOver" class="overlay gameover-overlay" role="dialog" aria-labelledby="gameover-title" aria-modal="true">
+    <div
+      v-if="isGameOver"
+      class="overlay gameover-overlay"
+      role="dialog"
+      aria-labelledby="gameover-title"
+      aria-modal="true"
+    >
       <div class="overlay-content">
-        <Skull :size="64" class="overlay-icon gameover-icon" aria-hidden="true" />
+        <Skull
+          :size="64"
+          class="overlay-icon gameover-icon"
+          aria-hidden="true"
+        />
         <h2 class="text-gradient-full" id="gameover-title">GAME OVER</h2>
         <div class="overlay-stats">
           <p>
@@ -505,7 +571,7 @@ watch(isVictory, (val) => {
 
 .stat-value {
   color: var(--color-gray-800);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
 
 /* CONTROLS */
