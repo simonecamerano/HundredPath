@@ -79,6 +79,7 @@ exports.getUserBestScores = async ( req, res ) => {
           username: "$player.username",
           avatar: "$player.avatar",
           duration: 1,
+          createdAt: 1,
           completedAt: 1,
           updatedAt: 1,
           currentNumber: { $subtract: ["$currentNumber", 1] }

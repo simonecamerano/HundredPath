@@ -131,7 +131,7 @@
               <div class="game-stats-row">
                 <span>
                   <Target :size="14" />
-                  {{ game.currentNumber }}
+                  {{ game.currentNumber === 101 ? 100 : game.currentNumber - 1 }}
                 </span>
                 <span>
                   <Timer :size="14" />
