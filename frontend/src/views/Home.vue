@@ -27,12 +27,19 @@ function startGame(mode) {
   router.push(`/game?mode=${mode}`);
 }
 
-// Banner Cold Start - Dismissible per session
-const showColdStartBanner = ref(true);
+// Banner Cold Start - Riappare ad ogni nuova sessione browser
+const showColdStartBanner = ref(false);
+
+onMounted(() => {
+  const dismissed = sessionStorage.getItem('coldStartBannerDismissed');
+  if (!dismissed) {
+    showColdStartBanner.value = true;
+  }
+});
 
 function dismissBanner() {
   showColdStartBanner.value = false;
-  // Non salviamo in localStorage, quindi riapparirà al prossimo refresh
+  sessionStorage.setItem('coldStartBannerDismissed', 'true');
 }
 </script>
 

@@ -178,25 +178,81 @@ exports.getPublicProfile = async ( req, res ) => {
       return res.status( 404 ).json( { error: 'User not found' } );
     }
 
-    // Get user's stats
-    const totalGames = await Game.countDocuments( { userId: user._id, isCompleted: true } );
-    const wins = await Game.countDocuments( { userId: user._id, isCompleted: true, gameMode: 'ranked' } );
+    // Get user's stats - ONLY RANKED games like in Users
+    const totalGames = await Game.countDocuments( { 
+      userId: user._id, 
+      gameMode: 'ranked'
+    } );
     
-    // Get recent games (last 5)
-    const recentGames = await Game.find( { userId: user._id, isCompleted: true } )
+    const wins = await Game.countDocuments( { 
+      userId: user._id, 
+      currentNumber: 101,
+      gameMode: 'ranked'
+    } );
+    
+    // Get recent games (last 5 - all modes)
+    const recentGames = await Game.find( { 
+      userId: user._id,
+      status: 'completed'
+    } )
       .sort( { createdAt: -1 } )
       .limit( 5 )
       .select( 'gameMode duration currentNumber createdAt' );
 
-    // Calculate average duration
-    const completedGames = await Game.find( { userId: user._id, isCompleted: true, duration: { $exists: true } } );
+    // Calculate average duration (ranked only)
+    const completedGames = await Game.find( { 
+      userId: user._id, 
+      status: 'completed',
+      gameMode: 'ranked',
+      duration: { $exists: true } 
+    } );
+    
     const avgDuration = completedGames.length > 0
       ? Math.round( completedGames.reduce( ( sum, game ) => sum + game.duration, 0 ) / completedGames.length )
       : null;
 
-    // Get best rank from leaderboard
-    const Leaderboard = require( '../models/Leaderboard' );
-    const bestScore = await Leaderboard.findOne( { userId: user._id } ).sort( { rank: 1 } );
+    // Get best rank from all ranked games via aggregation
+    const rankedGames = await Game.aggregate( [
+      { 
+        $match: { 
+          userId: user._id,
+          status: 'completed', 
+          gameMode: 'ranked' 
+        } 
+      },
+      {
+        $addFields: {
+          endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
+        }
+      },
+      {
+        $addFields: {
+          duration: { $subtract: ['$endTime', '$startedAt'] }
+        }
+      },
+      {
+        $sort: { currentNumber: -1, duration: 1 }
+      },
+      { $limit: 1 }
+    ] );
+
+    // Calculate global rank for best game
+    let bestRank = null;
+    if (rankedGames.length > 0) {
+      const bestGame = rankedGames[0];
+      const betterGames = await Game.countDocuments({
+        status: 'completed',
+        gameMode: 'ranked',
+        $or: [
+          { currentNumber: { $gt: bestGame.currentNumber } },
+          {
+            currentNumber: bestGame.currentNumber,
+            duration: { $lt: bestGame.duration }
+          }
+        ]
+      });
+      bestRank = betterGames + 1;
+    }
 
     res.json( {
       profile: {
@@ -207,7 +263,7 @@ exports.getPublicProfile = async ( req, res ) => {
           totalGames,
           wins,
           avgDuration,
-          bestRank: bestScore ? bestScore.rank : null
+          bestRank
         }
       },
       recentGames
