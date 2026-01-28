@@ -103,6 +103,10 @@ function dismissBanner() {
             >
             to unlock Ranked mode!
           </p>
+          
+          <p class="login-link-text">
+            Already have an account? <router-link to="/login" class="login-link">Log In</router-link>
+          </p>
         </div>
 
         <!-- LOGGED IN VIEW (Classic 2 buttons but better styled) -->
@@ -268,7 +272,7 @@ function dismissBanner() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 .tutorial-card {
@@ -342,6 +346,24 @@ function dismissBanner() {
 .unlock-text {
   font-size: 0.9rem;
   color: #adb5bd;
+}
+
+.login-link-text {
+  font-size: 0.9rem;
+  color: #868e96;
+  margin-top: 0.25rem;
+}
+
+.login-link {
+  color: var(--color-purple);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-link:hover {
+  color: var(--color-pink);
+  text-decoration: underline;
 }
 
 .pink-link {
@@ -534,6 +556,9 @@ function dismissBanner() {
   .tutorial-card {
     padding: 30px 20px;
     width: 90%;
+  }
+  .login-link-text {
+    display: block;
   }
   .feature-card {
     width: 90%;
