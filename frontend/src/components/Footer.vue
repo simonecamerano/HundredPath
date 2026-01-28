@@ -36,6 +36,33 @@
   font-weight: 500;
 }
 
+.footer-credit a {
+  color: var(--color-purple);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.footer-credit a:hover {
+  color: var(--color-pink);
+}
+
+.footer-credit a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-purple), var(--color-pink));
+  transition: width 0.3s ease;
+}
+
+.footer-credit a:hover::after {
+  width: 100%;
+}
+
 .footer-links {
   display: flex;
   align-items: center;
