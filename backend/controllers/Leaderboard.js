@@ -11,7 +11,10 @@ exports.getLeaderboard = async ( req, res ) => {
 
     // Filtro temporale basato su query param
     const period = req.query.period || 'all'; // all, week, day
-    let timeFilter = { status: 'completed', gameMode: 'ranked' }; // ONLY RANKED
+
+    // Permetti filtro per gameMode (default: ranked)
+    const mode = req.query.gameMode === 'mastermind' ? 'mastermind' : 'ranked';
+    let timeFilter = { status: 'completed', gameMode: mode };
 
     const now = new Date();
     if ( period === 'week' ) {
@@ -44,7 +47,8 @@ exports.getLeaderboard = async ( req, res ) => {
             duration: 1,
             completedAt: 1,
             updatedAt: 1,
-            currentNumber: { $subtract: ["$currentNumber", 1] }
+            currentNumber: { $subtract: ["$currentNumber", 1] },
+            bonusPoints: 1
           }
         }
       ]
@@ -74,7 +78,8 @@ exports.getLeaderboard = async ( req, res ) => {
             duration: 1,
             completedAt: 1,
             updatedAt: 1,
-            currentNumber: { $subtract: ["$currentNumber", 1] }
+            currentNumber: { $subtract: ["$currentNumber", 1] },
+            bonusPoints: 1
           }
         }
       ];
@@ -96,12 +101,23 @@ exports.getLeaderboard = async ( req, res ) => {
         }
       },
 
-      // 3. CALCOLA IL RANK GLOBALE
+      // 3. CALCOLA IL RANK GLOBALE (in mastermind somma bonusPoints)
+      {
+        $addFields: {
+          totalScore: {
+            $cond: [
+              { $eq: [mode, "mastermind"] },
+              { $add: [ { $subtract: ["$currentNumber", 1] }, { $ifNull: ["$bonusPoints", 0] } ] },
+              { $subtract: ["$currentNumber", 1] }
+            ]
+          }
+        }
+      },
       {
         $addFields: {
           combinedRankScore: {
             $subtract: [
-              { $multiply: ["$currentNumber", 1000000000] },
+              { $multiply: ["$totalScore", 1000000000] },
               { $ifNull: ["$duration", 0] }
             ]
           }

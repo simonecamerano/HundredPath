@@ -1,26 +1,29 @@
 <script setup>
 import {
-    LogOut,
-    Play,
-    RotateCcw,
-    Skull,
-    Target,
-    Timer,
-    Trophy,
-    Undo,
-    User,
-    UserPlus,
+  CircleHelp,
+  LogOut,
+  Play,
+  RotateCcw,
+  Skull,
+  Star,
+  Target,
+  Timer,
+  Trophy,
+  Undo,
+  User,
+  UserPlus,
 } from "lucide-vue-next";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import Grid from "../components/Grid.vue";
 import TutorialOverlay from "../components/TutorialOverlay.vue";
 import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
-import { useAuthStore } from "../stores/auth"; // Import auth store
+import { useAuthStore } from "../stores/auth"; // Import store
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore(); // Accesso allo stato auth
 const { error: notifyError } = useNotification();
 const { confirm } = useConfirm();
@@ -33,13 +36,56 @@ const grid = ref(Array(100).fill(0));
 const currentNumber = ref(1);
 const lastPosition = ref(-1);
 const gameId = ref(null);
+
 const undoCount = ref(3);
+const bonusPoints = ref(0);
 const loading = ref(false);
 const isGameActive = ref(false); // Has the game started (timer active)?
 
 // TUTORIAL STATE
 const showTutorial = ref(false);
-const hasSeenTutorial = ref(localStorage.getItem("tutorialSeen") === "true");
+
+const tutorialType = computed(() => {
+  if (gameMode.value === "ranked") return "ranked";
+  if (gameMode.value === "mastermind") return "mastermind";
+  return "basic"; // Default/Tutorial mode
+});
+
+function checkAndShowTutorial() {
+  let seen = false;
+  // Use current gameMode value
+  const mode = gameMode.value;
+
+  if (mode === "ranked") {
+    seen = localStorage.getItem("tutorialSeen_ranked") === "true";
+  } else if (mode === "mastermind") {
+    seen = localStorage.getItem("tutorialSeen_mastermind") === "true";
+  } else {
+    // Basic tutorial
+    seen = localStorage.getItem("tutorialSeen") === "true";
+  }
+
+  console.log(`🧐 checking tutorial for mode: ${mode}, seen: ${seen}`);
+
+  if (!seen) {
+    showTutorial.value = true;
+  }
+}
+
+function openTutorial() {
+  showTutorial.value = true;
+}
+
+function handleTutorialComplete() {
+  showTutorial.value = false;
+  if (gameMode.value === "ranked") {
+    localStorage.setItem("tutorialSeen_ranked", "true");
+  } else if (gameMode.value === "mastermind") {
+    localStorage.setItem("tutorialSeen_mastermind", "true");
+  } else {
+    localStorage.setItem("tutorialSeen", "true");
+  }
+}
 
 const localHistory = ref([]); // For undo in guest mode
 
@@ -62,6 +108,25 @@ const isValidMove = (currentIndex, targetIndex) => {
     (dx === 3 && dy === 0) || (dx === 0 && dy === 3) || (dx === 2 && dy === 2)
   );
 };
+
+// MASTERMIND HELPERS (Duplicated from Grid/Backend for optimization)
+function getCellColor(index) {
+  const row = Math.floor(index / 10);
+  const col = index % 10;
+  return (row + col) % 2 === 0 ? "white" : "black";
+}
+
+function calculateBonus(number, cellIndex) {
+  // Non contare mai la cella che contiene l'1 iniziale come bonus
+  const startPos = grid.value.findIndex((n) => n === 1);
+  if (number === 1 && cellIndex === startPos) return 0;
+  const cellColor = getCellColor(cellIndex);
+  const isOdd = number % 2 === 1;
+  // Odd on Black OR Even on White = +1
+  return (isOdd && cellColor === "black") || (!isOdd && cellColor === "white")
+    ? 1
+    : 0;
+}
 
 function startTimer() {
   stopTimer();
@@ -90,20 +155,24 @@ function stopTimer() {
 
 onMounted(async () => {
   // Read mode from query params (default: tutorial)
-  const queryMode = router.currentRoute.value.query.mode;
+  const queryMode = route.query.mode;
+  console.log("👀 Game onMounted. Query Mode:", queryMode);
+
   if (queryMode === "ranked") {
     gameMode.value = "ranked";
+  } else if (queryMode === "mastermind") {
+    gameMode.value = "mastermind";
   } else {
     gameMode.value = "tutorial";
   }
 
+  console.log("🎮 GameMode set to:", gameMode.value);
+
+  // Check if tutorial should be shown (IMMEDIATELY)
+  checkAndShowTutorial();
+
   // Load data, but DO NOT start the game yet
   await initGame();
-
-  // Show tutorial in tutorial mode (always for now, for testing)
-  if (gameMode.value === "tutorial") {
-    showTutorial.value = true;
-  }
 });
 
 onUnmounted(() => {
@@ -119,6 +188,7 @@ async function initGame() {
     isGameActive.value = false;
     elapsedTime.value = "00.00s"; // Reset display
     currentNumber.value = 1; // Safety reset
+    bonusPoints.value = 0; // Reset bonus
 
     if (authStore.isAuthenticated) {
       // --- LOGGED USER LOGIC ---
@@ -130,6 +200,7 @@ async function initGame() {
       gameId.value = game._id;
       grid.value = game.grid;
       currentNumber.value = game.currentNumber;
+      bonusPoints.value = game.bonusPoints || 0;
 
       const startPos = game.grid.findIndex((n) => n === 1);
       lastPosition.value = startPos;
@@ -166,6 +237,12 @@ async function handleMove(index) {
 
   // AGGIORNAMENTO OTTIMISTICO / LOCALE
   grid.value[index] = currentNumber.value;
+
+  // Update local bonus points
+  if (gameMode.value === "mastermind") {
+    const bonus = calculateBonus(currentNumber.value, index);
+    bonusPoints.value += bonus;
+  }
 
   if (!authStore.isAuthenticated) {
     // Save history for local undo
@@ -206,6 +283,7 @@ async function undo() {
       grid.value = game.grid;
       currentNumber.value = game.currentNumber;
       undoCount.value--;
+      bonusPoints.value = game.bonusPoints || 0; // Sync bonus from server
 
       if (game.moves.length > 0) {
         lastPosition.value = game.moves[game.moves.length - 1].position;
@@ -299,6 +377,25 @@ const isGameOver = computed(
 
 const hasCalledGameOver = ref(false);
 
+watch(
+  () => route.query.mode,
+  async (newMode) => {
+    console.log("🔄 Route mode changed to:", newMode);
+    let mode = "tutorial";
+    if (newMode === "ranked") mode = "ranked";
+    else if (newMode === "mastermind") mode = "mastermind";
+
+    if (gameMode.value !== mode) {
+      console.log("🔀 Switching gameMode to:", mode);
+      gameMode.value = mode;
+
+      checkAndShowTutorial();
+
+      await initGame();
+    }
+  },
+);
+
 watch(isGameOver, async (newValue) => {
   if (newValue && !hasCalledGameOver.value) {
     stopTimer();
@@ -335,8 +432,9 @@ watch(isVictory, (val) => {
     <!-- Tutorial Overlay for first-time users -->
     <TutorialOverlay
       v-model="showTutorial"
-      @complete="hasSeenTutorial = true"
-      @skip="hasSeenTutorial = true"
+      :tutorialType="tutorialType"
+      @complete="handleTutorialComplete"
+      @skip="handleTutorialComplete"
     />
 
     <div class="game-header">
@@ -352,6 +450,17 @@ watch(isVictory, (val) => {
         <Target :size="20" class="stat-icon" aria-hidden="true" />
         <span class="stat-value">{{ currentNumber - 1 }}/100</span>
       </div>
+
+      <div
+        v-if="gameMode === 'mastermind'"
+        class="stat-card bonus-card"
+        role="status"
+        aria-label="Bonus points"
+      >
+        <Star :size="20" class="stat-icon" aria-hidden="true" />
+        <span class="stat-value">+{{ bonusPoints }}</span>
+      </div>
+
       <div
         v-if="!authStore.isAuthenticated"
         class="badge badge-purple"
@@ -429,6 +538,18 @@ watch(isVictory, (val) => {
             <Play :size="20" aria-hidden="true" />
             START
           </button>
+
+          <div style="margin-top: 4.5rem">
+            <button
+              class="btn btn-outline btn-sm btn-tutorial-trigger"
+              @click="openTutorial"
+              aria-label="Show Tutorial/Rules"
+              style="width: auto; padding: 0.5rem 1.5rem; border-color: #4b5563"
+            >
+              <CircleHelp :size="18" />
+              How to Play
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -450,6 +571,16 @@ watch(isVictory, (val) => {
         <h2 class="text-gradient-full" id="victory-title">VICTORY!</h2>
         <p class="overlay-stats">
           Completed in <strong>{{ elapsedTime }}</strong>
+        </p>
+        <p v-if="gameMode === 'mastermind'" class="overlay-stats">
+          Final Score:
+          <strong>{{ currentNumber - 1 + bonusPoints }}</strong> ({{
+            currentNumber - 1
+          }}
+          + <span style="color: #fab005">{{ bonusPoints }}</span> bonus)
+        </p>
+        <p v-else class="overlay-stats">
+          Final Score: <strong>{{ currentNumber - 1 }}</strong>
         </p>
 
         <div v-if="!authStore.isAuthenticated" class="guest-cta">
@@ -489,7 +620,14 @@ watch(isVictory, (val) => {
         />
         <h2 class="text-gradient-full" id="gameover-title">GAME OVER</h2>
         <div class="overlay-stats">
-          <p>
+          <p v-if="gameMode === 'mastermind'">
+            Final Score:
+            <strong>{{ currentNumber - 1 + bonusPoints }}</strong> ({{
+              currentNumber - 1
+            }}
+            + <span style="color: #fab005">{{ bonusPoints }}</span> bonus)
+          </p>
+          <p v-else>
             Final Score: <strong>{{ currentNumber - 1 }}</strong>
           </p>
           <p>
@@ -549,6 +687,16 @@ watch(isVictory, (val) => {
   font-weight: 700;
   font-size: 1.1rem;
   transition: all 0.3s ease;
+  min-width: 140px; /* larghezza minima per evitare resize */
+  justify-content: center;
+}
+
+.stat-value {
+  color: var(--color-gray-800);
+  font-family: "Courier New", monospace;
+  min-width: 110px; /* spazio per 00m 00.00s */
+  text-align: right;
+  display: inline-block;
 }
 
 .timer-card {
@@ -559,6 +707,18 @@ watch(isVictory, (val) => {
 .score-card {
   border: 2px solid rgba(121, 80, 242, 0.3);
   box-shadow: var(--shadow-glow-purple);
+}
+
+.bonus-card {
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  color: #b45309; /* Dark Amber (700) for better contrast */
+}
+
+.bonus-card .stat-icon {
+  color: #ffd700; /* True Gold */
+  position: relative;
+  z-index: 10;
 }
 
 .stat-icon {
@@ -744,6 +904,32 @@ watch(isVictory, (val) => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* TUTORIAL BUTTON */
+/* TUTORIAL BUTTON */
+.btn-tutorial-trigger {
+  border-radius: 50px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border:2px solid var(--color-purple) !important;
+  color: var(--color-purple);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  height: 48px; /* Slightly smaller than stat cards */
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.btn-tutorial-trigger:hover {
+  border-color: var(--color-purple) !important; /* Border becomes purple like text */
+  color: var(--color-purple) !important;
+  background: #f3f0ff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* MOBILE RESPONSIVE */

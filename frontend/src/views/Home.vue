@@ -1,14 +1,15 @@
 <script setup>
 import {
-    AlertCircle,
-    ArrowRight,
-    GraduationCap,
-    Lock,
-    Puzzle,
-    Swords,
-    Timer,
-    Trophy,
-    X,
+  AlertCircle,
+  ArrowRight,
+  Brain,
+  GraduationCap,
+  Lock,
+  Puzzle,
+  Swords,
+  Timer,
+  Trophy,
+  X,
 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -18,9 +19,11 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const rankedUnlocked = computed(() => {
-  return authStore.isAuthenticated && 
-         !authStore.user?.isGuest && 
-         (authStore.user?.tutorialCompleted || false);
+  return (
+    authStore.isAuthenticated &&
+    !authStore.user?.isGuest &&
+    (authStore.user?.tutorialCompleted || false)
+  );
 });
 
 function startGame(mode) {
@@ -31,7 +34,7 @@ function startGame(mode) {
 const showColdStartBanner = ref(false);
 
 onMounted(() => {
-  const dismissed = localStorage.getItem('coldStartBannerDismissed');
+  const dismissed = localStorage.getItem("coldStartBannerDismissed");
   if (!dismissed) {
     showColdStartBanner.value = true;
   }
@@ -39,7 +42,7 @@ onMounted(() => {
 
 function dismissBanner() {
   showColdStartBanner.value = false;
-  localStorage.setItem('coldStartBannerDismissed', 'true');
+  localStorage.setItem("coldStartBannerDismissed", "true");
 }
 </script>
 
@@ -47,13 +50,15 @@ function dismissBanner() {
   <div class="home-container">
     <!-- Cold Start Warning Banner -->
     <div v-if="showColdStartBanner" class="cold-start-banner">
-      <AlertCircle style="width: 1.2rem; height: 1.2rem; flex-shrink: 0;" />
+      <AlertCircle style="width: 1.2rem; height: 1.2rem; flex-shrink: 0" />
       <p>
-        <strong>⚠️ Alpha Demo Notice:</strong> This app runs on a free server that goes to sleep after inactivity. 
-        <strong>Your first request may take up to 60 seconds</strong> to wake it up. After that, everything will be instant! ⚡
+        <strong>⚠️ Alpha Demo Notice:</strong> This app runs on a free server
+        that goes to sleep after inactivity.
+        <strong>Your first request may take up to 60 seconds</strong> to wake it
+        up. After that, everything will be instant! ⚡
       </p>
       <button @click="dismissBanner" class="dismiss-btn" aria-label="Dismiss">
-        <X style="width: 1rem; height: 1rem;" />
+        <X style="width: 1rem; height: 1rem" />
       </button>
     </div>
 
@@ -98,18 +103,17 @@ function dismissBanner() {
           </div>
 
           <p class="unlock-text">
-            <router-link to="/register" class="pink-link"
-              >Register</router-link
-            >
+            <router-link to="/register" class="pink-link">Register</router-link>
             to unlock Ranked mode!
           </p>
-          
+
           <p class="login-link-text">
-            Already have an account? <router-link to="/login" class="login-link">Log In</router-link>
+            Already have an account?
+            <router-link to="/login" class="login-link">Log In</router-link>
           </p>
         </div>
 
-        <!-- LOGGED IN VIEW (Classic 2 buttons but better styled) -->
+        <!-- LOGGED IN VIEW (3 game modes) -->
         <div v-else class="logged-modes">
           <button @click="startGame('tutorial')" class="mode-card">
             <div class="card-icon-wrapper blue-gradient">
@@ -125,7 +129,7 @@ function dismissBanner() {
             :class="{ locked: !rankedUnlocked }"
             :disabled="!rankedUnlocked"
           >
-            <div class="card-icon-wrapper gradient-ranked">
+            <div class="card-icon-wrapper gradient-amber">
               <Swords
                 v-if="rankedUnlocked"
                 style="width: 50px; height: 50px; color: white"
@@ -137,6 +141,27 @@ function dismissBanner() {
             </div>
             <h3>Ranked</h3>
             <p v-if="rankedUnlocked">Competitive</p>
+            <p v-else class="locked-text">Complete 1 tutorial</p>
+          </button>
+
+          <button
+            @click="startGame('mastermind')"
+            class="mode-card"
+            :class="{ locked: !rankedUnlocked }"
+            :disabled="!rankedUnlocked"
+          >
+            <div class="card-icon-wrapper gradient-mastermind">
+              <Brain
+                v-if="rankedUnlocked"
+                style="width: 50px; height: 50px; color: white"
+              />
+              <Lock
+                v-else
+                style="width: 50px; height: 50px; color: white; opacity: 0.8"
+              />
+            </div>
+            <h3>Mastermind</h3>
+            <p v-if="rankedUnlocked">Chess Bonus</p>
             <p v-else class="locked-text">Complete 1 tutorial</p>
           </button>
         </div>
@@ -240,7 +265,7 @@ function dismissBanner() {
 /* HERO */
 .hero {
   text-align: center;
-  padding: 0 20px 40px;
+  padding: 40px 20px 40px; /* Increased top padding for Desktop */
   max-width: 800px;
   width: 100%;
 }
@@ -253,9 +278,13 @@ function dismissBanner() {
   line-height: 1.1;
 }
 
-.gradient-ranked {
-  background: linear-gradient(135deg, #f06595, #ff6b6b);
-} /* Pink-Red (Ranked) */
+.gradient-amber {
+  background: linear-gradient(135deg, #fcc419, #f08c00);
+} /* Amber-Orange (Ranked) */
+
+.gradient-mastermind {
+  background: linear-gradient(135deg, #f06595, #cc5de8);
+} /* Pink-Purple (Mastermind) */
 
 .subtitle {
   font-size: 1.2rem;
@@ -378,26 +407,31 @@ function dismissBanner() {
 }
 
 /* LOGGED IN MODES */
+
+/* LOGGED IN MODES (Grid Layout matches Features) */
 .logged-modes {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .mode-card {
   background: white;
-  border: 2px solid #e9ecef; /* Default subtle border */
-  border-radius: 20px;
-  padding: 30px;
+  border: 2px solid #e9ecef;
+  border-radius: 24px; /* Matched to feature-card */
+  padding: 40px 30px; /* Matched to feature-card */
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  width: 350px;
+  width: 100%; /* Fill grid cell */
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start; /* Ensure content starts at top */
+  height: 100%; /* Fill height */
 }
 
 /* Tutorial Mode Styling (Blue/Teal) */
@@ -410,21 +444,30 @@ function dismissBanner() {
   box-shadow: 0 15px 40px rgba(32, 201, 151, 0.2);
 }
 
-/* Ranked Mode Styling (Pink/Red) - Matching Tutorial Card Structure */
+/* Ranked Mode Styling (Amber) */
 .mode-card:nth-child(2) {
-  border: 2px solid #f7a8a8; /* Red/Pink Border like Tutorial */
-  background: linear-gradient(
-    180deg,
-    #fff,
-    #fff0f6
-  ); /* Subtle pink tint at bottom */
-  box-shadow: 0 10px 30px rgba(240, 101, 149, 0.15); /* Pink Glow */
+  border-color: #fcc419;
+  background: linear-gradient(180deg, #fff, #fff9db);
+  box-shadow: 0 10px 30px rgba(250, 176, 5, 0.15);
 }
 
-/* Hover effect for Ranked Card */
+/* Mastermind Mode Styling (Purple/Pink) */
+.mode-card:nth-child(3) {
+  border-color: #f06595;
+  background: linear-gradient(180deg, #fff, #fff0f6);
+  box-shadow: 0 10px 30px rgba(240, 101, 149, 0.15);
+}
+
+/* Hover Ranked */
 .mode-card:nth-child(2):hover:not(:disabled) {
   transform: translateY(-5px);
-  box-shadow: 0 15px 50px rgba(240, 101, 149, 0.25); /* Stronger Pink Glow */
+  box-shadow: 0 15px 50px rgba(250, 176, 5, 0.25);
+}
+
+/* Hover Mastermind */
+.mode-card:nth-child(3):hover:not(:disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(240, 101, 149, 0.25);
 }
 
 .mode-card h3 {
@@ -453,11 +496,6 @@ function dismissBanner() {
   transition: transform 0.3s;
 }
 
-.mode-card:nth-child(2):hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(240, 101, 149, 0.2);
-}
-
 .locked {
   opacity: 0.7;
   cursor: not-allowed;
@@ -470,20 +508,21 @@ function dismissBanner() {
 }
 
 /* FEATURES */
+/* FEATURES (Grid Layout) */
 .features {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 10000px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 40px;
 }
 
 .feature-card {
   background: white;
   padding: 40px 30px;
   border-radius: 24px;
-
-  width: 280px;
+  width: 100%;
   text-align: center;
   border: 1px solid #ececec;
   transition: transform 0.3s;
@@ -551,35 +590,39 @@ function dismissBanner() {
 }
 
 /* MOBILE */
-@media (max-width: 1100px) {
+@media (max-width: 768px) {
+  .hero {
+    padding: 20px 20px 30px; /* Less padding on mobile */
+  }
+
   .title {
     font-size: 3rem;
   }
   .tutorial-card {
-    padding: 30px 20px;
     width: 90%;
   }
   .login-link-text {
     display: block;
   }
   .feature-card {
-    width: 90%;
+    width: 100%;
   }
-  .logged-modes {
-    flex-wrap: nowrap;
+
+  /* Stack modes and features vertically on mobile */
+  .logged-modes,
+  .features {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 20px;
-    padding: 0 15px;
+    padding: 0 20px;
   }
-  .mode-card {
-    width: 160px;
-    min-width: 140px;
-    padding: 20px 15px;
-  }
-  .mode-card h3 {
-    font-size: 1rem;
-  }
-  .mode-card p {
-    font-size: 0.8rem;
+
+  .mode-card,
+  .feature-card {
+    width: 100%;
+    max-width: none;
+    min-width: unset;
+    padding: 30px 20px;
   }
 }
 </style>

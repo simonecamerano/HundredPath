@@ -3,8 +3,8 @@
  * 
  * Defines the schema for games in the database
  */
-const mongoose = require('mongoose');
-const gameSchema = new mongoose.Schema({
+const mongoose = require( 'mongoose' );
+const gameSchema = new mongoose.Schema( {
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -15,9 +15,9 @@ const gameSchema = new mongoose.Schema({
   // null = empty cell, number = number placed
   grid: {
     type: [Number],
-    default: () => Array(100).fill(null),
+    default: () => Array( 100 ).fill( null ),
     validate: {
-      validator: function(arr) {
+      validator: function ( arr ) {
         return arr.length === 100;
       },
       message: 'Grid must have exactly 100 cells'
@@ -49,9 +49,15 @@ const gameSchema = new mongoose.Schema({
   },
   gameMode: {
     type: String,
-    enum: ['tutorial', 'ranked'],
+    enum: ['tutorial', 'ranked', 'mastermind'],
     default: 'tutorial',
     required: true
+  },
+  bonusPoints: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 100
   },
   startedAt: {
     type: Date,
@@ -67,20 +73,20 @@ const gameSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
-});
+} );
 // Composed index to find user's in-progress game quickly
-gameSchema.index({ userId: 1, status: 1 });
+gameSchema.index( { userId: 1, status: 1 } );
 // ===== CUSTOM METHODS =====
 // Calculate time elapsed
-gameSchema.methods.calculateTimeElapsed = function() {
-  if (this.completedAt) {
-    return Math.floor((this.completedAt - this.startedAt) / 1000);
+gameSchema.methods.calculateTimeElapsed = function () {
+  if ( this.completedAt ) {
+    return Math.floor( ( this.completedAt - this.startedAt ) / 1000 );
   }
-  return Math.floor((Date.now() - this.startedAt) / 1000);
+  return Math.floor( ( Date.now() - this.startedAt ) / 1000 );
 };
 // Verify if game is complete
-gameSchema.methods.isComplete = function() {
+gameSchema.methods.isComplete = function () {
   return this.currentNumber > 100;
 };
-const Game = mongoose.model('Game', gameSchema);
+const Game = mongoose.model( 'Game', gameSchema );
 module.exports = Game;

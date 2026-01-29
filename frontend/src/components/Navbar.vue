@@ -40,7 +40,11 @@
           <Users :size="16" />
           <span>Users</span>
         </router-link>
-        <router-link to="/profile" class="user-info-desktop desktop-link" :aria-label="`Profile of ${authStore.user?.username}`">
+        <router-link
+          to="/profile"
+          class="user-info-desktop desktop-link"
+          :aria-label="`Profile of ${authStore.user?.username}`"
+        >
           <img
             :src="getAvatarUrl(authStore.user?.avatar)"
             :alt="`${authStore.user?.username}'s avatar`"
@@ -77,9 +81,9 @@
       aria-hidden="true"
     ></div>
 
-    <nav 
+    <nav
       id="mobile-menu"
-      class="mobile-menu" 
+      class="mobile-menu"
       :class="{ open: menuOpen }"
       aria-label="Mobile navigation"
     >
@@ -107,7 +111,11 @@
         <!-- MAIN MENU ITEMS -->
         <div class="menu-items">
           <!-- Tutorial -->
-          <button class="menu-card" @click="navigate('/game?mode=tutorial')" aria-label="Play Tutorial mode">
+          <button
+            class="menu-card"
+            @click="navigate('/game?mode=tutorial')"
+            aria-label="Play Tutorial mode"
+          >
             <div class="icon-box gradient-1" aria-hidden="true">
               <GraduationCap class="menu-icon" />
             </div>
@@ -132,8 +140,28 @@
             </div>
           </button>
 
+          <!-- Mastermind (New) -->
+          <button
+            v-if="authStore.isAuthenticated && rankedUnlocked"
+            class="menu-card"
+            @click="navigate('/game?mode=mastermind')"
+            aria-label="Play Mastermind mode"
+          >
+            <div class="icon-box gradient-mastermind" aria-hidden="true">
+              <BrainCircuit class="menu-icon" />
+            </div>
+            <div class="text-box">
+              <span class="label">Mastermind</span>
+              <span class="desc">Logic Challenge</span>
+            </div>
+          </button>
+
           <!-- Classifiche -->
-          <button class="menu-card" @click="navigate('/leaderboard')" aria-label="View Leaderboards">
+          <button
+            class="menu-card"
+            @click="navigate('/leaderboard')"
+            aria-label="View Leaderboards"
+          >
             <div class="icon-box gradient-2" aria-hidden="true">
               <Trophy class="menu-icon" />
             </div>
@@ -180,17 +208,31 @@
         <!-- AUTH SECTION -->
         <div class="auth-section">
           <template v-if="!authStore.isAuthenticated">
-            <button class="btn-outline" @click="navigate('/login')" aria-label="Log in to your account">
+            <button
+              class="btn-outline"
+              @click="navigate('/login')"
+              aria-label="Log in to your account"
+            >
               <LogIn class="btn-icon" aria-hidden="true" /> Log In
             </button>
-            <button class="btn-gradient" @click="navigate('/register')" aria-label="Register a free account">
+            <button
+              class="btn-gradient"
+              @click="navigate('/register')"
+              aria-label="Register a free account"
+            >
               <UserPlus class="btn-icon" aria-hidden="true" /> Register Free
             </button>
           </template>
 
           <template v-else>
             <!-- User Profile Snippet -->
-            <div class="user-profile-card" @click="navigate('/profile')" role="button" tabindex="0" :aria-label="`View profile of ${authStore.user?.username}`">
+            <div
+              class="user-profile-card"
+              @click="navigate('/profile')"
+              role="button"
+              tabindex="0"
+              :aria-label="`View profile of ${authStore.user?.username}`"
+            >
               <img
                 :src="getAvatarUrl(authStore.user?.avatar)"
                 :alt="`${authStore.user?.username}'s avatar`"
@@ -202,7 +244,11 @@
               </div>
             </div>
 
-            <button class="btn-outline logout" @click="logout" aria-label="Log out from your account">
+            <button
+              class="btn-outline logout"
+              @click="logout"
+              aria-label="Log out from your account"
+            >
               <LogOut class="btn-icon" aria-hidden="true" /> Logout
             </button>
           </template>
@@ -220,6 +266,7 @@
 
 <script setup>
 import {
+  BrainCircuit,
   GraduationCap,
   LogIn,
   LogOut,
@@ -238,9 +285,11 @@ const router = useRouter();
 const menuOpen = ref(false);
 
 const rankedUnlocked = computed(() => {
-  return authStore.isAuthenticated && 
-         !authStore.user?.isGuest && 
-         (authStore.user?.tutorialCompleted || false);
+  return (
+    authStore.isAuthenticated &&
+    !authStore.user?.isGuest &&
+    (authStore.user?.tutorialCompleted || false)
+  );
 });
 
 function getAvatarUrl(seed) {
@@ -532,8 +581,11 @@ function logout() {
   background: linear-gradient(135deg, #339af0, #5c7cfa);
 } /* Blue */
 .gradient-ranked {
-  background: linear-gradient(135deg, #f06595, #ff6b6b);
-} /* Pink-Red (Ranked) */
+  background: linear-gradient(135deg, #fcc419, #f08c00);
+} /* Amber-Orange (Ranked - Matches Home) */
+.gradient-mastermind {
+  background: linear-gradient(135deg, #f06595, #cc5de8);
+} /* Pink-Purple (Mastermind - Matches Home) */
 
 .text-box {
   display: flex;

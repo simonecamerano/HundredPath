@@ -10,6 +10,22 @@
         </p>
       </div>
 
+      <!-- MODE SWITCHER -->
+      <div class="tab-switcher" role="tablist" aria-label="Users mode switcher">
+        <button
+          v-for="mode in modes"
+          :key="mode.value"
+          @click="switchMode(mode.value)"
+          class="tab-btn"
+          :class="{ active: activeMode === mode.value }"
+          role="tab"
+          :aria-selected="activeMode === mode.value"
+        >
+          <component :is="mode.icon" :size="16" />
+          {{ mode.label }}
+        </button>
+      </div>
+
       <div v-if="loading" class="flex-center" style="min-height: 400px">
         <div class="badge badge-purple">Loading...</div>
       </div>
@@ -66,12 +82,14 @@
 
 <script setup>
 import {
-    Calendar,
-    Gamepad2,
-    Medal,
-    Trophy,
-    UserCheck,
-    Users,
+  BrainCircuit,
+  Calendar,
+  Crown,
+  Gamepad2,
+  Medal,
+  Trophy,
+  UserCheck,
+  Users,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
@@ -79,6 +97,12 @@ import api from "../services/api";
 const users = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const activeMode = ref("ranked");
+
+const modes = [
+  { value: "ranked", label: "Ranked", icon: Crown },
+  { value: "mastermind", label: "Mastermind", icon: BrainCircuit },
+];
 
 function getAvatarUrl(seed) {
   const safeSeed = seed || "shape_default";
@@ -94,16 +118,28 @@ function formatDate(dateString) {
   });
 }
 
-onMounted(async () => {
+async function fetchUsers() {
   try {
-    const res = await api.get("/users");
+    loading.value = true;
+    const res = await api.get(`/users?gameMode=${activeMode.value}`);
     users.value = res.data;
   } catch (err) {
-    console.error(err);
-    error.value = "Impossibile caricare gli utenti";
+    console.error("Error fetching users:", err);
+    error.value = "Failed to load community members";
   } finally {
     loading.value = false;
   }
+}
+
+function switchMode(mode) {
+  if (activeMode.value !== mode) {
+    activeMode.value = mode;
+    fetchUsers();
+  }
+}
+
+onMounted(() => {
+  fetchUsers();
 });
 </script>
 

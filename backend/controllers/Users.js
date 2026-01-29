@@ -3,9 +3,11 @@ const Game = require( '../models/Game' );
 
 exports.getAllUsers = async ( req, res ) => {
   try {
-    // Step 1: Calculate globalRank for ALL RANKED completed games
+    const gameMode = req.query.gameMode || 'ranked'; // Default to ranked
+
+    // Step 1: Calculate globalRank for ALL completed games of specific mode
     const rankedGames = await Game.aggregate( [
-      { $match: { status: 'completed', gameMode: 'ranked' } }, // ONLY RANKED
+      { $match: { status: 'completed', gameMode: gameMode } },
       {
         $addFields: {
           endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
@@ -13,14 +15,21 @@ exports.getAllUsers = async ( req, res ) => {
       },
       {
         $addFields: {
-          duration: { $subtract: ['$endTime', '$startedAt'] }
+          duration: { $subtract: ['$endTime', '$startedAt'] },
+          totalScore: {
+            $cond: {
+              if: { $eq: [gameMode, 'mastermind'] },
+              then: { $add: ['$currentNumber', { $ifNull: ['$bonusPoints', 0] }] },
+              else: '$currentNumber'
+            }
+          }
         }
       },
       {
         $addFields: {
           combinedRankScore: {
             $subtract: [
-              { $multiply: ['$currentNumber', 1000000000] },
+              { $multiply: ['$totalScore', 1000000000] },
               { $ifNull: ['$duration', 0] }
             ]
           }
@@ -39,12 +48,13 @@ exports.getAllUsers = async ( req, res ) => {
         $project: {
           userId: 1,
           currentNumber: 1,
+          bonusPoints: 1,
           globalRank: 1
         }
       }
     ] );
 
-    // Step 2: Group by user and calculate stats (ONLY RANKED)
+    // Step 2: Group by user and calculate stats for specific mode
     const usersWithStats = await User.aggregate( [
       {
         $lookup: {
@@ -54,7 +64,7 @@ exports.getAllUsers = async ( req, res ) => {
             {
               $match: {
                 $expr: { $eq: ['$userId', '$$userId'] },
-                gameMode: 'ranked' // ONLY RANKED
+                gameMode: gameMode
               }
             }
           ],

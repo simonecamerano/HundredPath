@@ -2,9 +2,11 @@ const User = require( '../models/User' );
 const Game = require( '../models/Game' );
 
 // GET current user's profile with stats
+// GET current user's profile with stats
 exports.getMyProfile = async ( req, res ) => {
   try {
     const userId = req.user._id;
+    const gameMode = req.query.gameMode || 'ranked'; // Default to ranked
 
     // 1. Get user basic info
     const user = await User.findById( userId ).select( '-password' );
@@ -13,8 +15,9 @@ exports.getMyProfile = async ( req, res ) => {
     }
 
     // 2. Calculate stats (same logic as Users.js but for single user)
+    // We need to calculate RANK within the specific game mode
     const rankedGames = await Game.aggregate( [
-      { $match: { status: 'completed', gameMode: 'ranked' } },
+      { $match: { status: 'completed', gameMode: gameMode } },
       {
         $addFields: {
           endTime: { $ifNull: ['$completedAt', '$updatedAt'] }
@@ -22,14 +25,21 @@ exports.getMyProfile = async ( req, res ) => {
       },
       {
         $addFields: {
-          duration: { $subtract: ['$endTime', '$startedAt'] }
+          duration: { $subtract: ['$endTime', '$startedAt'] },
+          totalScore: {
+            $cond: {
+              if: { $eq: [gameMode, 'mastermind'] },
+              then: { $add: ['$currentNumber', { $ifNull: ['$bonusPoints', 0] }] },
+              else: '$currentNumber'
+            }
+          }
         }
       },
       {
         $addFields: {
           combinedRankScore: {
             $subtract: [
-              { $multiply: ['$currentNumber', 1000000000] },
+              { $multiply: ['$totalScore', 1000000000] },
               { $ifNull: ['$duration', 0] }
             ]
           }
@@ -56,15 +66,15 @@ exports.getMyProfile = async ( req, res ) => {
       }
     ] );
 
-    // 3. Get all user RANKED games for basic stats
-    const allGames = await Game.find( { userId, gameMode: 'ranked' } );
+    // 3. Get all user games for basic stats (Total Games, Wins)
+    const allGames = await Game.find( { userId, gameMode: gameMode } );
     const totalGames = allGames.length;
     const wins = allGames.filter( g => g.currentNumber === 101 ).length;
     const bestRank = rankedGames.length > 0
       ? Math.min( ...rankedGames.map( g => g.globalRank ) )
       : null;
 
-    // 4. Calculate average time (only for completed RANKED games)
+    // 4. Calculate average time (only for completed games)
     const completedGames = allGames.filter( g => g.status === 'completed' );
     let avgDuration = null;
     if ( completedGames.length > 0 ) {
@@ -75,7 +85,7 @@ exports.getMyProfile = async ( req, res ) => {
       avgDuration = Math.floor( totalDuration / completedGames.length );
     }
 
-    console.log( '📊 [PROFILE] User:', userId, 'tutorialCompleted:', user.tutorialCompleted );
+    console.log( '📊 [PROFILE] User:', userId, 'Mode:', gameMode );
 
     res.json( {
       _id: user._id,
@@ -83,7 +93,7 @@ exports.getMyProfile = async ( req, res ) => {
       email: user.email,
       avatar: user.avatar,
       createdAt: user.createdAt,
-      tutorialCompleted: user.tutorialCompleted, // ⭐ THIS WAS MISSING!
+      tutorialCompleted: user.tutorialCompleted,
       stats: {
         totalGames,
         wins,

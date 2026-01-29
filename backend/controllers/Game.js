@@ -1,15 +1,54 @@
 const Game = require( '../models/Game' );
 const User = require( '../models/User' );
 
+// ===== MASTERMIND HELPERS =====
+/**
+ * Calculate chess board color for a cell index (0-99)
+ * @param {number} index - Cell index (0-99)
+ * @returns {string} 'white' or 'black'
+ */
+function getCellColor( index ) {
+  const row = Math.floor( index / 10 );
+  const col = index % 10;
+  return ( row + col ) % 2 === 0 ? 'white' : 'black';
+}
+
+/**
+ * Calculate bonus points for placing a number on a cell
+ * Mastermind rule: +1 if odd number on black cell OR even number on white cell
+ * @param {number} number - The number being placed (1-100)
+ * @param {number} cellIndex - The cell index (0-99)
+ * @returns {number} 1 if bonus earned, 0 otherwise
+ */
+function calculateBonus( number, cellIndex ) {
+  // Non assegnare mai bonus alla cella che contiene l'1 iniziale, ovunque si trovi
+  // Serve la posizione dell'1 iniziale nella griglia
+  // In questo contesto, la funzione non riceve la griglia, quindi va passato come parametro aggiuntivo
+  // Per compatibilità, se la griglia è disponibile come this.grid, la usiamo
+  let startPos = 0;
+  if (this && this.grid && Array.isArray(this.grid)) {
+    startPos = this.grid.findIndex((n) => n === 1);
+  }
+  if (number === 1 && cellIndex === startPos) return 0;
+  const cellColor = getCellColor( cellIndex );
+  const isOdd = number % 2 === 1;
+
+  // Odd on Black OR Even on White = +1
+  if ( ( isOdd && cellColor === 'black' ) || ( !isOdd && cellColor === 'white' ) ) {
+    return 1;
+  }
+  return 0;
+}
+
 exports.startGame = async ( req, res ) => {
   try {
     const userId = req.user._id;
-    const { gameMode } = req.body; // 'tutorial' or 'ranked'
+    const { gameMode } = req.body; // 'tutorial', 'ranked', or 'mastermind'
 
     // VALIDAZIONE GAME MODE
-    const validModes = ['tutorial', 'ranked'];
+    const validModes = ['tutorial', 'ranked', 'mastermind'];
     if ( !gameMode || !validModes.includes( gameMode ) ) {
-      return res.status( 400 ).json( { error: 'Invalid game mode. Must be tutorial or ranked.' } );
+      return res.status( 400 ).json( { error: 'Invalid game mode. Must be tutorial, ranked, or mastermind.' } );
     }
 
     // GUEST CHECK: Guests can only play tutorial
@@ -85,6 +124,13 @@ exports.makeMove = async ( req, res ) => {
     }
     // 5. APPLICA MOSSA
     game.grid[position] = game.currentNumber; // Write CURRENT NUMBER (e.g. 1)
+
+    // MASTERMIND: Calculate bonus if in mastermind mode
+    if ( game.gameMode === 'mastermind' ) {
+      const bonus = calculateBonus( game.currentNumber, position );
+      game.bonusPoints += bonus;
+    }
+
     game.currentNumber += 1; // Increment for next (e.g. becomes 2)
 
     // DIDACTIC NOTE: Mongoose doesn't easily detect changes in primitive arrays.
@@ -142,6 +188,16 @@ exports.undoMove = async ( req, res ) => {
     if ( game.status !== 'in_progress' ) return res.status( 400 ).json( { error: 'Game is over' } );
     const lastMove = game.moves.pop();
     game.grid[lastMove.position] = 0;
+
+    // MASTERMIND: Rollback bonus
+    if ( game.gameMode === 'mastermind' ) {
+      // Calculate what the bonus was for this move
+      const bonus = calculateBonus( lastMove.number, lastMove.position );
+      if ( bonus > 0 ) {
+        game.bonusPoints = Math.max( 0, ( game.bonusPoints || 0 ) - bonus );
+      }
+    }
+
     game.currentNumber -= 1;
     game.moveCount -= 1;
     game.markModified( 'grid' );

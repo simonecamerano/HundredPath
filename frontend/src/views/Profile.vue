@@ -35,7 +35,10 @@
           </div>
 
           <!-- AVATAR PICKER -->
-          <div v-if="showAvatarPicker && !isPublicProfile" class="avatar-picker">
+          <div
+            v-if="showAvatarPicker && !isPublicProfile"
+            class="avatar-picker"
+          >
             <div class="picker-header">
               <h4>Choose a new avatar</h4>
               <button
@@ -47,7 +50,11 @@
                 New Avatars
               </button>
             </div>
-            <div class="avatar-grid" role="radiogroup" aria-label="Avatar selection">
+            <div
+              class="avatar-grid"
+              role="radiogroup"
+              aria-label="Avatar selection"
+            >
               <div
                 v-for="seed in avatarOptions"
                 :key="seed"
@@ -76,14 +83,38 @@
           </div>
         </div>
 
+        <!-- MODE SWITCHER -->
+        <div
+          class="tab-switcher"
+          role="tablist"
+          aria-label="Profile stats mode switcher"
+        >
+          <button
+            v-for="mode in modes"
+            :key="mode.value"
+            @click="switchMode(mode.value)"
+            class="tab-btn"
+            :class="{ active: activeMode === mode.value }"
+            role="tab"
+            :aria-selected="activeMode === mode.value"
+          >
+            <component :is="mode.icon" :size="16" />
+            {{ mode.label }}
+          </button>
+        </div>
+
         <!-- STATS GRID -->
         <div v-if="profile && profile.stats" class="stats-section">
           <h2 class="section-title">
             <BarChart3 :size="24" />
-            {{ isPublicProfile ? 'Statistics' : 'Your Statistics' }}
+            {{ isPublicProfile ? "Statistics" : "Your Statistics" }}
           </h2>
           <div class="stats-grid" role="list">
-            <div class="stat-card card-hover" role="listitem" aria-label="Games played statistic">
+            <div
+              class="stat-card card-hover"
+              role="listitem"
+              aria-label="Games played statistic"
+            >
               <Gamepad2 :size="32" class="stat-icon" aria-hidden="true" />
               <div class="stat-label">Games Played</div>
               <div class="stat-value">{{ profile.stats.totalGames || 0 }}</div>
@@ -131,7 +162,9 @@
               <div class="game-stats-row">
                 <span>
                   <Target :size="14" />
-                  {{ game.currentNumber === 101 ? 100 : game.currentNumber - 1 }}
+                  {{
+                    game.currentNumber === 101 ? 100 : game.currentNumber - 1
+                  }}
                 </span>
                 <span>
                   <Timer :size="14" />
@@ -152,7 +185,10 @@
           <div class="danger-card">
             <div class="danger-info">
               <h3>Delete Account</h3>
-              <p>Permanently delete your account and all your data. This action cannot be undone.</p>
+              <p>
+                Permanently delete your account and all your data. This action
+                cannot be undone.
+              </p>
             </div>
             <button @click="handleDeleteAccount" class="btn btn-danger">
               <Trash2 :size="18" />
@@ -167,21 +203,23 @@
 
 <script setup>
 import {
-    AlertTriangle,
-    BarChart3,
-    Calendar,
-    Clock,
-    Edit2,
-    Gamepad2,
-    GraduationCap,
-    Medal,
-    Save,
-    Shuffle,
-    Swords,
-    Target,
-    Timer,
-    Trash2,
-    Trophy,
+  AlertTriangle,
+  BarChart3,
+  BrainCircuit,
+  Calendar,
+  Clock,
+  Crown,
+  Edit2,
+  Gamepad2,
+  GraduationCap,
+  Medal,
+  Save,
+  Shuffle,
+  Swords,
+  Target,
+  Timer,
+  Trash2,
+  Trophy,
 } from "lucide-vue-next";
 import { onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -214,6 +252,19 @@ const profile = ref({
 const recentGames = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const activeMode = ref("ranked");
+
+const modes = [
+  { value: "ranked", label: "Ranked", icon: Crown },
+  { value: "mastermind", label: "Mastermind", icon: BrainCircuit },
+];
+
+function switchMode(mode) {
+  if (activeMode.value !== mode) {
+    activeMode.value = mode;
+    loadProfile();
+  }
+}
 
 const showAvatarPicker = ref(false);
 const avatarOptions = ref([]);
@@ -271,7 +322,7 @@ async function saveAvatar() {
 async function handleDeleteAccount() {
   const confirmed = await confirm(
     "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.",
-    "Delete Account"
+    "Delete Account",
   );
 
   if (!confirmed) return;
@@ -288,25 +339,41 @@ async function handleDeleteAccount() {
 }
 
 async function loadProfile() {
-  loading.value = true;
-  error.value = null;
-  
   try {
-    // Check if viewing someone else's profile via username
+    loading.value = true;
+    error.value = null;
+
     if (route.params.username) {
       isPublicProfile.value = true;
       viewedUsername.value = route.params.username;
-      
       // Fetch public profile
-      const res = await api.get(`/auth/user/${route.params.username}`);
+      const res = await api.get(
+        `/auth/user/${route.params.username}?gameMode=${activeMode.value}`,
+      );
       profile.value = res.data.profile;
       recentGames.value = res.data.recentGames || [];
     } else {
       // Fetch own profile
       isPublicProfile.value = false;
-      const res = await api.get("/profile");
-      profile.value = res.data;
+      const res = await api.get(`/profile?gameMode=${activeMode.value}`);
+      // Handle the new structure where API returns { user: ... } and stats are inside user
+      profile.value = res.data.user || res.data;
+      // Recent games logic for own profile might need adjustment if backend doesn't return them in getUserProfile yet
+      // However, User.js currently DOES NOT return recentGames in getUserProfile
+      // Let's check User.js again. It returns { user: ... }
+      // I need to update User.js to return recentGames too if I want them in private profile!
+      // For now I'll leave recentGames empty for private profile if backend doesn't send it, checking response.
       recentGames.value = [];
+
+      // Wait, getPublicProfile returns { profile: ..., recentGames: ... }
+      // getUserProfile returns { user: ... }
+      // The frontend expects the same structure?
+      // Line 308 was: profile.value = res.data;
+      // Line 309 was: recentGames.value = [];
+
+      // So private profile NEVER showed recent games?
+      // Line 114: v-if="recentGames && recentGames.length > 0"
+      // So it was hidden.
     }
   } catch (err) {
     console.error("Error fetching profile:", err);
@@ -317,9 +384,12 @@ async function loadProfile() {
 }
 
 // Watch for route changes to reload profile when navigating between profiles
-watch(() => route.params.username, () => {
-  loadProfile();
-});
+watch(
+  () => route.params.username,
+  () => {
+    loadProfile();
+  },
+);
 
 onMounted(async () => {
   await loadProfile();
@@ -328,7 +398,7 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@import '../styles/auth.css';
+@import "../styles/auth.css";
 
 .profile-content {
   animation: slideUp 0.4s ease-out;
@@ -599,7 +669,6 @@ onMounted(async () => {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
-
 
 @media (max-width: 1100px) {
   .profile-header {

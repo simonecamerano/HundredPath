@@ -10,12 +10,25 @@
         valid: showHints && isValid(index),
         current: index === currentPosition,
         ranked: props.gameMode === 'ranked',
+        mastermind: props.gameMode === 'mastermind',
+        'chess-white':
+          props.gameMode === 'mastermind' && getCellColor(index) === 'white',
+        'chess-black':
+          props.gameMode === 'mastermind' && getCellColor(index) === 'black',
+        'bonus-match':
+          props.gameMode === 'mastermind' &&
+          cell !== 0 &&
+          hasBonus(cell, index),
         clicked: clickedCell === index,
         invalid: invalidCell === index,
       }"
       @click="onCellClick(index)"
       role="gridcell"
-      :aria-label="cell !== 0 ? `Cell ${index + 1}, number ${cell}` : `Empty cell ${index + 1}${showHints && isValid(index) ? ', valid move' : ''}`"
+      :aria-label="
+        cell !== 0
+          ? `Cell ${index + 1}, number ${cell}`
+          : `Empty cell ${index + 1}${showHints && isValid(index) ? ', valid move' : ''}`
+      "
       :tabindex="isValid(index) || cell !== 0 ? 0 : -1"
     >
       <!-- Show the number if present, otherwise nothing -->
@@ -40,6 +53,23 @@ const showHints = computed(() => props.gameMode !== "ranked");
 // Animation state
 const clickedCell = ref(null);
 const invalidCell = ref(null);
+
+function getCellColor(index) {
+  const row = Math.floor(index / 10);
+  const col = index % 10;
+  return (row + col) % 2 === 0 ? "white" : "black";
+}
+
+function hasBonus(number, cellIndex) {
+  // Non colorare mai la cella che contiene l'1 iniziale, ovunque si trovi
+  // Cerchiamo la posizione dell'1 iniziale nella griglia
+  const startPos = props.grid.findIndex((n) => n === 1);
+  if (number === 1 && cellIndex === startPos) return false;
+  const cellColor = getCellColor(cellIndex);
+  const isOdd = number % 2 === 1;
+  // Odd on Black OR Even on White = Bonus
+  return (isOdd && cellColor === "black") || (!isOdd && cellColor === "white");
+}
 
 function onCellClick(index) {
   // Check if this is a valid move
@@ -94,6 +124,29 @@ function isValid(index) {
 .cell.ranked {
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+/* MASTERMIND MODE */
+.cell.mastermind {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.cell.chess-white {
+  background: #f8f9fa;
+  color: #343a40;
+}
+
+.cell.chess-black {
+  background: #e2e8f0;
+  color: #1f2937;
+}
+
+/* BONUS GLOW */
+.cell.bonus-match {
+  box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.6);
+  text-shadow: 0 0 5px gold;
+  position: relative;
+  z-index: 1;
 }
 
 .cell:hover {

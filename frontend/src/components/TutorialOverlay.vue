@@ -1,20 +1,38 @@
 <script setup>
-import { ArrowRight, ChevronRight, Move, Target, X } from "lucide-vue-next";
-import { computed, ref } from "vue";
+import {
+  ArrowRight,
+  ChevronRight,
+  EyeOff,
+  Move,
+  RotateCcw,
+  Target,
+  Timer,
+  Trophy,
+  X,
+} from "lucide-vue-next";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: true,
   },
+  steps: {
+    type: Array,
+    default: () => [],
+  },
+  tutorialType: {
+    type: String,
+    default: "basic", // 'basic', 'ranked', 'mastermind'
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "complete", "skip"]);
 
 const currentStep = ref(0);
-const totalSteps = 4;
 
-const steps = [
+// Basic Steps (Tutorial Mode)
+const basicSteps = [
   {
     title: "Welcome to HundredPath!",
     description:
@@ -31,8 +49,7 @@ const steps = [
   },
   {
     title: "Diagonal Move",
-    description:
-      "Or you can jump 1 cell diagonally (in any direction).",
+    description: "Or you can jump 1 cell diagonally (in any direction).",
     icon: Move,
     animation: "diagonal",
   },
@@ -43,11 +60,90 @@ const steps = [
     icon: ChevronRight,
     animation: "hints",
   },
+  {
+    title: "Made a Mistake?",
+    description:
+      "Don't worry! You can use the Undo button to go back one step. But be careful, you only have limited undos!",
+    icon: RotateCcw,
+    animation: "undo",
+  },
 ];
 
-const currentStepData = computed(() => steps[currentStep.value]);
-const isLastStep = computed(() => currentStep.value === totalSteps - 1);
-const progress = computed(() => ((currentStep.value + 1) / totalSteps) * 100);
+// Ranked Steps
+const rankedSteps = [
+  {
+    title: "Ranked Mode",
+    description:
+      "Compete against other players for the top spot on the leaderboard!",
+    icon: Target,
+    animation: "ranked_intro",
+  },
+  {
+    title: "Scoring",
+    description:
+      "Your score relies on reaching high numbers and your speed. Be fast and precise!",
+    icon: Target, // Can change icon
+    animation: "ranked_scoring",
+  },
+  {
+    title: "No Hints",
+    description:
+      "Green cell indicators are disabled in Ranked mode. You're on your own!",
+    icon: EyeOff,
+    animation: "ranked_warning",
+  },
+];
+
+// Mastermind Steps
+const mastermindSteps = [
+  {
+    title: "Mastermind Mode",
+    description:
+      "The rules of movement are the same, but the scoring changes completely!",
+    icon: Target,
+    animation: "mastermind_intro",
+  },
+  {
+    title: "Bonus Points",
+    description:
+      "Place ODD numbers on DARK cells and EVEN numbers on LIGHT cells to earn +1 Bonus Point per move.",
+    icon: Target,
+    animation: "mastermind_bonus",
+  },
+  {
+    title: "Maximize Score",
+    description:
+      "The leaderboard is based on Total Score (Number reached + Bonus Points). Plan your path!",
+    icon: Move,
+    animation: "mastermind_strategy",
+  },
+];
+
+const currentSteps = computed(() => {
+  if (props.steps && props.steps.length > 0) return props.steps;
+  if (props.tutorialType === "ranked") return rankedSteps;
+  if (props.tutorialType === "mastermind") return mastermindSteps;
+  return basicSteps;
+});
+
+const totalSteps = computed(() => currentSteps.value.length);
+const currentStepData = computed(
+  () => currentSteps.value[currentStep.value] || {},
+);
+
+const isLastStep = computed(() => currentStep.value === totalSteps.value - 1);
+const progress = computed(
+  () => ((currentStep.value + 1) / totalSteps.value) * 100,
+);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      currentStep.value = 0;
+    }
+  },
+);
 
 function nextStep() {
   if (isLastStep.value) {
@@ -111,8 +207,22 @@ function completeTutorial() {
 
           <!-- Animation Demo -->
           <div class="demo-container">
-            <!-- Step 0: Welcome animation -->
-            <div v-if="currentStep === 0" class="demo-welcome" style="display: flex; flex-direction: row; gap: 8px; justify-content: center; align-items: center; margin: 16px 0 0 0;">
+            <!-- Step 0: Welcome animation (Basic & Ranked Intro) -->
+            <div
+              v-if="
+                currentStep === 0 &&
+                (tutorialType === 'basic' || tutorialType === 'ranked')
+              "
+              class="demo-welcome"
+              style="
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                justify-content: center;
+                align-items: center;
+                margin: 16px 0 0 0;
+              "
+            >
               <div class="demo-cell start">1</div>
               <div class="demo-cell">→</div>
               <div class="demo-cell">...</div>
@@ -120,54 +230,391 @@ function completeTutorial() {
               <div class="demo-cell end">100</div>
             </div>
 
-            <!-- Step 1: Straight movement -->
-            <div v-if="currentStep === 1" class="demo-grid demo-straight">
+            <!-- Step 1: Straight movement (Basic Only) -->
+            <div
+              v-if="currentStep === 1 && tutorialType === 'basic'"
+              class="demo-grid demo-straight"
+            >
+              <!-- Griglia 7x7 con 1 al centro e 2 a distanza di 2 caselle -->
+
               <!-- Griglia 7x7 con 1 al centro e 2 a distanza di 2 caselle -->
               <div class="demo-row">
-                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid pulse">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell valid pulse">2</div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
               </div>
               <div class="demo-row">
-                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
               </div>
               <div class="demo-row">
-                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
               </div>
               <div class="demo-row">
-                <div class="demo-cell valid pulse">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell current">1</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid pulse">2</div>
+                <div class="demo-cell valid pulse">2</div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell current">1</div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell valid pulse">2</div>
               </div>
               <div class="demo-row">
-                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
               </div>
               <div class="demo-row">
-                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
               </div>
               <div class="demo-row">
-                <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid pulse">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell valid pulse">2</div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
+                <div class="demo-cell"></div>
               </div>
             </div>
 
-            <!-- Step 2: Diagonal movement -->
-            <div v-if="currentStep === 2" class="demo-grid demo-diagonal">
+            <!-- Step 2: Diagonal movement (Basic Only) -->
+            <div
+              v-if="currentStep === 2 && tutorialType === 'basic'"
+              class="demo-grid demo-diagonal"
+            >
               <!-- Griglia 7x7 con 1 al centro e frecce diagonali a distanza di 2 (posizioni corrette) -->
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell valid pulse">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid pulse">2</div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell current">1</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell valid pulse">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid pulse">2</div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid pulse">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid pulse">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell current">1</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid pulse">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid pulse">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
             </div>
 
-            <!-- Step 3: Green hints -->
-            <div v-if="currentStep === 3" class="demo-grid demo-hints">
+            <!-- Step 3: Green hints (Basic Only) -->
+            <div
+              v-if="currentStep === 3 && tutorialType === 'basic'"
+              class="demo-grid demo-hints"
+            >
               <!-- Griglia 7x7: 2 solo sulla terza dritto e seconda diagonale dal centro (4,4) -->
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid glow">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell valid glow">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid glow">2</div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell valid glow">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell current">1</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid glow">2</div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell valid glow">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid glow">2</div><div class="demo-cell"></div>
-              <div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell valid glow">2</div><div class="demo-cell"></div><div class="demo-cell"></div><div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell current">1</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell valid glow">2</div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+              <div class="demo-cell"></div>
+            </div>
+            <!-- Step 4: Undo demo (Basic Only) -->
+            <div
+              v-if="currentStep === 4 && tutorialType === 'basic'"
+              class="demo-welcome"
+              style="
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
+                justify-content: center;
+                align-items: center;
+                margin: 16px 0 0 0;
+              "
+            >
+              <div class="demo-cell start">2</div>
+              <div class="demo-cell">→</div>
+              <div class="demo-cell" style="position: relative">
+                <div
+                  style="
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #ef4444;
+                    font-size: 24px;
+                    font-weight: bold;
+                    animation: fadeOut 1s infinite alternate;
+                  "
+                >
+                  <RotateCcw :size="24" />
+                </div>
+                <span style="opacity: 0.3">3</span>
+              </div>
+              <div class="demo-cell">→</div>
+              <div class="demo-cell start">2</div>
+            </div>
+
+            <!-- RANKED DEMOS -->
+
+            <!-- Ranked Step 1: Scoring -->
+            <div
+              v-if="currentStep === 1 && tutorialType === 'ranked'"
+              class="demo-welcome"
+              style="
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                align-items: center;
+                margin-top: 20px;
+                font-size: 1.5rem;
+                font-weight: bold;
+              "
+            >
+              <div class="demo-cell end">100</div>
+              <div>+</div>
+              <div class="demo-cell"><Timer :size="28" /></div>
+              <div>=</div>
+              <div class="demo-cell valid glow"><Trophy :size="28" /></div>
+            </div>
+
+            <!-- Ranked Step 2: No Hints -->
+            <div
+              v-if="currentStep === 2 && tutorialType === 'ranked'"
+              style="display: flex; flex-direction: column; align-items: center"
+            >
+              <div class="demo-grid demo-hints">
+                <!-- Row 1 -->
+                <div class="demo-row">
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                </div>
+                <!-- Row 2 -->
+                <div class="demo-row">
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                </div>
+                <!-- Row 3 -->
+                <div class="demo-row">
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                </div>
+
+                <!-- Active Row 4 -->
+                <div class="demo-row">
+                  <!-- Target 2 (Left) -->
+                  <div
+                    class="demo-cell"
+                    style="
+                      background: transparent;
+                      border: 2px dashed #9ca3af;
+                      color: #9ca3af;
+                      font-weight: bold;
+                    "
+                  >
+                    2
+                  </div>
+
+                  <!-- Skipped Cells -->
+                  <div
+                    class="demo-cell"
+                    style="background: #e5e7eb; border: 1px solid #d1d5db"
+                  ></div>
+                  <div
+                    class="demo-cell"
+                    style="background: #e5e7eb; border: 1px solid #d1d5db"
+                  ></div>
+
+                  <!-- Current 1 -->
+                  <div class="demo-cell current">1</div>
+
+                  <!-- Skipped Cells -->
+                  <div
+                    class="demo-cell"
+                    style="background: #e5e7eb; border: 1px solid #d1d5db"
+                  ></div>
+                  <div
+                    class="demo-cell"
+                    style="background: #e5e7eb; border: 1px solid #d1d5db"
+                  ></div>
+
+                  <!-- Target 2 (Right) -->
+                  <div
+                    class="demo-cell"
+                    style="
+                      background: transparent;
+                      border: 2px dashed #9ca3af;
+                      color: #9ca3af;
+                      font-weight: bold;
+                    "
+                  >
+                    2
+                  </div>
+                </div>
+
+                <!-- Row 5 -->
+                <div class="demo-row">
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                </div>
+                <!-- Row 6 -->
+                <div class="demo-row">
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                </div>
+                <!-- Row 7 -->
+                <div class="demo-row">
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                  <div class="demo-cell"></div>
+                </div>
+              </div>
+
+              <!-- Banner Below -->
+              <div style="margin-top: 16px">
+                <div
+                  style="
+                    background: #ef4444;
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: bold;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                  "
+                >
+                  <EyeOff :size="20" /> No Hints
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -7,9 +7,12 @@ exports.getUserBestScores = async ( req, res ) => {
     const targetUserId = new mongoose.Types.ObjectId( req.user._id );
     console.log( "Searching best scores for user (ObjectId):", targetUserId );
 
+
+    // Permetti filtro per gameMode (default: ranked)
+    const mode = req.query.gameMode === 'mastermind' ? 'mastermind' : 'ranked';
     const userBest = await Game.aggregate( [
-      // 1. Filter only 'completed' RANKED games for ALL users
-      { $match: { status: 'completed', gameMode: 'ranked' } },
+      // 1. Filter only 'completed' games for ALL users, per modalità
+      { $match: { status: 'completed', gameMode: mode } },
 
       // 2. Calculate duration for all
       {
@@ -23,15 +26,23 @@ exports.getUserBestScores = async ( req, res ) => {
         }
       },
 
-      // 3. CALCULATE GLOBAL RANK
-      // Since MongoDB $rank requires a single sort field in some configurations,
-      // we create a combined score: (points * 1 billion) - duration_ms.
-      // Higher is better position.
+      // 3. CALCOLA IL RANK GLOBALE (in mastermind somma bonusPoints)
+      {
+        $addFields: {
+          totalScore: {
+            $cond: [
+              { $eq: [mode, "mastermind"] },
+              { $add: [ { $subtract: ["$currentNumber", 1] }, { $ifNull: ["$bonusPoints", 0] } ] },
+              { $subtract: ["$currentNumber", 1] }
+            ]
+          }
+        }
+      },
       {
         $addFields: {
           combinedRankScore: {
             $subtract: [
-              { $multiply: ["$currentNumber", 1000000000] },
+              { $multiply: ["$totalScore", 1000000000] },
               { $ifNull: ["$duration", 0] }
             ]
           }
@@ -53,7 +64,7 @@ exports.getUserBestScores = async ( req, res ) => {
       { $match: { userId: targetUserId } },
 
       // 5. Sort user RESULTS (their best)
-      { $sort: { currentNumber: -1, duration: 1 } },
+      { $sort: { totalScore: -1, duration: 1 } },
 
       // 6. Limit to 10 (user's top 10 with their global rank)
       { $limit: 10 },
@@ -82,7 +93,8 @@ exports.getUserBestScores = async ( req, res ) => {
           createdAt: 1,
           completedAt: 1,
           updatedAt: 1,
-          currentNumber: { $subtract: ["$currentNumber", 1] }
+          currentNumber: { $subtract: ["$currentNumber", 1] },
+          bonusPoints: 1
         }
       }
     ] );

@@ -7,8 +7,34 @@
         <p class="subtitle">Climb to the global top</p>
       </div>
 
+      <!-- MODE SWITCHER -->
+      <div class="mode-switcher-bar">
+        <div
+          class="tab-switcher mode-switcher"
+          role="tablist"
+          aria-label="Leaderboard mode switcher"
+        >
+          <button
+            v-for="mode in modes"
+            :key="mode.value"
+            :class="['tab-btn', { active: activeMode === mode.value }]"
+            @click="switchMode(mode.value)"
+            role="tab"
+            :aria-selected="activeMode === mode.value"
+            :aria-label="`View ${mode.label} leaderboard`"
+          >
+            <component :is="mode.iconComponent" :size="18" />
+            {{ mode.label }}
+          </button>
+        </div>
+      </div>
+
       <!-- TAB SWITCHER -->
-      <div class="tab-switcher" role="tablist" aria-label="Leaderboard time periods">
+      <div
+        class="tab-switcher period-switcher"
+        role="tablist"
+        aria-label="Leaderboard time periods"
+      >
         <button
           v-for="period in periods"
           :key="period.value"
@@ -41,14 +67,13 @@
           ]"
         >
           <div class="leaderboard-card">
-            <div class="card-header">
-              <component :is="period.iconComponent" :size="24" />
-              <h3>{{ period.label }}</h3>
-            </div>
-
             <!-- Top 10 Table -->
             <div class="table-wrapper">
-              <table class="table" role="table" :aria-label="`${period.label} leaderboard top 10`">
+              <table
+                class="table"
+                role="table"
+                :aria-label="`${period.label} leaderboard top 10`"
+              >
                 <thead>
                   <tr>
                     <th>Rank</th>
@@ -60,7 +85,8 @@
                 </thead>
                 <tbody>
                   <tr
-                    v-for="entry in leaderboards[period.value]?.top10 || []"
+                    v-for="entry in leaderboards[activeMode][period.value]
+                      ?.top10 || []"
                     :key="entry._id"
                     :class="{ 'podium-row': entry.globalRank <= 3 }"
                   >
@@ -81,16 +107,55 @@
                       />
                     </td>
                     <td class="username-cell">
-                      <router-link :to="`/user/${entry.username}`" class="username-link">
+                      <router-link
+                        :to="`/user/${entry.username}`"
+                        class="username-link"
+                      >
                         {{ entry.username }}
                       </router-link>
                     </td>
-                    <td class="score-cell">{{ entry.currentNumber }}</td>
+                    <td class="score-cell">
+                      <template v-if="activeMode === 'mastermind'">
+                        <div
+                          style="
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-start;
+                            line-height: 1.2;
+                          "
+                        >
+                          <span>{{
+                            entry.currentNumber + (entry.bonusPoints || 0)
+                          }}</span>
+                          <span
+                            v-if="entry.bonusPoints"
+                            style="
+                              font-size: 0.75rem;
+                              color: #6b7280;
+                              font-weight: normal;
+                            "
+                          >
+                            ({{ entry.currentNumber }} +
+                            <span style="color: #f59f00">{{
+                              entry.bonusPoints
+                            }}</span
+                            >)
+                          </span>
+                        </div>
+                      </template>
+                      <template v-else>
+                        {{ entry.currentNumber }}
+                      </template>
+                    </td>
                     <td class="time-cell">
                       {{ formatDuration(entry.duration) }}
                     </td>
                   </tr>
-                  <tr v-if="leaderboards[period.value].top10.length === 0">
+                  <tr
+                    v-if="
+                      leaderboards[activeMode][period.value].top10.length === 0
+                    "
+                  >
                     <td colspan="5" class="empty-state">
                       <Target
                         :size="32"
@@ -106,8 +171,8 @@
             <!-- User Best (se fuori Top 10) -->
             <div
               v-if="
-                leaderboards[period.value].userBest &&
-                leaderboards[period.value].userBest.globalRank > 10
+                leaderboards[activeMode][period.value].userBest &&
+                leaderboards[activeMode][period.value].userBest.globalRank > 10
               "
               class="user-rank-section"
             >
@@ -117,29 +182,39 @@
               </h4>
               <div class="user-rank-card">
                 <div class="rank-badge">
-                  #{{ leaderboards[period.value].userBest.globalRank }}
+                  #{{
+                    leaderboards[activeMode][period.value].userBest.globalRank
+                  }}
                 </div>
                 <img
                   :src="
-                    getAvatarUrl(leaderboards[period.value].userBest.avatar)
+                    getAvatarUrl(
+                      leaderboards[activeMode][period.value].userBest.avatar,
+                    )
                   "
                   alt="Avatar"
                   class="avatar"
                 />
                 <div class="user-stats">
                   <p class="username">
-                    {{ leaderboards[period.value].userBest.username }}
+                    {{
+                      leaderboards[activeMode][period.value].userBest.username
+                    }}
                   </p>
                   <div class="stats-row">
                     <span>
                       <Target :size="14" />
-                      {{ leaderboards[period.value].userBest.currentNumber }}
+                      {{
+                        leaderboards[activeMode][period.value].userBest
+                          .currentNumber
+                      }}
                     </span>
                     <span>
                       <Timer :size="14" />
                       {{
                         formatDuration(
-                          leaderboards[period.value].userBest.duration,
+                          leaderboards[activeMode][period.value].userBest
+                            .duration,
                         )
                       }}
                     </span>
@@ -156,13 +231,13 @@
 
 <script setup>
 import {
-    BarChart3,
-    Calendar,
-    Flame,
-    Target,
-    Timer,
-    Trophy,
-    User,
+  BarChart3,
+  Calendar,
+  Flame,
+  Target,
+  Timer,
+  Trophy,
+  User,
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
@@ -173,11 +248,26 @@ const periods = [
   { value: "day", label: "Daily", iconComponent: Flame },
 ];
 
+const modes = [
+  { value: "ranked", label: "Ranked", iconComponent: Trophy },
+  { value: "mastermind", label: "Mastermind", iconComponent: Target },
+];
+
+const activeMode = ref("ranked");
 const activePeriod = ref("all");
+
+// Structure: { ranked: { all: {...}, week: {...}, day: {...} }, mastermind: { ... } }
 const leaderboards = ref({
-  all: { top10: [], userBest: null },
-  week: { top10: [], userBest: null },
-  day: { top10: [], userBest: null },
+  ranked: {
+    all: { top10: [], userBest: null },
+    week: { top10: [], userBest: null },
+    day: { top10: [], userBest: null },
+  },
+  mastermind: {
+    all: { top10: [], userBest: null },
+    week: { top10: [], userBest: null },
+    day: { top10: [], userBest: null },
+  },
 });
 const loading = ref(true);
 const error = ref(null);
@@ -200,16 +290,15 @@ function formatDuration(ms) {
   return `${seconds.toString().padStart(2, "0")}.${centis.toString().padStart(2, "0")}s`;
 }
 
-onMounted(async () => {
+async function fetchLeaderboards(mode) {
   try {
     loading.value = true;
-    // Fetch all three periods
     const [allRes, weekRes, dayRes] = await Promise.all([
-      api.get("/game/leaderboard?period=all"),
-      api.get("/game/leaderboard?period=week"),
-      api.get("/game/leaderboard?period=day"),
+      api.get(`/game/leaderboard?period=all&gameMode=${mode}`),
+      api.get(`/game/leaderboard?period=week&gameMode=${mode}`),
+      api.get(`/game/leaderboard?period=day&gameMode=${mode}`),
     ]);
-    leaderboards.value = {
+    leaderboards.value[mode] = {
       all: allRes.data,
       week: weekRes.data,
       day: dayRes.data,
@@ -220,6 +309,23 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+}
+
+function switchMode(mode) {
+  if (activeMode.value !== mode) {
+    activeMode.value = mode;
+    // Only fetch if not already loaded
+    if (
+      !leaderboards.value[mode] ||
+      !leaderboards.value[mode].all.top10.length
+    ) {
+      fetchLeaderboards(mode);
+    }
+  }
+}
+
+onMounted(async () => {
+  await fetchLeaderboards("ranked");
 });
 </script>
 
@@ -239,124 +345,6 @@ onMounted(async () => {
 .leaderboard-header h1 {
   font-size: 3rem;
   margin-bottom: var(--space-sm);
-  font-weight: 800;
-}
-
-.subtitle {
-  color: var(--color-gray-700);
-  font-size: 1.2rem;
-}
-
-/* TAB SWITCHER */
-.tab-switcher {
-  display: flex;
-  gap: var(--space-sm);
-  justify-content: center;
-  margin-bottom: var(--space-xl);
-  flex-wrap: wrap;
-}
-
-.tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: 12px 24px;
-  margin-bottom: 40px;
-  background: white;
-  border: 2px solid var(--color-gray-300);
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--color-gray-700);
-  transition: all 0.3s ease;
-}
-
-.tab-btn:hover {
-  border-color: var(--color-purple);
-  background: rgba(121, 80, 242, 0.05);
-}
-
-.tab-btn.active {
-  background: var(--gradient-primary);
-  color: white;
-  border-color: transparent;
-  box-shadow: var(--shadow-glow-purple);
-}
-
-/* LEADERBOARDS GRID */
-.leaderboards-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-xl);
-}
-
-.leaderboard-column.hidden {
-  display: none;
-}
-
-.leaderboard-card {
-  background: white;
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  animation: slideUp 0.4s ease-out;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-md);
-  padding: var(--space-lg);
-  background: var(--gradient-primary);
-  color: white;
-}
-
-.card-header h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-/* TABLE */
-.table-wrapper {
-  overflow-x: auto;
-}
-
-.table {
-  margin: 0 auto;
-  box-shadow: none;
-  border-radius: 0;
-  width: 100%;
-}
-
-.table th,
-.table td {
-  vertical-align: middle;
-  text-align: center;
-}
-
-.table thead {
-  background: var(--gradient-secondary);
-}
-
-.podium-row {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 215, 0, 0.05),
-    rgba(255, 215, 0, 0.01)
-  );
-  font-weight: 600;
-}
-
-.rank-cell {
-  white-space: nowrap;
-}
-
-.rank-cell .rank-number,
-.rank-cell svg {
-  display: inline-block;
-  vertical-align: middle;
 }
 
 .rank-cell svg {
@@ -369,7 +357,7 @@ onMounted(async () => {
 }
 
 .trophy-1 {
-  color: #ffd700;
+  color: #f59f00; /* Darker Gold/Orange */
   filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
 }
 
@@ -487,6 +475,22 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+/* FILTERS & LAYOUT */
+.hidden {
+  display: none !important;
+}
+
+.leaderboards-grid {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.leaderboard-column {
+  width: 100%;
+  animation: fadeIn 0.3s ease;
 }
 
 /* ANIMATIONS */

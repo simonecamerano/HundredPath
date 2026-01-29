@@ -4,7 +4,27 @@
       <div class="page-header">
         <Sparkles :size="54" class="header-icon" />
         <h1 class="text-gradient">Your Records</h1>
-        <p class="subtitle">Your best performances in Ranked mode</p>
+        <p class="subtitle">Your best performances in each mode</p>
+      </div>
+
+      <!-- MODE SWITCHER -->
+      <div
+        class="tab-switcher"
+        role="tablist"
+        aria-label="Best scores mode switcher"
+      >
+        <button
+          v-for="mode in modes"
+          :key="mode.value"
+          :class="['tab-btn', { active: activeMode === mode.value }]"
+          @click="switchMode(mode.value)"
+          role="tab"
+          :aria-selected="activeMode === mode.value"
+          :aria-label="`View ${mode.label} best scores`"
+        >
+          <component :is="mode.iconComponent" :size="18" />
+          {{ mode.label }}
+        </button>
       </div>
 
       <!-- LOADING/ERROR -->
@@ -15,21 +35,29 @@
 
       <!-- RECORDS -->
       <div v-else class="records-container">
-        <div v-if="userBestScores.length === 0" class="empty-state-card">
+        <div
+          v-if="userBestScores[activeMode].length === 0"
+          class="empty-state-card"
+        >
           <Target :size="64" style="opacity: 0.3; margin-bottom: 16px" />
           <h3>No records yet</h3>
           <p>
-            Complete games in Ranked mode to see your records!
+            Complete games in
+            {{ modes.find((m) => m.value === activeMode).label }} mode to see
+            your records!
           </p>
-          <router-link to="/game?mode=ranked" class="btn btn-gradient">
+          <router-link
+            :to="`/game?mode=${activeMode}`"
+            class="btn btn-gradient"
+          >
             <Swords :size="18" />
-            Start Ranked Game
+            Start {{ modes.find((m) => m.value === activeMode).label }} Game
           </router-link>
         </div>
 
         <div v-else class="records-grid">
           <div
-            v-for="(entry, index) in userBestScores"
+            v-for="(entry, index) in userBestScores[activeMode]"
             :key="entry._id"
             class="record-card"
             :class="{ 'top-record': index === 0 }"
@@ -60,7 +88,39 @@
                 <div class="stat">
                   <Target :size="16" />
                   <span class="stat-label">Score</span>
-                  <span class="stat-value">{{ entry.currentNumber }}</span>
+                  <span class="stat-value">
+                    <template v-if="activeMode === 'mastermind'">
+                      <div
+                        style="
+                          display: flex;
+                          flex-direction: column;
+                          align-items: flex-start;
+                          line-height: 1.2;
+                        "
+                      >
+                        <span>{{
+                          entry.currentNumber + (entry.bonusPoints || 0)
+                        }}</span>
+                        <span
+                          v-if="entry.bonusPoints"
+                          style="
+                            font-size: 0.75rem;
+                            color: #6b7280;
+                            font-weight: normal;
+                          "
+                        >
+                          ({{ entry.currentNumber }} +
+                          <span style="color: #f59f00">{{
+                            entry.bonusPoints
+                          }}</span
+                          >)
+                        </span>
+                      </div>
+                    </template>
+                    <template v-else>
+                      {{ entry.currentNumber }}
+                    </template>
+                  </span>
                 </div>
                 <div class="stat">
                   <Timer :size="16" />
@@ -83,7 +143,12 @@ import { Sparkles, Swords, Target, Timer, Trophy } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
 
-const userBestScores = ref([]);
+const modes = [
+  { value: "ranked", label: "Ranked", iconComponent: Trophy },
+  { value: "mastermind", label: "Mastermind", iconComponent: Target },
+];
+const activeMode = ref("ranked");
+const userBestScores = ref({ ranked: [], mastermind: [] });
 const loading = ref(true);
 const error = ref(null);
 
@@ -115,16 +180,33 @@ function formatDate(dateString) {
   });
 }
 
-onMounted(async () => {
+async function fetchBestScores(mode) {
   try {
-    const res = await api.get("/game/userBestScores");
-    userBestScores.value = res.data;
+    loading.value = true;
+    const res = await api.get(`/game/userBestScores?gameMode=${mode}`);
+    userBestScores.value[mode] = res.data;
   } catch (err) {
     console.error("Error fetching user best scores:", err);
     error.value = "Error loading records";
   } finally {
     loading.value = false;
   }
+}
+
+function switchMode(mode) {
+  if (activeMode.value !== mode) {
+    activeMode.value = mode;
+    if (
+      !userBestScores.value[mode] ||
+      userBestScores.value[mode].length === 0
+    ) {
+      fetchBestScores(mode);
+    }
+  }
+}
+
+onMounted(async () => {
+  await fetchBestScores("ranked");
 });
 </script>
 
@@ -230,7 +312,7 @@ onMounted(async () => {
 }
 
 .trophy-1 {
-  color: #ffd700;
+  color: #f59f00; /* Darker Gold/Orange */
   filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
   margin-bottom: var(--space-xs);
 }
