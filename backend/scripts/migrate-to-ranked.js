@@ -2,7 +2,8 @@
 // Run this once: node scripts/migrate-to-ranked.js
 
 const mongoose = require( 'mongoose' );
-require( 'dotenv' ).config( { path: '../.env' } ); // Load .env from parent dir
+const path = require( 'path' );
+require( 'dotenv' ).config( { path: path.resolve( __dirname, '../.env' ) } ); // Load .env from backend root (parent of scripts/)
 
 async function migrateToRanked() {
   try {
