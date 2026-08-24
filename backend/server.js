@@ -3,6 +3,7 @@ require( 'dotenv' ).config();
 
 // Import libraries
 const express = require( 'express' );
+const path = require( 'path' );
 const cors = require( 'cors' );
 const connectDB = require( './config/database' );
 const authRoutes = require( './routes/auth' );
@@ -23,6 +24,10 @@ app.use( cors( {
 // Body Parser - Parse JSON in request body
 app.use( express.json() );
 app.use( express.urlencoded( { extended: true } ) );
+// Frontend - Serve the compiled Vue app from the same origin as the API,
+// so no external service delivers the pages to users and CORS is not needed.
+const frontendPath = path.join( __dirname, 'public' );
+app.use( express.static( frontendPath ) );
 // Logger - Log requests in console (only in development)
 if ( process.env.NODE_ENV === 'development' ) {
   app.use( ( req, res, next ) => {
@@ -32,14 +37,6 @@ if ( process.env.NODE_ENV === 'development' ) {
 }
 
 // ===== ROUTES =====
-// Root - Welcome message
-app.get( '/', ( req, res ) => {
-  res.json( {
-    message: 'Welcome to HundredPath API!',
-    version: '1.0.0'
-  } );
-} );
-
 // Health check endpoint for deployment monitoring
 app.get( '/api/health', async ( req, res ) => {
   const mongoose = require( 'mongoose' );
@@ -66,6 +63,17 @@ app.use( '/api/game', gameRoutes );
 
 // Profile routes
 app.use( '/api/profile', profileRoutes );
+
+// SPA fallback - Any non-API GET request returns index.html, so Vue Router can
+// handle deep links on a hard refresh. Express 5 no longer accepts app.get('*').
+app.use( ( req, res, next ) => {
+  if ( req.method !== 'GET' || req.path.startsWith( '/api' ) ) {
+    return next();
+  }
+  res.sendFile( path.join( frontendPath, 'index.html' ), ( err ) => {
+    if ( err ) next();
+  } );
+} );
 
 // ===== ERROR HANDLING =====
 // 404 - Route not found

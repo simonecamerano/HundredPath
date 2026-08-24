@@ -1,167 +1,103 @@
 # HundredPath Deployment Guide
 
-## 📋 Prerequisites
+Both the frontend and the API run in **one container on a single Hetzner server managed
+by Coolify**, reachable at `https://hundredpath.simonecamerano.dev`. The pages are served
+from the same origin as the API, so no external service delivers the site to visitors and
+no CORS configuration is needed.
+
+## Prerequisites
 
 - GitHub account
-- Vercel account (connect with GitHub)
-- Render account (free tier)
-- MongoDB Atlas account (free tier)
+- A Coolify instance on your own server
+- MongoDB Atlas account (free tier is enough)
 
 ---
 
-## 1️⃣ Setup MongoDB Atlas (Database)
+## 1. MongoDB Atlas (database)
 
-1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Create a free M0 cluster
-3. Create database user (username + password)
-4. Whitelist IP: `0.0.0.0/0` (allow from anywhere for Render)
-5. Get connection string: `mongodb+srv://<username>:<password>@cluster.mongodb.net/hundredpath?retryWrites=true&w=majority`
-6. Replace `<username>` and `<password>` with your credentials
-
----
-
-## 2️⃣ Deploy Backend on Render
-
-1. Go to [Render](https://render.com)
-2. Click **New +** → **Web Service**
-3. Connect your GitHub repository
-4. Configure:
-   - **Name**: `hundredpath-backend`
-   - **Region**: Frankfurt (Europe)
-   - **Branch**: `main`
-   - **Root Directory**: `backend`
-   - **Environment**: `Node`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-   - **Plan**: Free
-
-5. Add Environment Variables:
-   ```
-   NODE_ENV=production
-   PORT=3000
-   MONGODB_URI=<your_mongodb_atlas_connection_string>
-   JWT_SECRET=<generate_a_random_32_character_string>
-   FRONTEND_URL=https://your-app.vercel.app
-   ```
-
-6. Click **Create Web Service**
-7. Wait for deployment (5-10 minutes)
-8. Copy your backend URL: `https://hundredpath.onrender.com`
-
-**⚠️ Important**: Free tier sleeps after 15 minutes of inactivity. First request after sleep takes ~1 minute.
+1. Create a free M0 cluster. **Pick a region inside the EU** (Frankfurt) if your privacy
+   policy claims the data stays in the European Union.
+2. Create a database user.
+3. Allow the server's IP address, or `0.0.0.0/0` if the address is not static.
+4. Copy the connection string:
+   `mongodb+srv://<user>:<password>@cluster.mongodb.net/hundredpath?retryWrites=true&w=majority`
 
 ---
 
-## 3️⃣ Deploy Frontend on Vercel
+## 2. Coolify resource
 
-1. Go to [Vercel](https://vercel.com)
-2. Click **Add New** → **Project**
-3. Import your GitHub repository
-4. Configure:
-   - **Framework Preset**: Vite
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
+Create one application resource from the GitHub repository:
 
-5. Add Environment Variable:
-   ```
-   VITE_API_URL=https://hundredpath.onrender.com
-   ```
+| Setting | Value |
+|---|---|
+| Build Pack | Dockerfile |
+| **Base Directory** | `/` |
+| Dockerfile Location | `/Dockerfile` |
+| Branch | `main` |
+| Port | `3000` |
+| Domain | `https://hundredpath.simonecamerano.dev` |
 
-6. Click **Deploy**
-7. Wait for deployment (2-3 minutes)
-8. Your app is live at: `https://your-app.vercel.app`
+**Base Directory must be `/`, not `/backend`.** The root `Dockerfile` is a two stage
+build: the first stage compiles the frontend, the second copies `frontend/dist` into the
+backend image as `public/`. With the base directory set to `/backend` the build has no
+access to the frontend sources and only the API gets deployed.
 
----
+Environment variables on the resource:
 
-## 4️⃣ Update Configuration
-
-### Update Backend CORS
-Go back to Render → Environment → Update `FRONTEND_URL`:
 ```
-FRONTEND_URL=https://your-app.vercel.app
-```
-(Replace with your actual Vercel domain)
-
-### Update Frontend Meta Tags
-Update `/frontend/index.html` Open Graph URLs:
-```html
-<meta property="og:url" content="https://your-app.vercel.app/" />
-<meta property="og:image" content="https://your-app.vercel.app/hundredpath-og.png" />
-<link rel="canonical" href="https://your-app.vercel.app/" />
+NODE_ENV=production
+PORT=3000
+MONGODB_URI=<your MongoDB Atlas connection string>
+JWT_SECRET=<a random 32+ character string>
 ```
 
----
+`FRONTEND_URL` is no longer required: the pages and the API share one origin, so the CORS
+allow list is not used in production. Keep it only if you also serve the frontend from a
+different host.
 
-## 5️⃣ Custom Domain (Optional)
-
-### Vercel (Frontend)
-1. Go to Project Settings → Domains
-2. Add your domain: `hundredpath.com`
-3. Configure DNS records as instructed by Vercel
-
-### Render (Backend)
-1. Keep using `onrender.com` subdomain (recommended for API)
-2. Or add custom domain in Render settings
+`frontend/.env.production` sets `VITE_API_URL=/api`, a relative path. Do not point it at
+an absolute host: that would send the browser to a different origin and reintroduce CORS.
 
 ---
 
-## 🧪 Testing Deployment
+## 3. Deploy
 
-1. **Test Backend**: `https://your-backend.onrender.com/api/health`
-2. **Test Frontend**: Open your Vercel URL
-3. **Test Registration**: Create new account
-4. **Test Game**: Play a game and check leaderboard
-5. **Test Social Sharing**: Use [Facebook Debugger](https://developers.facebook.com/tools/debug/)
+Push to `main`. Coolify builds the image and restarts the container.
 
----
+Routes after deployment:
 
-## 🔧 Troubleshooting
-
-### Backend returns 502/503
-- Render free tier is sleeping → wait 1 minute for wake up
-- Check Render logs for errors
-
-### Frontend can't connect to backend
-- Check `VITE_API_URL` in Vercel environment variables
-- Verify CORS `FRONTEND_URL` in Render
-
-### Database connection fails
-- Check MongoDB Atlas IP whitelist
-- Verify connection string credentials
-- Check Render logs for MongoDB errors
-
-### Images not loading
-- Ensure `hundredpath-og.png` is in `/frontend/public/`
-- Check browser console for 404 errors
+- `/` and every non `/api` path return the compiled Vue app, so deep links survive a
+  hard refresh
+- `/api/*` is handled by Express
+- `/api/health` reports the API status and whether the database is connected
 
 ---
 
-## 📊 Monitoring
+## 4. Data retention
 
-- **Render Logs**: Real-time backend logs
-- **Vercel Analytics**: Page views and performance
-- **MongoDB Atlas**: Database metrics and queries
+The privacy policy promises that accounts inactive for 24 months are deleted. The script
+that does it lives in `backend/scripts/purge-inactive-accounts.js` and runs as a dry run
+unless called with `--apply`.
 
----
+On the host, a monthly cron job runs it inside the container. **Select the container by
+the UUID of the Coolify resource, not by name**: the container name changes on every
+deploy, so a job pinned to the name silently stops working.
 
-## 💰 Costs
-
-- **MongoDB Atlas M0**: Free forever (512MB storage)
-- **Render Free Tier**: Free (750 hours/month, sleeps after 15min)
-- **Vercel Hobby**: Free (100GB bandwidth/month)
-
-**Total: €0/month** 🎉
-
----
-
-## 🚀 Continuous Deployment
-
-Both Vercel and Render auto-deploy on git push to main:
 ```bash
-git add .
-git commit -m "Update feature"
-git push origin main
+C=$(docker ps --format '{{.Names}}' | grep "^<resource-uuid>" | head -1)
+docker exec "$C" node scripts/purge-inactive-accounts.js --apply
 ```
 
-Vercel and Render will automatically rebuild and deploy! ✅
+---
+
+## 5. Verification checklist
+
+1. `https://hundredpath.simonecamerano.dev/api/health` returns `"database":"connected"`
+2. The home page loads, and a deep link such as `/leaderboard` still works after a
+   manual refresh
+3. Registration and login succeed, and a game can be started and saved
+4. The browser network tab shows **no requests to third party domains**: avatars are
+   generated locally by the bundled DiceBear library
+5. The frontend is a single page app, so the page text lives inside
+   `assets/index-*.js`, not in the HTML. Search the bundle to confirm a text change
+   actually shipped

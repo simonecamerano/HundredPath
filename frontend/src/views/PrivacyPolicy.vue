@@ -60,10 +60,11 @@
           <h2>6. Data Storage and Security</h2>
           <p>
             Your account and game data are stored on MongoDB Atlas servers located in Frankfurt, Germany,
-            inside the European Union, and the game API runs on a server in Germany. The website itself is
-            delivered by Vercel, whose servers are outside the European Union: Vercel and MongoDB, Inc. are
-            US companies acting as our data processors, and any transfer outside the EU relies on the Standard
-            Contractual Clauses approved by the European Commission (Art. 46 GDPR).
+            inside the European Union. Both the pages you are reading and the game API run on a single server
+            in Germany, so no third party outside the European Union delivers this website. MongoDB, Inc. is a
+            US company acting as our data processor: your data is held in the European Union, and any transfer
+            outside the EU relies on the Standard Contractual Clauses approved by the European Commission
+            (Art. 46 GDPR).
             We implement appropriate technical and organizational measures to protect your data, including:
           </p>
           <ul>
@@ -85,9 +86,8 @@
             We do not sell your personal data. We may share your data with:
           </p>
           <ul>
-            <li><strong>Service Providers:</strong> Vercel Inc. (delivery of the web pages you are reading,
-            United States), Hetzner Online GmbH (server running the game API, Germany), MongoDB Atlas
-            (database, Frankfurt)</li>
+            <li><strong>Service Providers:</strong> Hetzner Online GmbH (server delivering the web pages you
+            are reading and running the game API, Germany), MongoDB Atlas (database, Frankfurt)</li>
             <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
           </ul>
           <p>Your username and scores are publicly visible on leaderboards.</p>
@@ -152,9 +152,9 @@
           <p>We use the following third-party services:</p>
           <ul>
             <li><strong>MongoDB Atlas:</strong> Database hosting (Privacy Policy: <a href="https://www.mongodb.com/legal/privacy-policy" target="_blank" rel="noopener">mongodb.com/legal/privacy-policy</a>)</li>
-            <li><strong>DiceBear Avatars:</strong> avatar images are requested by your browser directly from
-            this service, which therefore receives your IP address and the identifier of the avatar you picked
-            from a fixed list. It never receives your username or email address.</li>
+            <li><strong>Avatars:</strong> your avatar is drawn by your own browser using the open source
+            DiceBear library, which is part of this website. No request leaves your browser to generate it, so
+            no avatar service receives your IP address.</li>
           </ul>
         </section>
 

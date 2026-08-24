@@ -279,6 +279,7 @@ import {
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
+import { getAvatarUrl } from "../utils/avatar";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -291,12 +292,6 @@ const rankedUnlocked = computed(() => {
     (authStore.user?.tutorialCompleted || false)
   );
 });
-
-function getAvatarUrl(seed) {
-  const safeSeed = seed || "shape_default";
-  const style = safeSeed.startsWith("shape_") ? "shapes" : "adventurer";
-  return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
-}
 
 function navigate(path) {
   menuOpen.value = false;

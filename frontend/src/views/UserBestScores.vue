@@ -142,6 +142,7 @@
 import { Sparkles, Swords, Target, Timer, Trophy } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
+import { getAvatarUrl } from "../utils/avatar";
 
 const modes = [
   { value: "ranked", label: "Ranked", iconComponent: Trophy },
@@ -151,12 +152,6 @@ const activeMode = ref("ranked");
 const userBestScores = ref({ ranked: [], mastermind: [] });
 const loading = ref(true);
 const error = ref(null);
-
-function getAvatarUrl(seed) {
-  const safeSeed = seed || "shape_default";
-  const style = safeSeed.startsWith("shape_") ? "shapes" : "adventurer";
-  return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
-}
 
 function formatDuration(ms) {
   const totalMs = Math.floor(ms);

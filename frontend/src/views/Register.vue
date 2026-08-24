@@ -34,7 +34,7 @@
 
             <div v-if="selectedAvatar" class="avatar-preview">
               <img
-                :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${selectedAvatar}`"
+                :src="getAvatarUrl(selectedAvatar)"
                 alt="Selected avatar preview"
               />
             </div>
@@ -62,7 +62,7 @@
                 tabindex="0"
               >
                 <img
-                  :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
+                  :src="getAvatarUrl(seed)"
                   :alt="`Avatar option ${seed}`"
                 />
               </div>
@@ -140,6 +140,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
+import { getAvatarUrl } from "../utils/avatar";
 
 const router = useRouter();
 const { success: notifySuccess, error: notifyError, warning: notifyWarning } = useNotification();

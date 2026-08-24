@@ -67,7 +67,7 @@
                 tabindex="0"
               >
                 <img
-                  :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`"
+                  :src="getAvatarUrl(seed)"
                   :alt="`Avatar option ${seed}`"
                 />
               </div>
@@ -227,6 +227,7 @@ import { useConfirm } from "../composables/useConfirm";
 import { useNotification } from "../composables/useNotification";
 import api from "../services/api";
 import { useAuthStore } from "../stores/auth";
+import { getAvatarUrl } from "../utils/avatar";
 
 const { success: notifySuccess, error: notifyError } = useNotification();
 const { confirm } = useConfirm();
@@ -269,12 +270,6 @@ function switchMode(mode) {
 const showAvatarPicker = ref(false);
 const avatarOptions = ref([]);
 const selectedAvatar = ref(null);
-
-function getAvatarUrl(seed) {
-  const safeSeed = seed || "shape_default";
-  const style = safeSeed.startsWith("shape_") ? "shapes" : "adventurer";
-  return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
-}
 
 function formatDate(dateString) {
   const date = new Date(dateString);
