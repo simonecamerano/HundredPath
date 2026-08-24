@@ -55,6 +55,10 @@ exports.loginUser = async ( req, res ) => {
       return res.status( 401 ).json( { error: 'Invalid credentials' } );
     }
 
+    // Track last access: the retention policy in the privacy policy is measured on this.
+    // Written without validation and without blocking the response.
+    await User.updateOne( { _id: user._id }, { $set: { lastLogin: new Date() } } );
+
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id },

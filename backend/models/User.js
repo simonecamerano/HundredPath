@@ -39,6 +39,12 @@ const userSchema = new mongoose.Schema( {
     type: Boolean,
     default: false // Unlocks ranked mode after first tutorial win
   },
+  lastLogin: {
+    // Used to enforce the 24-month inactivity retention stated in the privacy policy.
+    // Older accounts created before this field existed fall back to updatedAt.
+    type: Date,
+    default: Date.now
+  },
   stats: {
     gamesPlayed: {
       type: Number,
