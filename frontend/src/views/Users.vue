@@ -93,6 +93,7 @@ import {
 } from "lucide-vue-next";
 import { onMounted, ref } from "vue";
 import api from "../services/api";
+import { getAvatarUrl } from "../utils/avatar";
 
 const users = ref([]);
 const loading = ref(true);
@@ -103,12 +104,6 @@ const modes = [
   { value: "ranked", label: "Ranked", icon: Crown },
   { value: "mastermind", label: "Mastermind", icon: BrainCircuit },
 ];
-
-function getAvatarUrl(seed) {
-  const safeSeed = seed || "shape_default";
-  const style = safeSeed.startsWith("shape_") ? "shapes" : "adventurer";
-  return `https://api.dicebear.com/7.x/${style}/svg?seed=${safeSeed}`;
-}
 
 function formatDate(dateString) {
   return new Date(dateString).toLocaleDateString("en-US", {

@@ -8,7 +8,7 @@ A strategic 10×10 grid puzzle game where players navigate from 1 to 100 followi
 
 HundredPath is a logic-based puzzle game that tests your strategic thinking and problem-solving skills. Navigate through a 10×10 grid by jumping 2 squares horizontally or 1 square diagonally to reach 100 in the shortest time possible.
 
-**Live Demo:** [https://your-app.vercel.app](https://your-app.vercel.app)
+**Live Demo:** [https://hundredpath.simonecamerano.dev](https://hundredpath.simonecamerano.dev)
 
 ## ✨ Features
 
@@ -116,20 +116,17 @@ HundredPath/
 
 ## 🌐 Deployment
 
-For detailed deployment instructions to Vercel (frontend) and Render (backend), see [DEPLOYMENT.md](DEPLOYMENT.md).
+Frontend and backend are deployed together as a single container on Coolify, so the
+pages and the API share one domain and no external service delivers the site to users.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the full procedure.
 
 ### Quick Deploy
 
-**Frontend (Vercel):**
-1. Push to GitHub
-2. Import project in Vercel
-3. Set `VITE_API_URL` environment variable
-4. Deploy!
-
-**Backend (Render):**
-1. Connect GitHub repository
-2. Set environment variables (MongoDB URI, JWT secret)
-3. Deploy!
+1. Push to `main`
+2. Coolify builds the root `Dockerfile`: it compiles the frontend, then copies `dist`
+   into the backend image as `public/`
+3. Express serves the static files and the API under `/api` on the same origin
+4. Set the environment variables (MongoDB URI, JWT secret) on the Coolify resource
 
 ## 🤝 Contributing
 
