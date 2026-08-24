@@ -59,9 +59,10 @@
         <section>
           <h2>6. Data Storage and Security</h2>
           <p>
-            Your data is stored on MongoDB Atlas servers located in Frankfurt, Germany, inside the
-            European Union. MongoDB, Inc. is a US company acting as our data processor under a data
-            processing agreement; where any transfer outside the EU occurs, it relies on the Standard
+            Your account and game data are stored on MongoDB Atlas servers located in Frankfurt, Germany,
+            inside the European Union, and the game API runs on a server in Germany. The website itself is
+            delivered by Vercel, whose servers are outside the European Union: Vercel and MongoDB, Inc. are
+            US companies acting as our data processors, and any transfer outside the EU relies on the Standard
             Contractual Clauses approved by the European Commission (Art. 46 GDPR).
             We implement appropriate technical and organizational measures to protect your data, including:
           </p>
@@ -84,8 +85,9 @@
             We do not sell your personal data. We may share your data with:
           </p>
           <ul>
-            <li><strong>Service Providers:</strong> MongoDB Atlas (database, Frankfurt), Hetzner Online GmbH
-            (server hosting, Germany)</li>
+            <li><strong>Service Providers:</strong> Vercel Inc. (delivery of the web pages you are reading,
+            United States), Hetzner Online GmbH (server running the game API, Germany), MongoDB Atlas
+            (database, Frankfurt)</li>
             <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
           </ul>
           <p>Your username and scores are publicly visible on leaderboards.</p>
