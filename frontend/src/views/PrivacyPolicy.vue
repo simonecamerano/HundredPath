@@ -3,7 +3,7 @@
     <div class="container-md">
       <div class="legal-document">
         <h1>Privacy Policy</h1>
-        <p class="last-updated">Last updated: January 27, 2026</p>
+        <p class="last-updated">Last updated: August 24, 2026</p>
 
         <section>
           <h2>1. Introduction</h2>
@@ -59,7 +59,10 @@
         <section>
           <h2>6. Data Storage and Security</h2>
           <p>
-            Your data is stored securely on MongoDB Atlas servers located in the European Union.
+            Your data is stored on MongoDB Atlas servers located in Frankfurt, Germany, inside the
+            European Union. MongoDB, Inc. is a US company acting as our data processor under a data
+            processing agreement; where any transfer outside the EU occurs, it relies on the Standard
+            Contractual Clauses approved by the European Commission (Art. 46 GDPR).
             We implement appropriate technical and organizational measures to protect your data, including:
           </p>
           <ul>
@@ -68,7 +71,11 @@
             <li>JWT token-based authentication</li>
             <li>Regular security updates</li>
           </ul>
-          <p>We retain your data for as long as your account is active or as needed to provide services.</p>
+          <p>
+            We retain your account data for as long as your account is active. Accounts with no login for
+            <strong>24 consecutive months</strong> are deleted, along with their scores and statistics. You can
+            also delete your account at any time yourself, as described in section 9.
+          </p>
         </section>
 
         <section>
@@ -77,7 +84,8 @@
             We do not sell your personal data. We may share your data with:
           </p>
           <ul>
-            <li><strong>Service Providers:</strong> MongoDB Atlas (database), Render/Vercel (hosting)</li>
+            <li><strong>Service Providers:</strong> MongoDB Atlas (database, Frankfurt), Hetzner Online GmbH
+            (server hosting, Germany)</li>
             <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
           </ul>
           <p>Your username and scores are publicly visible on leaderboards.</p>
@@ -98,6 +106,16 @@
           <p>
             To exercise these rights, contact us at 
             <a href="mailto:info@simonecamerano.dev">info@simonecamerano.dev</a>
+          </p>
+        </section>
+
+        <section>
+          <h2>8b. Lodging a Complaint</h2>
+          <p>
+            If you believe your data is not being handled lawfully, you can lodge a complaint with the Italian
+            data protection authority, Garante per la protezione dei dati personali
+            (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>),
+            or with the supervisory authority of the country where you live.
           </p>
         </section>
 
@@ -132,7 +150,9 @@
           <p>We use the following third-party services:</p>
           <ul>
             <li><strong>MongoDB Atlas:</strong> Database hosting (Privacy Policy: <a href="https://www.mongodb.com/legal/privacy-policy" target="_blank" rel="noopener">mongodb.com/legal/privacy-policy</a>)</li>
-            <li><strong>DiceBear Avatars:</strong> Avatar generation API</li>
+            <li><strong>DiceBear Avatars:</strong> avatar images are requested by your browser directly from
+            this service, which therefore receives your IP address and the identifier of the avatar you picked
+            from a fixed list. It never receives your username or email address.</li>
           </ul>
         </section>
 
