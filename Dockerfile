@@ -6,7 +6,10 @@
 FROM node:22-alpine AS frontend
 WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+# --include=dev serve perche' Coolify passa NODE_ENV=production come ARG anche in
+# questa fase: senza il flag npm salta le devDependencies e vite non viene
+# installato, quindi "npm run build" fallisce con "vite: not found".
+RUN npm ci --include=dev
 COPY frontend/ ./
 RUN npm run build
 
