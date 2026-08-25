@@ -141,9 +141,27 @@
         <section>
           <h2>11. Cookies and Local Storage</h2>
           <p>
-            We do not use cookies. We use browser localStorage to store your authentication token (JWT)
-            locally on your device. This is necessary for the game to function and remember your login session.
-            You can clear this data at any time through your browser settings.
+            <strong>We do not use cookies at all</strong>: no technical, analytics,
+            profiling or advertising cookies. If you only open the site without
+            signing in and without playing, nothing is written to your device. This
+            is why you will not see a consent banner: there is nothing to consent to.
+          </p>
+          <p>
+            While you use the game, we store the following items in your browser's
+            localStorage, on your device only. They are never sent to third parties.
+          </p>
+          <ul>
+            <li><strong>token</strong>: your authentication token (JWT), so you stay signed in between pages.</li>
+            <li><strong>user</strong>: your profile as returned by the server (username, email, avatar and game statistics), so the interface can show it without asking the server again.</li>
+            <li><strong>tutorialSeen</strong>, <strong>tutorialSeen_ranked</strong> and <strong>tutorialSeen_mastermind</strong>: a bookmark per game mode, so the tutorial is not shown again after you have closed it.</li>
+            <li><strong>coldStartBannerDismissed</strong>: set only when you close the notice about the server waking up, so we do not show it to you again.</li>
+            <li><strong>coldStartNotificationShown</strong>: the time that notice was last shown. This is the only item written automatically, without any action from you: it is set when a request takes more than ten seconds, so the same notice is not repeated more than once a day.</li>
+          </ul>
+          <p>
+            All of them are strictly necessary to provide the service you asked for,
+            so no separate consent is required. None of them tracks you, builds a
+            profile or follows you across other websites. You can clear them at any
+            time by signing out or by clearing site data in your browser settings.
           </p>
         </section>
 
