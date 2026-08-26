@@ -126,6 +126,8 @@
           <p>
             You can delete your account at any time from your Profile page.
             This will permanently remove all your personal data, including scores and statistics.
+            Copies contained in our backups are removed in the normal rotation cycles,
+            within 21 days of the deletion.
           </p>
         </section>
 
@@ -154,8 +156,6 @@
             <li><strong>token</strong>: your authentication token (JWT), so you stay signed in between pages.</li>
             <li><strong>user</strong>: your profile as returned by the server (username, email, avatar and game statistics), so the interface can show it without asking the server again.</li>
             <li><strong>tutorialSeen</strong>, <strong>tutorialSeen_ranked</strong> and <strong>tutorialSeen_mastermind</strong>: a bookmark per game mode, so the tutorial is not shown again after you have closed it.</li>
-            <li><strong>coldStartBannerDismissed</strong>: set only when you close the notice about the server waking up, so we do not show it to you again.</li>
-            <li><strong>coldStartNotificationShown</strong>: the time that notice was last shown. This is the only item written automatically, without any action from you: it is set when a request takes more than ten seconds, so the same notice is not repeated more than once a day.</li>
           </ul>
           <p>
             All of them are strictly necessary to provide the service you asked for,
